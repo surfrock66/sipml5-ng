@@ -1,0 +1,8 @@
+<?php
+
+// SIP Realm
+define("REALM","sample realm");
+
+?>
+
+
