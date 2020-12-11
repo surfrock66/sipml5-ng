@@ -1,7 +1,10 @@
 # Local 1000 Implementation
 SEIU Local 1000 is adopting this project as part of a transition to an open-source and maintainable communications stack.  Our changes in this repository intend to take this reference implementaion and library to a usable product for our organization and other organizations.  While it is being built to be targeted for our environment and stack, we are keeping modularity in mind so other organizations could use this with their own requirements.  
+
 Our environment uses asterisk as a back end and has many web resources protected by SAML (specifically simplesamlphp), which are key integration points for this implementation.  The SAML login will hopefully bypass SIP registration by providing credentials in the background, so all other SIP parameters (realm, websocket server, proxy) will be provided by a configuration file and will NOT be user configurable.  Where possible we may make this configurable; settings are hidden if they're set in the config but available in a pop-out menu if they are not set.
+
 While moving things to a static config file, we will also attempt to modularize theming and metadata with the hope tha most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
+
 Stretch goals for our organization are to implement presence indication, contacts lookup, text chat, and saveable dialing shortcuts.
 
 # SIPml5-NG
