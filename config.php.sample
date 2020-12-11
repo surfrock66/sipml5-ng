@@ -3,6 +3,13 @@
 // SIP Realm
 define("REALM","sample realm");
 
+// SIP Websocket URL
+define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
+
+// SimpleSAMLPhp Provider Name
+define("SAMLSPNAME","saml-sp-name");
+
+
 ?>
 
 

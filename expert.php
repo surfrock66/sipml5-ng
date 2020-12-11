@@ -126,7 +126,7 @@
                         <label style="height: 100%">WebSocket Server URL<sup><a href="#aWebSocketServerURL">[2]</a></sup>:</label>
                     </td>
                     <td>
-                        <input type="text" style="width: 100%; height: 100%" id="txtWebsocketServerUrl" value="" placeholder="e.g. ws://sipml5.org:5062" />
+		    <input type="text" style="width: 100%; height: 100%" id="txtWebsocketServerUrl" value="<?php echo constant("WEBSOCKETURL"); ?>" placeholder="<?php echo constant("WEBSOCKETURL"); ?>" />
                     </td>
                 </tr>
                 <tr>

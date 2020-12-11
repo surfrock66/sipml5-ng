@@ -833,7 +833,11 @@ SIPml.Stack = function (o_conf) {
     var i_port;
     var s_proxy;
 
-    if (!SIPml.isWebSocketSupported()) {
+    // 2020.12.10 - edit by jgullo - hardcoding the proxy to the realm as we will not be relying on cloud proxy
+    i_port = 5060;
+    s_proxy = o_conf.realm;
+
+/*    if (!SIPml.isWebSocketSupported()) {
         // port and host will be updated using the result from DNS SRV(NAPTR(realm))
         i_port = 5060;
         s_proxy = o_conf.realm;
@@ -852,7 +856,7 @@ SIPml.Stack = function (o_conf) {
         i_port = ((o_conf.enable_rtcweb_breaker || (window.location && window.location.protocol == "https:")) ? 10062 : 10060) + (((new Date().getTime()) % 5) * 1000);
         s_proxy = "ns313841.ovh.net";
     }
-
+*/
     // create the stack
     this.o_stack = new tsip_stack(o_conf.realm, o_conf.impi, o_conf.impu, s_proxy, i_port);
     this.o_stack.oStack = this;
