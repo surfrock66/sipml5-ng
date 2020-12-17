@@ -62,7 +62,9 @@
     DEBUG VERSION: 'SIPml-api.js'
     RELEASE VERSION: 'release/SIPml-api.js'
     -->
-    <script src="SIPml-api.js?svn=250" type="text/javascript"> </script>
+    <script src="./js/SIPml-api.js" type="text/javascript"> </script>
+    <!--<script src="./js/SIPml.js" type="text/javascript"> </script>-->
+    <!--<script src="./js/tinySIP/src/tsip_api.js" type="text/javascript"> </script>-->
 
     <!-- Styles -->
     <link href="./assets/css/bootstrap.css" rel="stylesheet" />
