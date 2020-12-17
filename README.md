@@ -7,6 +7,14 @@ While moving things to a static config file, we will also attempt to modularize 
 
 Stretch goals for our organization are to implement presence indication, contacts lookup, text chat, and saveable dialing shortcuts.
 
+# Installation Requirements
+Our implementation requires the following:
+1. Ubuntu Linux Server
+2. apache2 web server
+3. php
+4. mysql-server (Optional for shortcuts and SAML integration)
+5. php-curl and php-dom (PHP modules for optional simplesamlphp integration)
+
 # SIPml5-NG
 On May 14th, 2012 SIPml5, the world's first open Source HTML SIP client was released. SIPml5 had captivated the mind of RTC pioneers
   in the open source communities. However, as time pregressed, its creator Doubango Telecom had abandoned the project. On Feb 8th, 2018 

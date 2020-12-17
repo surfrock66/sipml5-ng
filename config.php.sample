@@ -9,7 +9,6 @@ define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
 // SimpleSAMLPhp Provider Name
 define("SAMLSPNAME","saml-sp-name");
 
-
 ?>
 
 
