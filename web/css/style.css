@@ -1,0 +1,286 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+	padding-top: 4.5rem;
+	margin-bottom: 40px;
+	display: -ms-flexbox;
+	display: flex;
+	/*-ms-flex-align: center;
+	align-items: center;*/
+	background-color: #f5f5f5;
+	font-family: 'Montserrat', sans-serif;  
+}
+
+.page {
+	margin-top: 40px;	
+}
+
+.container {
+	max-width: 1360px;
+}
+
+h1, h2, h3, h4 {
+	color: #362886;
+}
+
+h1 {
+	font-size: 30px;
+}
+
+h2 {
+	font-size: 24px;
+}
+
+h3 {
+	font-size: 24px;
+}
+
+li {
+	margin: 5px 0px;
+}
+
+ul, ol {
+	margin: 16px 0px 16px 0px;
+}
+
+ol ol,
+ul ul,
+ol ul,
+ul ol {
+  margin-bottom: 16px;
+}
+
+table {
+	margin: 20px 0px 20px 0px;
+}
+
+.form-signin {
+	width: 100%;
+	max-width: 400px;
+	padding: 15px;
+	margin: 150px auto 0;
+}
+.form-signin .form-control {
+	position: relative;
+	box-sizing: border-box;
+	height: auto;
+	padding: 10px;
+	font-size: 16px;
+	margin-bottom: 15px;
+}
+.form-signin .form-control:focus {
+	z-index: 2;
+}
+.form-signin input[type="email"] {
+	margin-bottom: -1px;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+	margin-bottom: 10px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+.lh-condensed { line-height: 1.25; }
+
+.btn-primary {
+	background-color: #362886;
+	color: #fff;
+	font-size: larger;
+	padding: 15px;
+}
+
+.btn-primary:hover {
+	background-color: #fce36c;
+	color: #362886;
+  border-color: #362886;
+}
+
+.btn-secondary {
+	font-size: larger;
+	padding: 15px;
+}
+
+.btn-sm {
+  padding: .25rem .5rem;
+  font-size: .875rem;
+  line-height: 1.5;
+  border-radius: .2rem;
+}
+
+.navbar-seiu {
+  background-color: #4c3f99;
+  height: 65px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+}
+
+a.white {
+	color: white!important;
+}
+.branding .logo img {
+  height: 21px;
+  width: 234px;
+}
+
+img, svg {
+  vertical-align: middle;
+}
+
+.branding .logo a {
+  line-height: 65px;
+}
+
+label.error {
+	color: red;
+	font-size: 10px;
+}
+
+.remaining {
+	color: #362886;
+}
+
+.remaining-error {
+	color: red;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 40px;
+  line-height: 40px; /* Vertically center the text there */
+  background: #f5f5f5;
+}
+
+form.navbar-form {
+	width: 0px;
+	height: 0px;
+	margin: 8px;
+	padding: 0px;
+	display: inline;
+}
+
+input[type=submit].LogOut {
+  color: #000;
+  background-color: #fce36c;
+}
+
+.HighlightLine {
+	background: #FDF1B5;
+	#font-weight: bolder;
+	margin: 1px;
+	#display: block;
+	#padding: 8px 8px 8px 28px;
+	padding: 8px 8px 8px 8px;
+	#margin-left: -28px;
+	border-radius: 10px;
+}
+
+.HighlightTerm {
+	font-weight: bolder;
+	#text-decoration: underline;
+}
+.navbar-inner-red {
+  background-color: #600000;
+  background-image: none;
+  background-repeat: no-repeat;
+  filter: none;
+}
+
+.full-screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.normal-screen {
+  position: relative;
+}
+
+.call-options {
+  padding: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #eee;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -webkit-transition-property: opacity;
+  -moz-transition-property: opacity;
+  -o-transition-property: opacity;
+  -webkit-transition-duration: 2s;
+  -moz-transition-duration: 2s;
+  -o-transition-duration: 2s;
+}
+
+.tab-video,
+.div-video {
+  width: 100%;
+  height: 0px;
+  -webkit-transition-property: height;
+  -moz-transition-property: height;
+  -o-transition-property: height;
+  -webkit-transition-duration: 2s;
+  -moz-transition-duration: 2s;
+  -o-transition-duration: 2s;
+}
+
+.label-align {
+  display: block;
+  padding-left: 15px;
+  text-indent: -15px;
+}
+
+.input-align {
+  width: 13px;
+  height: 13px;
+  padding: 0;
+  margin: 0;
+  vertical-align: bottom;
+  position: relative;
+  top: -1px;
+   *overflow: hidden;
+}
+
+.glass-panel {
+  z-index: 99;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+  background-color: Gray;
+}
+
+.div-keypad {
+  z-index: 100;
+  position: fixed;
+  -moz-transition-property: left top;
+  -o-transition-property: left top;
+  -webkit-transition-duration: 2s;
+  -moz-transition-duration: 2s;
+  -o-transition-duration: 2s;
+}
+
+.previewvideo {
+  position: absolute;
+  width: 88px;
+  height: 72px;
+  margin-top: -42px;
+}
+
