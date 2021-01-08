@@ -9,6 +9,17 @@ define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
 // SimpleSAMLPhp Provider Name
 define("SAMLSPNAME","saml-sp-name");
 
-?>
+// LDAP/AD URI
+define("LDAPURI","ldaps://sampleserver.sampledomain.tld:636");
 
+// LDAP/AD Bind Username
+define("LDAPBINDUSER","sampleusername@sampledomain.tld");
+
+// LDAP/AD Bind Password
+define("LDAPBINDPASS","samplepassword");
+
+// LDAB Base DN
+define("LDAPBASEDN","dc=SAMPLEDOMAIN,dc=TLD");
+
+?>
 

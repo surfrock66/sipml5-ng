@@ -119,6 +119,14 @@ table {
   z-index: 2;
 }
 
+.navbar-seiu-yellow {
+  background-color: #fce36c;
+  height: 65px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+}
+
 a.white {
 	color: white!important;
 }
@@ -133,6 +141,10 @@ img, svg {
 
 .branding .logo a {
   line-height: 65px;
+}
+
+label {
+  margin-top: .5em;
 }
 
 label.error {
@@ -206,6 +218,21 @@ input[type=submit].LogOut {
   position: relative;
 }
 
+.div-dialer {
+  width: 100%;
+  margin: 5px 0px;
+  text-align: center;
+}
+
+.btn-toolbar {
+  width: 75%;
+  margin: auto;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: center;
+  vertical-align: middle;
+}
+
 .call-options {
   padding: 5px;
   background-color: #f0f0f0;
@@ -227,7 +254,8 @@ input[type=submit].LogOut {
 
 .tab-video,
 .div-video {
-  width: 100%;
+  width: 75%;
+  margin: auto;
   height: 0px;
   -webkit-transition-property: height;
   -moz-transition-property: height;
@@ -281,6 +309,83 @@ input[type=submit].LogOut {
   position: absolute;
   width: 88px;
   height: 72px;
-  margin-top: -42px;
 }
 
+/* Start of styles for collapseable side panel */
+.offcanvas-active{
+  overflow:hidden;
+}
+.screen-overlay {
+  width:0%;
+  height: 100%;
+  z-index: 30;
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity:0;
+  visibility:hidden;
+  background-color: rgba(34, 34, 34, 0.6);
+  transition:opacity .2s linear, visibility .1s, width 1s ease-in;
+}
+.screen-overlay.show {
+  transition:opacity .5s ease, width 0s;
+  opacity:1;
+  width:100%;
+  visibility:visible;
+}
+.offcanvas{
+  width:350px;
+  visibility: hidden;
+  transform:translateX(-100%);
+  transition:all .2s;
+  border-radius:0; 
+  box-shadow: 0 5px 10px rgba(0,0,0, .2);
+  display:block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 1200;
+  background-color: #fff;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.offcanvas.offcanvas-right {
+  right: 0;
+  left: auto;
+  transform: translateX(100%); 
+}
+.offcanvas.show{
+  visibility: visible;
+  transform: translateX(0);
+  transition: transform .2s;
+}
+.offcanvas .btn-close{ 
+  position: absolute; 
+  right:15px; 
+  top:15px; 
+}
+/* End of styles for collapseable side panel */
+
+/* Start of styles for hovering tooltips */
+/* Tooltip container */
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #362886;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1400;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+/* End of styles for hovering tooltips */

@@ -3,6 +3,7 @@
 //    window.location.href += (window.location.href.indexOf("?") == -1 ? "svn=236" : "&svn=229");
 //}
 
+// Variables from the main phone functions
 var sTransferNumber;
 var oRingTone, oRingbackTone;
 var oSipStack, oSipSessionRegister, oSipSessionCall, oSipSessionTransferCall;
@@ -13,6 +14,13 @@ var bDisableVideo = false;
 var viewVideoLocal, viewVideoRemote, viewLocalScreencast; // <video> (webrtc) or <div> (webrtc4all)
 var oConfigCall;
 var oReadyStateTimer;
+
+// Variables from the Expert Options page
+var cbVideoDisable;
+var cbAVPFDisable;
+var txtWebsocketServerUrl;
+var txtSIPOutboundProxyUrl;
+var txtInfo;
 
 C =
 {
@@ -97,6 +105,22 @@ window.onload = function () {
             }
         }
     }*/
+
+    // The following code is for the Expert Settings Panel
+
+    cbVideoDisable = document.getElementById("cbVideoDisable");
+    cbRTCWebBreaker = document.getElementById("cbRTCWebBreaker");
+    txtWebsocketServerUrl = document.getElementById("txtWebsocketServerUrl");
+    txtSIPOutboundProxyUrl = document.getElementById("txtSIPOutboundProxyUrl");
+    txtInfo = document.getElementById("txtInfo");
+
+    //txtWebsocketServerUrl.disabled = !window.WebSocket || navigator.appName == "Microsoft Internet Explorer"; // Do not use WS on IE
+    document.getElementById("btnSave").disabled = !window.localStorage;
+    document.getElementById("btnRevert").disabled = !window.localStorage;
+
+    if(window.localStorage){
+        settingsRevert(true);
+    }
 };
 
 function postInit() {
@@ -539,11 +563,11 @@ function uiVideoDisplayEvent(b_local, b_added) {
 
 function uiVideoDisplayShowHide(b_show) {
     if (b_show) {
-        tdVideo.style.height = '340px';
+//        tdVideo.style.height = '340px';
         divVideo.style.height = navigator.appName == 'Microsoft Internet Explorer' ? '100%' : '340px';
     }
     else {
-        tdVideo.style.height = '0px';
+//        tdVideo.style.height = '0px';
         divVideo.style.height = '0px';
     }
     btnFullScreen.disabled = !b_show;
@@ -966,3 +990,40 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
     }
 }
 
+// Functions for the Expert Settings form
+function settingsSave() {
+    window.localStorage.setItem('org.doubango.expert.disable_video', cbVideoDisable.checked ? "true" : "false");
+    window.localStorage.setItem('org.doubango.expert.enable_rtcweb_breaker', cbRTCWebBreaker.checked ? "true" : "false");
+    if (!txtWebsocketServerUrl.disabled) {
+        window.localStorage.setItem('org.doubango.expert.websocket_server_url', txtWebsocketServerUrl.value);
+    }
+    window.localStorage.setItem('org.doubango.expert.sip_outboundproxy_url', txtSIPOutboundProxyUrl.value);
+    window.localStorage.setItem('org.doubango.expert.ice_servers', txtIceServers.value);
+    window.localStorage.setItem('org.doubango.expert.bandwidth', txtBandwidth.value);
+    window.localStorage.setItem('org.doubango.expert.video_size', txtSizeVideo.value);
+    window.localStorage.setItem('org.doubango.expert.disable_early_ims', cbEarlyIMS.checked ? "true" : "false");
+    window.localStorage.setItem('org.doubango.expert.disable_debug', cbDebugMessages.checked ? "true" : "false");
+    window.localStorage.setItem('org.doubango.expert.enable_media_caching', cbCacheMediaStream.checked ? "true" : "false");
+    window.localStorage.setItem('org.doubango.expert.disable_callbtn_options', cbCallButtonOptions.checked ? "true" : "false");
+
+    txtInfo.innerHTML = '<i>Saved</i>';
+}
+
+function settingsRevert(bNotUserAction) {
+    cbVideoDisable.checked = (window.localStorage.getItem('org.doubango.expert.disable_video') == "true");
+    cbRTCWebBreaker.checked = (window.localStorage.getItem('org.doubango.expert.enable_rtcweb_breaker') == "true");
+    txtWebsocketServerUrl.value = (window.localStorage.getItem('org.doubango.expert.websocket_server_url') || "");
+    txtSIPOutboundProxyUrl.value = (window.localStorage.getItem('org.doubango.expert.sip_outboundproxy_url') || "");
+    txtIceServers.value = (window.localStorage.getItem('org.doubango.expert.ice_servers') || "");
+    txtBandwidth.value = (window.localStorage.getItem('org.doubango.expert.bandwidth') || "");
+    txtSizeVideo.value = (window.localStorage.getItem('org.doubango.expert.video_size') || "");
+    cbEarlyIMS.checked = (window.localStorage.getItem('org.doubango.expert.disable_early_ims') == "true");
+    cbDebugMessages.checked = (window.localStorage.getItem('org.doubango.expert.disable_debug') == "true");
+    cbCacheMediaStream.checked = (window.localStorage.getItem('org.doubango.expert.enable_media_caching') == "true");
+    cbCallButtonOptions.checked = (window.localStorage.getItem('org.doubango.expert.disable_callbtn_options') == "true");
+
+
+    if (!bNotUserAction) {
+        txtInfo.innerHTML = '<i>Reverted</i>';
+    }
+}
