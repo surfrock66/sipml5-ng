@@ -91,7 +91,7 @@
 ?>
         </script>
         <script type="text/javascript">
-            // jQuery for hiding and showing the side panel
+            // jQuery for hiding and showing the stration/expert panel
             $(document).ready(function() {
                 $("[data-trigger]").on("click", function(e){
                     e.preventDefault();
@@ -118,15 +118,56 @@
             });
         </script>
         <script type="text/javascript">
-            function reqListener () {
-                console.log(this.responseText);
-            }
+<?php
+    // This disables the javascript lookups if LDAP isn't configured. 
+    if ( !defined ( 'LDAPURI' ) || !defined ( 'LDAPBINDUSER' ) || !defined ( 'LDAPBINDPASS' ) || !defined ( 'LDAPBASEDN' ) ) {
+        echo "\n            // Disable all contact lookup code as not all LDAP configurations are defined in the config!\n\n            /*\n\n";
+    }
+?>
+            // Code to capture the contacts list from AD id it's enabled
+            var contactInfo = "Enter phone number or type a name to search";
             var oReq = new XMLHttpRequest(); // New request object
+            var contactsArray = [];
             oReq.onload = function() {
-                alert(this.responseText); // Will alert: 42
+                var ele = document.getElementById('ADContacts');
+                contactsJSON = JSON.parse( this.responseText );
+                // Code to manage the contact search dropdown
+                for (var i = 0; i < contactsJSON.length; i++) {
+                    // POPULATE SELECT ELEMENT WITH JSON.
+                    var contact = Object.entries( contactsJSON[i] );
+                    contactsArray.push( { contactNumber : contact[2][1], contactDescription : contact[1][1] } );
+                    //contactsArray.push( { contact[0][0]:contact[0][1], contact[1][0]:contact[1][1], contact[2][0]:contact[2][1] } );
+                    ele.innerHTML = ele.innerHTML + '<option data-value="' + contact[2][1] + '" value="' + contact[1][1] + '"></option>';
+                }
             };
             oReq.open("get", "includes/getContacts.php", true);
             oReq.send();
+
+            // Function for what to do if a contact is chosen from the dropdown
+            function selectContact(event) {
+                txtPhoneNumber.value = $("#ADContacts option[value='" + event.target.value + "']").attr('data-value');
+                if ( typeof event.target.value === 'undefined' || event.target.value === null ) {
+                    //txtContactInfo.innerHTML = "Enter phone number or type a name to search";
+                    //contactInfo = "Enter phone number or type a name to search";
+                    contactInfo = "";
+                } else {
+                    //txtContactInfo.innerHTML = event.target.value;
+                    contactInfo = event.target.value;
+                }
+                for ( var i = 0 ; i < contactsArray.length; i++ ) {
+                    if ( contactsArray[i].contactNumber === event.target.value ) {
+                        txtContactInfo.innerHTML = contactsArray[i].contactDescription;
+                        break;
+                    }
+                    txtContactInfo.innerHTML = "";
+                }                
+            }
+<?php
+    // This disables the javascript lookups if LDAP isn't configured. 
+    if ( !defined ( 'LDAPURI' ) || !defined ( 'LDAPBINDUSER' ) || !defined ( 'LDAPBINDPASS' ) || !defined ( 'LDAPBASEDN' ) ) {
+        echo "\n            */\n\n";
+    }
+?>
         </script>
         <script src="./js/mainPhone.js" type="text/javascript"></script>
     </head>

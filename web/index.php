@@ -52,8 +52,12 @@
                     <label style="width: 75%;" align="center" id="txtCallStatus"></label>
                     <div class="div-dialer" style="width:75%;margin: auto;">
                         <h2>Call control</h2>
-                        <input type="text" style="width: 100%;" id="txtPhoneNumber" value="" placeholder="Enter phone number to call" />
+                        <input type="text" style="width: 100%;" id="txtPhoneNumber" value="" placeholder="Enter phone number or type a name to search" list="ADContacts" onchange="selectContact(event)" />
+                        <datalist id="ADContacts">
+                            <option data-value="Enter phone number or type a name to search" value=""></option>
+                        </datalist>
                     </div>
+                    <label style="width: 75%;" align="center" id="txtContactInfo"></label>
                     <div class="btn-toolbar" style="margin: 0 auto; vertical-align:middle">
                         <!--div class="btn-group">
                             <input type="button" id="btnBFCP" style="margin: 0; vertical-align:middle; height: 100%;" class="btn btn-primary" value="BFCP" onclick='sipShareScreen();' disabled />
@@ -97,6 +101,15 @@
                         <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
                         <input type="button" class="btn" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
                     </div>
+
+                    <!-- Sample code for populating contact search -->
+<!--                    <div>
+                        <input class="contactSearcher" id="contactSearchInput" list="ADContacts" onchange="selectContact(event)"/>
+                        <datalist id="ADContacts">
+                            <option data-value="Enter phone number or type a name to search" value=""></option>
+                        </datalist>
+                    </div>
+-->
                 </div>
             </div>
         </div>
