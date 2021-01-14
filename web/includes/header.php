@@ -91,7 +91,7 @@
 ?>
         </script>
         <script type="text/javascript">
-            // jQuery for hiding and showing the stration/expert panel
+            // jQuery for hiding and showing the registration/expert panel
             $(document).ready(function() {
                 $("[data-trigger]").on("click", function(e){
                     e.preventDefault();
@@ -145,22 +145,33 @@
 
             // Function for what to do if a contact is chosen from the dropdown
             function selectContact(event) {
-                txtPhoneNumber.value = $("#ADContacts option[value='" + event.target.value + "']").attr('data-value');
-                if ( typeof event.target.value === 'undefined' || event.target.value === null ) {
-                    //txtContactInfo.innerHTML = "Enter phone number or type a name to search";
-                    //contactInfo = "Enter phone number or type a name to search";
+                // This does a search in the ADContacts array to see if the input
+                //  value corresponds to an actual contact and stores it to a variable.
+                //  If the lookup returns nothing it becomes "undefined"
+                realNumber = $("#ADContacts option[value='" + event.target.value + "']").attr('data-value');
+                // Store the starting value of the search field
+                contactInfo = event.target.value;
+                if ( realNumber === undefined || realNumber === null ) {
+                    // If contact lookup fails, don't change the search field but
+                    //  clear the contact info
+                    contactInfo = "";
+                } else if ( event.target.value === '' ) {
+                    // If the search field is blank, clear the contact info
                     contactInfo = "";
                 } else {
-                    //txtContactInfo.innerHTML = event.target.value;
-                    contactInfo = event.target.value;
-                }
-                for ( var i = 0 ; i < contactsArray.length; i++ ) {
-                    if ( contactsArray[i].contactNumber === event.target.value ) {
-                        txtContactInfo.innerHTML = contactsArray[i].contactDescription;
-                        break;
+                    // Iterate through the ADContacts array, if there's a match pull the
+                    //  description into the contact info storage
+                    for ( var i = 0 ; i < contactsArray.length; i++ ) {
+                        if ( contactsArray[i].contactNumber === event.target.value ) {
+                            contactInfo = contactsArray[i].contactDescription;
+                            break;
+                        }
                     }
-                    txtContactInfo.innerHTML = "";
-                }                
+                    // Populate the search bar with the actual number to dial
+                    txtPhoneNumber.value = $("#ADContacts option[value='" + event.target.value + "']").attr('data-value');
+                }
+                // Populate the contact info with the results of the above code
+                txtContactInfo.innerHTML = contactInfo;
             }
 <?php
     // This disables the javascript lookups if LDAP isn't configured. 

@@ -86,22 +86,21 @@ table {
 }
 .lh-condensed { line-height: 1.25; }
 
-.btn-primary {
-	background-color: #362886;
-	color: #fff;
-	font-size: larger;
-	padding: 15px;
+.btn-primary, .btn {
+  background-color: #362886;
+  color: #fff;
+  font-size: larger;
 }
 
-.btn-primary:hover {
-	background-color: #fce36c;
-	color: #362886;
+.btn-primary:hover, .btn:hover {
+  background-color: #fce36c;
+  color: #362886;
   border-color: #362886;
 }
 
-.btn-secondary {
-	font-size: larger;
-	padding: 15px;
+.btn-primary:disabled, .btn:disabled {
+  background-color: #362886;
+  color: #6c757d;
 }
 
 .btn-sm {
@@ -109,6 +108,10 @@ table {
   font-size: .875rem;
   line-height: 1.5;
   border-radius: .2rem;
+}
+
+. btnDialpad {
+  margin: 3px auto;
 }
 
 .navbar-seiu {

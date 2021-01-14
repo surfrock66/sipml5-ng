@@ -241,13 +241,15 @@ function sipRegister() {
         // 2020.12.10 - Edit by jgullo - Removed check for txtRealm as it's set by config
         //if (!txtRealm.value || !txtPrivateIdentity.value || !txtPublicIdentity.value) {
         if ( !txtPrivateIdentity.value || !txtPublicIdentity.value) {
-            txtRegStatus.innerHTML = '<b>Please fill madatory fields (*)</b>';
+console.log("Debug 01");
+            txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Please fill madatory fields (*)</b>';
             btnRegister.disabled = false;
             return;
         }
         var o_impu = tsip_uri.prototype.Parse(txtPublicIdentity.value);
         if (!o_impu || !o_impu.s_user_name || !o_impu.s_host) {
-            txtRegStatus.innerHTML = "<b>[" + txtPublicIdentity.value + "] is not a valid Public identity</b>";
+console.log("Debug 02");
+            txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>[" + txtPublicIdentity.value + "] is not a valid Public identity</b>';
             btnRegister.disabled = false;
             return;
         }
@@ -288,12 +290,14 @@ function sipRegister() {
         }
         );
         if (oSipStack.start() != 0) {
-            txtRegStatus.innerHTML = '<b>Failed to start the SIP stack</b>';
+console.log("Debug 03");
+            txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Failed to start the SIP stack</b>';
         }
         else return;
     }
     catch (e) {
-        txtRegStatus.innerHTML = "<b>2:" + e + "</b>";
+console.log("Debug 04");
+        txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>2:' + e + '</b>';
     }
     btnRegister.disabled = false;
 }
@@ -321,7 +325,10 @@ function sipCall(s_type) {
                 return;
             }
         }
-        btnCall.disabled = true;
+        //btnCall.disabled = true;
+        btnAudio.disabled = true;
+        btnVideo.disabled = true;
+        btnScreenShare.disabled = true;
         btnHangUp.disabled = false;
 
         if (window.localStorage) {
@@ -335,7 +342,10 @@ function sipCall(s_type) {
         if (oSipSessionCall.call(txtPhoneNumber.value) != 0) {
             oSipSessionCall = null;
             txtCallStatus.value = 'Failed to make call';
-            btnCall.disabled = false;
+            //btnCall.disabled = false;
+            btnAudio.disabled = false;
+            btnVideo.disabled = false;
+            btnScreenShare.disabled = false;
             btnHangUp.disabled = true;
             return;
         }
@@ -534,7 +544,10 @@ function onKeyUp(evt) {
 function onDivCallCtrlMouseMove(evt) {
     try { // IE: DOM not ready
         if (tsk_utils_have_stream()) {
-            btnCall.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            //btnCall.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            btnAudio.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            btnVideo.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            btnScreenShare.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
             document.getElementById("divCallCtrl").onmousemove = null; // unsubscribe
         }
     }
@@ -544,7 +557,10 @@ function onDivCallCtrlMouseMove(evt) {
 function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: connecting, connected, terminating, terminated
     btnRegister.disabled = b_connected || b_connecting;
     btnUnRegister.disabled = !b_connected && !b_connecting;
-    btnCall.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    //btnCall.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    btnAudio.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnHangUp.disabled = !oSipSessionCall;
 }
 
@@ -586,9 +602,9 @@ function uiBtnCallSetText(s_text) {
         case "Call":
             {
                 var bDisableCallBtnOptions = (window.localStorage && window.localStorage.getItem('org.doubango.expert.disable_callbtn_options') == "true");
-                btnCall.value = btnCall.innerHTML = bDisableCallBtnOptions ? 'Call' : 'Call <span id="spanCaret" class="caret">';
-                btnCall.setAttribute("class", bDisableCallBtnOptions ? "btn btn-primary" : "btn btn-primary dropdown-toggle");
-                btnCall.onclick = bDisableCallBtnOptions ? function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); } : null;
+                //btnCall.value = btnCall.innerHTML = bDisableCallBtnOptions ? 'Call' : 'Call <span id="spanCaret" class="caret">';
+                //btnCall.setAttribute("class", bDisableCallBtnOptions ? "btn btn-primary" : "btn btn-primary dropdown-toggle");
+                //btnCall.onclick = bDisableCallBtnOptions ? function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); } : null;
                 ulCallOptions.style.visibility = bDisableCallBtnOptions ? "hidden" : "visible";
                 if (!bDisableCallBtnOptions && ulCallOptions.parentNode != divBtnCallGroup) {
                     divBtnCallGroup.appendChild(ulCallOptions);
@@ -601,9 +617,9 @@ function uiBtnCallSetText(s_text) {
             }
         default:
             {
-                btnCall.value = btnCall.innerHTML = s_text;
-                btnCall.setAttribute("class", "btn btn-primary");
-                btnCall.onclick = function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); };
+                //btnCall.value = btnCall.innerHTML = s_text;
+                //btnCall.setAttribute("class", "btn btn-primary");
+                //btnCall.onclick = function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); };
                 ulCallOptions.style.visibility = "hidden";
                 if (ulCallOptions.parentNode == divBtnCallGroup) {
                     document.body.appendChild(ulCallOptions);
@@ -618,7 +634,10 @@ function uiCallTerminated(s_description) {
     btnHangUp.value = 'HangUp';
     btnHoldResume.value = 'hold';
     btnMute.value = "Mute";
-    btnCall.disabled = false;
+    //btnCall.disabled = false;
+    btnAudio.disabled = false;
+    btnVideo.disabled = false;
+    btnScreenShare.disabled = false;
     btnHangUp.disabled = true;
     if (window.btnBFCP) window.btnBFCP.disabled = true;
 
@@ -629,7 +648,8 @@ function uiCallTerminated(s_description) {
 
     txtCallStatus.innerHTML = "<i>" + s_description + "</i>";
     uiVideoDisplayShowHide(false);
-    divCallOptions.style.opacity = 0;
+    // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
+    divCallOptions.style.display = "none";
 
     if (oNotifICall) {
         oNotifICall.cancel();
@@ -664,7 +684,8 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                     oSipSessionRegister.register();
                 }
                 catch (e) {
-                    txtRegStatus.value = txtRegStatus.innerHTML = "<b>1:" + e + "</b>";
+console.log("Debug 05");
+                    txtRegStatus.value = txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>1:' + e + '</b>';
                     btnRegister.disabled = false;
                 }
                 break;
@@ -682,10 +703,12 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                 stopRingTone();
 
                 uiVideoDisplayShowHide(false);
-                divCallOptions.style.opacity = 0;
+                // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
+                divCallOptions.style.display = "none";
 
                 txtCallStatus.innerHTML = '';
-                txtRegStatus.innerHTML = bFailure ? "<i>Disconnected: <b>" + e.description + "</b></i>" : "<i>Disconnected</i>";
+console.log("Debug 06");
+                txtRegStatus.innerHTML = bFailure ? '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected: <b>' + e.description + '</b></i>' : '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected</i>';
                 break;
             }
 
@@ -702,7 +725,10 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 
                     uiBtnCallSetText('Answer');
                     btnHangUp.value = 'Reject';
-                    btnCall.disabled = false;
+                    //btnCall.disabled = false;
+                    btnAudio.disabled = false;
+                    btnVideo.disabled = false;
+                    btnScreenShare.disabled = false;
                     btnHangUp.disabled = false;
 
                     startRingTone();
@@ -743,11 +769,15 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                 var bConnected = (e.type == 'connected');
                 if (e.session == oSipSessionRegister) {
                     uiOnConnectionEvent(bConnected, !bConnected);
-                    txtRegStatus.innerHTML = "<i>" + e.description + "</i>";
+console.log("Debug 07");
+                    txtRegStatus.innerHTML = '<img src="images/reg-status-connected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
                     btnHangUp.value = 'HangUp';
-                    btnCall.disabled = true;
+                    //btnCall.disabled = true;
+                    btnAudio.disabled = true;
+                    btnVideo.disabled = true;
+                    btnScreenShare.disabled = true;
                     btnHangUp.disabled = false;
                     btnTransfer.disabled = false;
                     if (window.btnBFCP) window.btnBFCP.disabled = false;
@@ -763,7 +793,8 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     }
 
                     txtCallStatus.innerHTML = "<i>" + e.description + "</i>";
-                    divCallOptions.style.opacity = bConnected ? 1 : 0;
+                    // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
+                    divCallOptions.style.display = bConnected ? "block" : "none";
 
                     if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback
                         uiVideoDisplayEvent(false, true);
@@ -780,7 +811,8 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     oSipSessionCall = null;
                     oSipSessionRegister = null;
 
-                    txtRegStatus.innerHTML = "<i>" + e.description + "</i>";
+console.log("Debug 08");
+                    txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
                     uiCallTerminated(e.description);

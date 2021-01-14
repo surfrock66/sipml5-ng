@@ -23,9 +23,9 @@
 
             //if ( is_dir( 'simplesaml' ) ) {
             require_once('simplesaml/lib/_autoload.php');
-            $as = new SimpleSAML_Auth_Simple( SAMLSPNAME );
-            $as->requireAuth();
-            $attributes = $as->getAttributes();
+            $_SESSION['as'] = new SimpleSAML_Auth_Simple( SAMLSPNAME );
+            $_SESSION['as']->requireAuth();
+            $attributes = $_SESSION['as']->getAttributes();
             $_SESSION['givenname'] = $attributes['givenname'][0];
             $_SESSION['surname'] = $attributes['surname'][0];
             $_SESSION['extension'] = $attributes['extension'][0];
@@ -48,9 +48,15 @@
             <div class="row mt-3 justify-content-md-center">
                 <div id="divCallCtrl" class="col col-sm-10 col-lg-10" style='vertical-align:middle;text-align:center;'>
                     <!-- Divs for status update messages -->
-                    <label style="width: 75%;" align="center" id="txtRegStatus"></label>
-                    <label style="width: 75%;" align="center" id="txtCallStatus"></label>
-                    <div class="div-dialer" style="width:75%;margin: auto;">
+                    <div id="divStatusMsgs" style="width:75%; margin: auto; display: block;">
+                        <div style="width: 20%; float: left;">
+                            <label align="center" id="txtRegStatus"><img src="images/reg-status-disconnected.png" height=24px;" /><i>Disconnected</i></label>
+                        </div>
+                        <div style="width: 80%;">
+                            <label align="center" id="txtCallStatus"></label>
+                        </div>
+                    </div>
+                    <div class="div-dialer" style="width:75%;margin: auto; clear: both;">
                         <h2>Call control</h2>
                         <input type="text" style="width: 100%;" id="txtPhoneNumber" value="" placeholder="Enter phone number or type a name to search" list="ADContacts" onchange="selectContact(event)" />
                         <datalist id="ADContacts">
@@ -58,19 +64,22 @@
                         </datalist>
                     </div>
                     <label style="width: 75%;" align="center" id="txtContactInfo"></label>
-                    <div class="btn-toolbar" style="margin: 0 auto; vertical-align:middle">
-                        <!--div class="btn-group">
-                            <input type="button" id="btnBFCP" style="margin: 0; vertical-align:middle; height: 100%;" class="btn btn-primary" value="BFCP" onclick='sipShareScreen();' disabled />
-                        </div-->
-                        <div id="divBtnCallGroup" class="btn-group">
-                            <button id="btnCall" disabled class="btn btn-primary" data-toggle="dropdown">Call</button>
-                        </div>&nbsp;&nbsp;
-                        <div class="btn-group">
-                            <input type="button" id="btnHangUp" style="margin: 0; vertical-align:middle; height: 100%;" class="btn btn-primary" value="HangUp" onclick='sipHangUp();' disabled />
+                    <div class="btn-toolbar" style="margin: 0 auto; vertical-align:middle; text-align:center;">
+                        <div id="divBtnCallGroup" style="margin: 0 auto;">
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnAudio" href="#" value="Audio" onclick="sipCall(&quot;call-audio&quot;);" />&nbsp;
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnVideo" href="#" value="Video" onclick="sipCall(&quot;call-audiovideo&quot;);" />&nbsp;
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnScreenShare" href="#" value="Screen Share" onclick="sipShareScreen();" />&nbsp;
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnHangUp" value="HangUp" onclick='sipHangUp();' />&nbsp;
+                            <input type="button" class="btn btn-primary btn-sm" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
                         </div>
                     </div>
-<!--
-                    <div id="divVideo" class='div-video'>
+                    <div id='divCallOptions' class='call-options' style='display:none; margin: 5px; width:75%;'>
+                        <input type="button" class="btn" style="" id="btnFullScreen" value="FullScreen" disabled onclick='toggleFullScreen();' /> &nbsp;
+                        <input type="button" class="btn" style="" id="btnMute" value="Mute" onclick='sipToggleMute();' /> &nbsp;
+                        <input type="button" class="btn" style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
+                        <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
+                    </div>
+                    <div id="divVideo" class="div-video" style="widt:75%; margin-top:5px;">
                         <div id="divVideoRemote" style='position:relative; border:1px solid #009; height:100%; width:100%; z-index: auto; opacity: 1'>
                             <video class="video" width="100%" height="100%" id="video_remote" autoplay="autoplay" style="opacity: 0; background-color: #000000; -webkit-transition-property: opacity; -webkit-transition-duration: 2s;"></video>
                         </div>
@@ -85,6 +94,7 @@
                             <div id="divScreencastLocal" class="previewvideo" style=' border:0px solid #009; z-index: 1000'>
                             </div>
                         </div>
+<!--
                         <div id="div1" style="margin-left: 300px; border:0px solid #009; z-index: 1000">
                             <iframe class="previewvideo" style="border:0px solid #009; z-index: 1000"> </iframe>
                             <div id="div2" class="previewvideo" style='border:0px solid #009; z-index: 1000'>
@@ -92,14 +102,7 @@
                                 <input type="button" class="btn" style="" id="Button2" value="Button2" /> &nbsp;
                             </div>
                         </div
-                    </div>
 -->
-                    <div id='divCallOptions' class='call-options' style='opacity: 0; margin-top: 0px'>
-                        <input type="button" class="btn" style="" id="btnFullScreen" value="FullScreen" disabled onclick='toggleFullScreen();' /> &nbsp;
-                        <input type="button" class="btn" style="" id="btnMute" value="Mute" onclick='sipToggleMute();' /> &nbsp;
-                        <input type="button" class="btn" style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
-                        <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
-                        <input type="button" class="btn" style="" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
                     </div>
 
                     <!-- Sample code for populating contact search -->
