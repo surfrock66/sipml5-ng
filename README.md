@@ -5,7 +5,11 @@ Our environment uses asterisk as a back end and has many web resources protected
 
 While moving things to a static config file, we will also attempt to modularize theming and metadata with the hope tha most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
 
-Stretch goals for our organization are to implement presence indication, contacts lookup, text chat, and saveable dialing shortcuts.
+We have added sms chat and threaded conversations.
+
+Stretch goals for our organization are to implement presence indication, contacts lookup, chat persistence between sessions (stored in mysql), saveable dialing shortcuts, and a better responsive mobile UI.
+
+At this time we cannot provide a public demo of our fork, however the demo below from duobango still works for external SIP testing.
 
 # Installation Requirements
 Our implementation requires the following:
