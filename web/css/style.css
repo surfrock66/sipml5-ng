@@ -110,7 +110,7 @@ table {
   border-radius: .2rem;
 }
 
-. btnDialpad {
+.btnDialpad {
   margin: 3px auto;
 }
 
@@ -144,6 +144,12 @@ img, svg {
 
 .branding .logo a {
   line-height: 65px;
+}
+
+.msgLine {
+  font-size: 12px;
+  margin: 0px 10px 5px 10px;
+  width: 95%;
 }
 
 label {

@@ -29,14 +29,9 @@
  
             if ( TRUE === ldap_bind ( $ldap_connection, $ldapbinduser, $ldapbindpass ) ) {
                 //Get standard users and contacts
-                //$search_filter = '(&(objectCategory=User)(enabled=true)(dn=*Users*)(!(dn=*Inactive*)))';
-                //$search_filter = '(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(cn=*Users*))';
                 $search_filter = '(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
-                //$search_filter = '(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(dn=*Users*)(!(dn=*Inactive*)))';
-                //$search_filter = '(|(SAMAccountName=jgullo))';
 
                 $attr = array("dn","samaccountname","givenname","sn","title","department","telephonenumber","mobile");
-                //$attr = array();
  
                 //Connect to LDAP
                 $result = ldap_search($ldap_connection, $ldapbasedn, $search_filter, $attr);
@@ -49,36 +44,6 @@
                     //var_dump($entries);
                     //echo "</pre>";
 
-                    //Create a table to display the raw LDAP data for debugging
-                    /*
-                    echo "                <div >\n";
-                    echo "                    <h2>AD User Results</h2></br>\n";
-                    echo "                    <table border = \"1\">\n";
-                    echo "                        <tr bgcolor=\"#cccccc\">\n";
-                    echo "                            <td>Username</td>\n";
-                    echo "                            <td>First Name</td>\n";
-                    echo "                            <td>Last Name</td>\n";
-                    echo "                            <td>Department</td>\n";
-                    echo "                            <td>Title</td>\n";
-                    echo "                            <td>Phone Number</td>\n";
-                    echo "                            <td>Mobile Number</td>\n";
-                    echo "                            <td>DN</td>\n";
-                    echo "                        </tr>\n";
-                    */
-
-                    //Create a table to display the filtered LDAP data for debugging
-/*                    echo "                <div >\n";
-                    echo "                    <h2>AD User Results</h2>\n";
-                    echo "                    <table border = \"1\">\n";
-                    echo "                        <tr bgcolor=\"#cccccc\">\n";
-                    echo "                            <td>Last Name</td>\n";
-                    echo "                            <td>First Name</td>\n";
-                    echo "                            <td>Department</td>\n";
-                    echo "                            <td>Title</td>\n";
-                    echo "                            <td>Number</td>\n";
-                    echo "                            <td>Type</td>\n";
-                    echo "                        </tr>\n";
-*/
                     $ADUsers = array();
 
                     //For each account returned by the search
@@ -176,20 +141,6 @@
                                 }
                             }
                         }
-
-                        //Create rows in the table to display the raw LDAP data for debugging
-                        /*
-                        echo "                        <tr>\n";
-                        echo "                            <td><strong>" . $LDAP_samaccountname . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_FirstName . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_LastName . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_Department . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_JobTitle . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_PhoneNumber . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_MobilePhone . "</strong></td>\n";
-                        echo "                            <td><strong>" . $LDAP_dn . "</strong></td>\n";
-                        echo "                        </tr>\n";
-                        */
                     }
 
                     // Sort the results by last name, first name, and number type
@@ -201,20 +152,6 @@
                     $contactLookup = array();
 
                     foreach( $ADUsers as $user ) {
-
-                        //Create rows in the table to display the filtered LDAP data for debugging
-/*
-                        echo "                        <tr>\n";
-                        echo "                            <td><strong>" . $user[0] . "</strong></td>\n";
-                        echo "                            <td><strong>" . $user[1] . "</strong></td>\n";
-                        echo "                            <td><strong>" . $user[2] . "</strong></td>\n";
-                        echo "                            <td><strong>" . $user[3] . "</strong></td>\n";
-                        echo "                            <td><strong>" . $user[4] . "</strong></td>\n";
-                        echo "                            <td><strong>" . $user[5] . "</strong></td>\n";
-                        echo "                        </tr>\n";
-*/
-
-                        //echo $user[1] . ", " . $user[0] . " - " . $user[2] . ", " . $user[3] . " - " . $user[5] . ": " . $user[4] . "<br />\n";
                         $userData = array (
                             "lookupName" => $user[1] . " " . $user[0],
                             "displayText" => $user[0] . ", " . $user[1] . " - " . $user[2] . ", " . $user[3] . " - " . $user[5] . ": " . $user[4],
@@ -223,9 +160,6 @@
                         
                         array_push ( $contactLookup, $userData );
                     }
-                    // Close the debugging table/div
-                    //echo "                    </table>\n"; 
-                    //echo "                </div>\n";
                     echo json_encode ( $contactLookup );
                 }
             }

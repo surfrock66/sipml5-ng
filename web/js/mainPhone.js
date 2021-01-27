@@ -185,6 +185,251 @@ function postInit() {
     };
 }
 
+
+// Function to enumerate chat conversations from localstorage object
+function chatEnum() {
+    msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+    var msgDiv = document.getElementById("divChat");
+    if ( msgSession.length == 0 ) {
+        msgDiv.style.borderTop = 'none';
+    } else {
+        msgDiv.style.borderTop = 'thick solid #362886';
+        var msgConvoListDiv = document.getElementById("chatList");
+        msgConvoListDiv.innerHTML = "";
+        var msgConvoHead = document.createElement('p');
+        msgConvoHead.setAttribute( 'style' , 'test-align: center;margin-bottom: 5px;' );
+        msgConvoHead.innerText = "Conversations";
+        msgConvoListDiv.appendChild( msgConvoHead );
+        msgSession.forEach( msgConversation => {
+                var msgConvoEntry = document.createElement('div');
+                msgConvoEntry.setAttribute( 'class', 'chatListEntry' );
+                var msgConvoSel = document.createElement('a');
+                msgConvoSel.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                msgConvoSel.setAttribute( 'id' , 'convo' + msgConversation.contact );
+                msgConvoSel.setAttribute( 'href' , '#' );
+                msgConvoSel.setAttribute( 'onclick' , 'chatDisplay("' + msgConversation.contact + '");' );
+                msgConvoSel.setAttribute( 'style' , 'margin-bottom: 5px;float: left;' );
+                activeChat = JSON.parse(window.localStorage.getItem('org.doubango.chat.activeConv'));
+                msgConvoSel.innerText = msgConversation.displayName;
+                var msgConvoSelClose = document.createElement('a');
+                msgConvoSelClose.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                msgConvoSelClose.setAttribute( 'id' , 'convo' + msgConversation.contact );
+                msgConvoSelClose.setAttribute( 'href' , '#' );
+                msgConvoSelClose.setAttribute( 'onclick' , 'chatCloseConvo("' + msgConversation.contact + '");' );
+                msgConvoSelClose.setAttribute( 'style' , 'margin-bottom: 5px;float:right;' );
+                msgConvoSelClose.innerText = 'X';
+                msgConvoListDiv.appendChild( msgConvoEntry );
+                msgConvoEntry.appendChild( msgConvoSel );
+                msgConvoEntry.appendChild( msgConvoSelClose );
+                if ( activeChat != msgConversation.contact && msgConversation.unread == 1 ) {
+                    document.getElementById( 'convo' + msgConversation.contact ).style.textDecoration = 'underline';
+                } else if ( activeChat == msgConversation.contact ) {
+                    document.getElementById( 'convo' + msgConversation.contact ).style.backgroundColor = '#fce36c';
+                    document.getElementById( 'convo' + msgConversation.contact ).style.color = '#000000';
+                }
+            }
+        );
+    }
+}
+
+// Function to display a chat interface from a selected conversation
+function chatDisplay( msgFrom ) {
+    if ( msgFrom != '' ) {
+        window.localStorage.setItem( 'org.doubango.chat.activeConv', msgFrom );
+        msgSession = JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) );
+        var chatConvDiv = document.getElementById( "chatConversation" );
+        //chatConvDiv.innerHTML = "";
+
+        // Draw the header with the contact name and the close button in the chat window
+        if ( document.getElementById("chatConvoHeader") != null ) {
+            chatConvHeader = document.getElementById("chatConvoHeader");
+            chatConvHeader.innerHTML = "";
+        } else {
+            var chatConvHeader = document.createElement( 'div' );
+            chatConvHeader.setAttribute( 'id' , 'chatConvoHeader' );
+            chatConvDiv.appendChild( chatConvHeader );
+        }
+        var chatConvContact = document.createElement('p');
+        chatConvContact.setAttribute( 'style' , 'test-align: center;float: left; width: 100%;' );
+        chatConvHeader.appendChild( chatConvContact );
+//        var chatCloseBtn = document.createElement('input');
+//        chatCloseBtn.setAttribute( 'href' , '#' );
+//        chatCloseBtn.setAttribute( 'type' , 'button' );
+//        chatCloseBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+//        chatCloseBtn.setAttribute( 'value' , 'Close Conversation' );
+//        chatCloseBtn.setAttribute( 'onClick' , 'chatCloseConvo(\'' + msgFrom + '\')' );
+//        chatCloseBtn.setAttribute( 'style' , 'float:right;width: 25%;' );
+//        chatConvHeader.appendChild( chatCloseBtn );
+
+        // Draw the actual messages window
+        let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
+        if ( typeof msgConversation !== 'undefined' ) {
+            // If a conversatione xists, prepare to display it
+            messages = msgConversation.messages;
+            //chatConvContact.innerText = msgConversation.contact;
+            chatConvContact.innerText = msgConversation.displayName;
+        } else {
+            // If this is a new conversation, initiate it
+            messages = [];
+            let conversation = {
+                "contact": msgFrom, 
+                // In a new conversation we don't know the display name,
+                //  so set it to the extension
+                "displayName": msgFrom,
+                "unread": 0,
+                "messages": messages
+            }
+            msgSession.push(conversation);
+            chatConvContact.innerText = msgFrom;
+            var chatConvListDiv = document.getElementById("chatList");
+            var chatConvSel = document.createElement('a');
+            chatConvSel.setAttribute( 'class' , 'list-group-item list-group-item-action active' );
+            chatConvSel.setAttribute( 'id' , 'convo' + msgFrom );
+            chatConvSel.setAttribute( 'data-toggle' , 'list' );
+            chatConvSel.setAttribute( 'href' , '#' );
+            chatConvSel.setAttribute( 'onclick' , 'chatDisplay("' + msgFrom + '");' );
+            //chatConvSel.setAttribute( 'role' , 'tab' );
+            //chatConvSel.setAttribute( 'aria-controls' , msgFrom );
+            chatConvSel.innerText = msgFrom;
+            chatConvListDiv.appendChild( chatConvSel );
+        }
+        if ( document.getElementById("chatMessages") != null ) {
+            chatMessagesDiv = document.getElementById("chatMessages");
+            chatMessagesDiv.innerHTML = "";
+        } else {
+            var chatMessagesDiv = document.createElement('div');
+            chatMessagesDiv.setAttribute( 'class' , 'overflow-auto' );
+            chatMessagesDiv.setAttribute( 'id' , 'chatMessages' );
+            chatMessagesDiv.setAttribute( 'style' , 'width:100%;height:250px;' );
+            chatConvDiv.appendChild( chatMessagesDiv );
+        }
+        messages.forEach( message => {
+                var chatMsgLine = document.createElement('p');
+                chatMsgLine.setAttribute( 'class' , 'msgLine' );
+                if ( message.inOut == 1 ) {
+                    chatMsgLine.setAttribute( 'style' , 'text-align: left;' );
+                } else {
+                    chatMsgLine.setAttribute( 'style' , 'text-align: right;' );
+                }
+                chatMsgLine.innerText = message.message;
+                chatMessagesDiv.appendChild( chatMsgLine );
+            }
+        );
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        var _listener = function(event) { 
+            if (event.keyCode === 13) { 
+                sipMsg( msgFrom ); 
+            } 
+        }
+        // Draw the message input and send buttons at the bottom
+        if ( document.getElementById("chatConvSend") != null ) {
+            chatConvSend = document.getElementById("chatConvSend");
+            chatInput = document.getElementById("chatInput");
+            chatInput.value = '';
+            // In order to reset the event listener so "send on enter" works
+            //   we need to clone and replace the input element
+            var new_chatInput = chatInput.cloneNode(true);
+            chatConvSend.replaceChild( new_chatInput, chatInput );
+            chatInput = document.getElementById("chatInput");
+            chatSendBtn = document.getElementById("chatSendBtn");
+        } else {
+            var chatConvSend = document.createElement( 'div' );
+            chatConvSend.setAttribute( 'id' , 'chatConvSend' );
+            chatConvDiv.appendChild( chatConvSend );
+            chatInput = document.createElement('input');
+            chatInput.setAttribute( 'type', 'text' );
+            chatInput.setAttribute( 'id', 'chatInput' );
+            chatInput.setAttribute( 'style' , 'width:75%; float:left;' );
+            chatConvSend.appendChild( chatInput );
+            var chatSendBtn = document.createElement('input');
+            chatSendBtn.setAttribute( 'href' , '#' );
+            chatSendBtn.setAttribute( 'type' , 'button' );
+            chatSendBtn.setAttribute( 'id' , 'chatSendBtn' );
+            chatSendBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            chatSendBtn.setAttribute( 'value' , 'Send' );
+            chatSendBtn.setAttribute( 'style' , 'float:right;' );
+            chatConvSend.appendChild( chatSendBtn );
+        }
+        chatSendBtn.setAttribute( 'onClick' , 'sipMsg(\'' + msgFrom + '\')' );
+        // Indicate these messages are now read
+        for ( var i in msgSession ) {
+            if (msgSession[i].contact == msgFrom) {
+                msgSession[i].unread = 0;
+                break; //Stop this loop, we found it!
+            }
+        }
+        window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+        chatEnum();
+        // Send chat when enter is pressed; 13 is enter key
+        chatInput.addEventListener( "keyup", _listener );
+        chatInput.focus();
+    }
+}
+
+// Close and delete a chat conversation
+function chatCloseConvo( msgFrom ) {
+    msgSession = JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) );
+    for ( var i in msgSession ) {
+        if ( msgSession[i].contact == msgFrom ) {
+            msgSession.splice( i , 1 );
+            break; //Stop this loop, we found it!
+        }
+    }
+    window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+    if ( msgSession !== 'undefined' && msgSession.length >= 1 ) {
+        chatDisplay( msgSession[0].contact );        
+    } else {
+        var chatConvListDiv = document.getElementById("chatList");
+        chatConvListDiv.innerHTML = "";
+        var chatConvDiv = document.getElementById( "chatConversation" );
+        chatConvDiv.innerHTML = "";
+    }
+    chatEnum();
+}
+
+// Function to send an sms message
+function sipMsg( msgFrom ) {
+    if ( oSipStack ) {
+        // create call session
+        msgTimeStamp = Date.now();
+        oSipSessionMsg = oSipStack.newSession( 'message' );
+        var msgMessage = chatInput.value;
+        oSipSessionMsg.send( msgFrom , msgMessage , 'text/plain;charset=utf-8');
+        msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+        let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
+        let message = {
+            "inOut": 0,
+            "timestamp": msgTimeStamp,
+            "message": msgMessage
+        }
+        if ( typeof msgConversation !== 'undefined' ) {
+            // A conversation exists with this user, add to it
+            msgConversation.messages.push(message);
+            for ( var i in msgSession ) {
+                if (msgSession[i].contact == msgFrom) {
+                    msgSession[i].messages = msgConversation.messages;
+                    break; //Stop this loop, we found it!
+                }
+            }
+        } else {
+            // This is a new conversation
+            messages = [];
+            messages.push(message);
+            let conversation = {
+                "contact": msgFrom,
+                // In a new conversation we don't know the display name,
+                //  so set it to the extension
+                "displayName": msgFrom,
+                "unread": 0,
+                "messages": messages
+            }
+            msgSession.push(conversation);
+        }
+        window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+        chatDisplay( msgFrom );
+    }
+}
+
 function loadCallOptions() {
     if (window.localStorage) {
         var s_value;
@@ -241,14 +486,12 @@ function sipRegister() {
         // 2020.12.10 - Edit by jgullo - Removed check for txtRealm as it's set by config
         //if (!txtRealm.value || !txtPrivateIdentity.value || !txtPublicIdentity.value) {
         if ( !txtPrivateIdentity.value || !txtPublicIdentity.value) {
-console.log("Debug 01");
             txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Please fill madatory fields (*)</b>';
             btnRegister.disabled = false;
             return;
         }
         var o_impu = tsip_uri.prototype.Parse(txtPublicIdentity.value);
         if (!o_impu || !o_impu.s_user_name || !o_impu.s_host) {
-console.log("Debug 02");
             txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>[" + txtPublicIdentity.value + "] is not a valid Public identity</b>';
             btnRegister.disabled = false;
             return;
@@ -257,6 +500,13 @@ console.log("Debug 02");
         // enable notifications if not already done
         if (window.webkitNotifications && window.webkitNotifications.checkPermission() != 0) {
             window.webkitNotifications.requestPermission();
+        }
+        // 2021.01.20 - Edit by jgullo - Adding initialization for chat array variable.
+        let msgSession = [];
+        if ( window.localStorage ) {
+            if ( localStorage.getItem( 'org.doubango.chat.session' ) === null ) {
+                window.localStorage.setItem( 'org.doubango.chat.session', JSON.stringify( msgSession ) );
+            }
         }
 
         // save credentials
@@ -290,13 +540,15 @@ console.log("Debug 02");
         }
         );
         if (oSipStack.start() != 0) {
-console.log("Debug 03");
             txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Failed to start the SIP stack</b>';
         }
-        else return;
+        else  {
+            // If there are chats stored in the local session, load them
+            chatEnum();
+            return;
+        }
     }
     catch (e) {
-console.log("Debug 04");
         txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>2:' + e + '</b>';
     }
     btnRegister.disabled = false;
@@ -346,6 +598,7 @@ function sipCall(s_type) {
             btnAudio.disabled = false;
             btnVideo.disabled = false;
             btnScreenShare.disabled = false;
+            btnChat.disabled = false;
             btnHangUp.disabled = true;
             return;
         }
@@ -548,6 +801,7 @@ function onDivCallCtrlMouseMove(evt) {
             btnAudio.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
             btnVideo.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
             btnScreenShare.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            btnChat.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
             document.getElementById("divCallCtrl").onmousemove = null; // unsubscribe
         }
     }
@@ -561,6 +815,7 @@ function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: con
     btnAudio.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    btnChat.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnHangUp.disabled = !oSipSessionCall;
 }
 
@@ -638,6 +893,7 @@ function uiCallTerminated(s_description) {
     btnAudio.disabled = false;
     btnVideo.disabled = false;
     btnScreenShare.disabled = false;
+    btnChat.disabled = false;
     btnHangUp.disabled = true;
     if (window.btnBFCP) window.btnBFCP.disabled = true;
 
@@ -684,7 +940,6 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                     oSipSessionRegister.register();
                 }
                 catch (e) {
-console.log("Debug 05");
                     txtRegStatus.value = txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>1:' + e + '</b>';
                     btnRegister.disabled = false;
                 }
@@ -707,7 +962,6 @@ console.log("Debug 05");
                 divCallOptions.style.display = "none";
 
                 txtCallStatus.innerHTML = '';
-console.log("Debug 06");
                 txtRegStatus.innerHTML = bFailure ? '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected: <b>' + e.description + '</b></i>' : '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected</i>';
                 break;
             }
@@ -729,6 +983,7 @@ console.log("Debug 06");
                     btnAudio.disabled = false;
                     btnVideo.disabled = false;
                     btnScreenShare.disabled = false;
+                    btnChat.disabled = false;
                     btnHangUp.disabled = false;
 
                     startRingTone();
@@ -754,6 +1009,60 @@ console.log("Debug 06");
                 }
                 break;
             }
+        case 'i_new_message':
+            {
+console.log("Raw Message: ", e);
+                //msgFrom = e.o_event.o_message.o_hdr_From.s_display_name;
+                activeChat = window.localStorage.getItem( 'org.doubango.chat.activeConv' );
+                msgFrom = e.o_event.o_message.o_hdr_From.o_uri.s_user_name;
+                msgFromDisplay = e.o_event.o_message.o_hdr_From.s_display_name;
+                msgTimeStamp = Date.now();
+                msgTimeDate = new Date(msgTimeStamp);
+                msgTimeString = msgTimeDate.toLocaleString()
+                msgMessage = e.getContentString();
+                msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+                let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
+                let message = {
+                    "inOut": 1,
+                    "timestamp": msgTimeStamp,
+                    "message": msgMessage
+                }
+                if ( typeof msgConversation !== 'undefined' ) {
+                    // A conversation exists with this user, add to it
+                    msgConversation.messages.push(message);
+                    for ( var i in msgSession ) {
+                        if (msgSession[i].contact == msgFrom) {
+                            // Trigger the unread indicator in an inactive chat
+                            if ( activeChat != msgFrom ) {
+                                msgSession[i].unread = 1;
+                            }
+                            if ( msgSession[i].displayName != msgFromDisplay ) {
+                                msgSession[i].displayName = msgFromDisplay;
+                            }
+                            msgSession[i].messages = msgConversation.messages;
+                            break; //Stop this loop, we found it!
+                        }
+                    }
+                } else {
+                    // This is a new conversation
+                    messages = [];
+                    messages.push(message);
+                    let conversation = {
+                        "contact": msgFrom,
+                        "displayName": msgFromDisplay,
+                        "unread": 0,
+                        "messages": messages
+                    }
+                    msgSession.push(conversation);
+                }
+                window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+                chatEnum();
+                if ( activeChat == msgFrom ) {
+                    chatDisplay( msgFrom );
+                }
+                //alert("From: " + msgFrom + " Time: " + msgTimeString + " Message: " + msgMessage);
+                break;
+            }
 
         case 'starting': default: break;
     }
@@ -769,7 +1078,6 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                 var bConnected = (e.type == 'connected');
                 if (e.session == oSipSessionRegister) {
                     uiOnConnectionEvent(bConnected, !bConnected);
-console.log("Debug 07");
                     txtRegStatus.innerHTML = '<img src="images/reg-status-connected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
@@ -811,7 +1119,6 @@ console.log("Debug 07");
                     oSipSessionCall = null;
                     oSipSessionRegister = null;
 
-console.log("Debug 08");
                     txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {

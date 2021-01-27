@@ -69,6 +69,7 @@
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnAudio" href="#" value="Audio" onclick="sipCall(&quot;call-audio&quot;);" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnVideo" href="#" value="Video" onclick="sipCall(&quot;call-audiovideo&quot;);" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnScreenShare" href="#" value="Screen Share" onclick="sipShareScreen();" />&nbsp;
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnChat" href="#" value="Chat" onclick="chatDisplay( txtPhoneNumber.value );" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnHangUp" value="HangUp" onclick='sipHangUp();' />&nbsp;
                             <input type="button" class="btn btn-primary btn-sm" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
                         </div>
@@ -79,6 +80,7 @@
                         <input type="button" class="btn" style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
                         <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
                     </div>
+<!--
                     <div id="divVideo" class="div-video" style="widt:75%; margin-top:5px;">
                         <div id="divVideoRemote" style='position:relative; border:1px solid #009; height:100%; width:100%; z-index: auto; opacity: 1'>
                             <video class="video" width="100%" height="100%" id="video_remote" autoplay="autoplay" style="opacity: 0; background-color: #000000; -webkit-transition-property: opacity; -webkit-transition-duration: 2s;"></video>
@@ -94,6 +96,7 @@
                             <div id="divScreencastLocal" class="previewvideo" style=' border:0px solid #009; z-index: 1000'>
                             </div>
                         </div>
+-->
 <!--
                         <div id="div1" style="margin-left: 300px; border:0px solid #009; z-index: 1000">
                             <iframe class="previewvideo" style="border:0px solid #009; z-index: 1000"> </iframe>
@@ -101,8 +104,14 @@
                                 <input type="button" class="btn" style="" id="Button1" value="Button1" /> &nbsp;
                                 <input type="button" class="btn" style="" id="Button2" value="Button2" /> &nbsp;
                             </div>
-                        </div
+                        </div>
+                    </div>
 -->
+                    <div id="divChat" class="row" style="width:75%; margin: auto; margin-top:5px; padding-top: 5px; clear: both;">
+                        <div class="col-2" id="chatList">
+                        </div>
+                        <div class="col-10" id="chatConversation">
+                        </div>
                     </div>
 
                     <!-- Sample code for populating contact search -->
