@@ -10,8 +10,10 @@
 
 API_VERSION=3.0.0
 API_FOLDER_NAME=release
-API_FILE_NAME=SIPml-api.js
-API_FILE_PATH=$API_FOLDER_NAME/$API_FILE_NAME
+API_FILE_NAME=SIPml-api
+API_FILE_EXT=js
+API_FILE_PATH_FULL=$API_FOLDER_NAME/$API_FILE_NAME.full.$API_FILE_EXT
+API_FILE_PATH_MINI=$API_FOLDER_NAME/$API_FILE_NAME.mini.$API_FILE_EXT
 
 # src dst
 CompressFile()
@@ -30,6 +32,9 @@ CompressFile()
 # src dst
 AppendFile()
 {
+        if [[ ! -f "$2" ]]; then
+                touch "$2"
+        fi
 	echo Appending... $1 to $2
 	cat $1 >> $2
 }
@@ -183,16 +188,18 @@ DeployFolder images
 DeployFolder sounds
 
 # deploy html files
-for file in call.htm contact.htm error.htm expert.htm index.html
-do
-	DeployFile $file $API_FOLDER_NAME/$file
-done
+#for file in call.htm contact.htm error.htm expert.htm index.html
+#do
+#	DeployFile $file $API_FOLDER_NAME/$file
+#done
 
+echo $API_FILE_PATH_FULL $API_FILE_MATH_MINI
+rm $API_FILE_PATH_FULL
+rm $API_FILE_PATH_MINI
 # append JS scripts
-AppendScripts $API_FILE_PATH.tmp.js
+AppendScripts $API_FILE_PATH_FULL
 # compress JS scripts
-CompressFile $API_FILE_PATH.tmp.js $API_FILE_PATH
-rm -r $API_FILE_PATH.tmp.js
+CompressFile $API_FILE_PATH_FULL $API_FILE_PATH_MINI
 
 # generate and deploy documentation
 ./docgen.sh

@@ -417,6 +417,10 @@ function __tsip_transport_ws_onmessage(evt) {
     else{
         tsk_ragel_state_init_ai(o_ragel_state, evt.data);
     }
+    // Do nothing if an incoming message is just 2 EOL codes
+    if( evt.data.length == 4 ) {
+         return 0;
+    }
     var o_message = tsip_message.prototype.Parse(o_ragel_state, true);
 
     if (o_message) {

@@ -30,8 +30,9 @@ C =
 window.onload = function () {
     window.console && window.console.info && window.console.info("location=" + window.location);
 
-    videoLocal = document.getElementById("video_local");
-    videoRemote = document.getElementById("video_remote");
+    // These have been rearchitected to only get put to the DOM when a call starts, so we can't set them here
+    //videoLocal = document.getElementById("video_local");
+    //videoRemote = document.getElementById("video_remote");
     audioRemote = document.getElementById("audio_remote");
 
     document.onkeyup = onKeyUp;
@@ -159,8 +160,9 @@ function postInit() {
     }
 
     // FIXME: displays must be per session
-    viewVideoLocal = videoLocal;
-    viewVideoRemote = videoRemote;
+    // Now that the video div is drawn at call start, these won't be defined yet.
+    //viewVideoLocal = videoLocal;
+    //viewVideoRemote = videoRemote;
 
     if (!SIPml.isWebRtcSupported()) {
         if (confirm('Your browser don\'t support WebRTC.\naudio/video calls will be disabled.\nDo you want to download a WebRTC-capable browser?')) {
@@ -172,8 +174,10 @@ function postInit() {
     document.body.style.cursor = 'default';
     oConfigCall = {
         audio_remote: audioRemote,
-        video_local: viewVideoLocal,
-        video_remote: viewVideoRemote,
+        //video_local: viewVideoLocal,
+        //video_remote: viewVideoRemote,
+        video_local: null,
+        video_remote: null,
         screencast_window_id: 0x00000000, // entire desktop
         bandwidth: { audio: undefined, video: undefined },
         video_size: { minWidth: undefined, minHeight: undefined, maxWidth: undefined, maxHeight: undefined },
@@ -250,16 +254,8 @@ function chatDisplay( msgFrom ) {
             chatConvDiv.appendChild( chatConvHeader );
         }
         var chatConvContact = document.createElement('p');
-        chatConvContact.setAttribute( 'style' , 'test-align: center;float: left; width: 100%;' );
+        chatConvContact.setAttribute( 'style' , 'test-align: center; width: 100%;' );
         chatConvHeader.appendChild( chatConvContact );
-//        var chatCloseBtn = document.createElement('input');
-//        chatCloseBtn.setAttribute( 'href' , '#' );
-//        chatCloseBtn.setAttribute( 'type' , 'button' );
-//        chatCloseBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
-//        chatCloseBtn.setAttribute( 'value' , 'Close Conversation' );
-//        chatCloseBtn.setAttribute( 'onClick' , 'chatCloseConvo(\'' + msgFrom + '\')' );
-//        chatCloseBtn.setAttribute( 'style' , 'float:right;width: 25%;' );
-//        chatConvHeader.appendChild( chatCloseBtn );
 
         // Draw the actual messages window
         let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
@@ -288,8 +284,6 @@ function chatDisplay( msgFrom ) {
             chatConvSel.setAttribute( 'data-toggle' , 'list' );
             chatConvSel.setAttribute( 'href' , '#' );
             chatConvSel.setAttribute( 'onclick' , 'chatDisplay("' + msgFrom + '");' );
-            //chatConvSel.setAttribute( 'role' , 'tab' );
-            //chatConvSel.setAttribute( 'aria-controls' , msgFrom );
             chatConvSel.innerText = msgFrom;
             chatConvListDiv.appendChild( chatConvSel );
         }
@@ -300,7 +294,6 @@ function chatDisplay( msgFrom ) {
             var chatMessagesDiv = document.createElement('div');
             chatMessagesDiv.setAttribute( 'class' , 'overflow-auto' );
             chatMessagesDiv.setAttribute( 'id' , 'chatMessages' );
-            chatMessagesDiv.setAttribute( 'style' , 'width:100%;height:250px;' );
             chatConvDiv.appendChild( chatMessagesDiv );
         }
         messages.forEach( message => {
@@ -339,7 +332,6 @@ function chatDisplay( msgFrom ) {
             chatInput = document.createElement('input');
             chatInput.setAttribute( 'type', 'text' );
             chatInput.setAttribute( 'id', 'chatInput' );
-            chatInput.setAttribute( 'style' , 'width:75%; float:left;' );
             chatConvSend.appendChild( chatInput );
             var chatSendBtn = document.createElement('input');
             chatSendBtn.setAttribute( 'href' , '#' );
@@ -347,7 +339,6 @@ function chatDisplay( msgFrom ) {
             chatSendBtn.setAttribute( 'id' , 'chatSendBtn' );
             chatSendBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
             chatSendBtn.setAttribute( 'value' , 'Send' );
-            chatSendBtn.setAttribute( 'style' , 'float:right;' );
             chatConvSend.appendChild( chatSendBtn );
         }
         chatSendBtn.setAttribute( 'onClick' , 'sipMsg(\'' + msgFrom + '\')' );
@@ -563,6 +554,14 @@ function sipUnRegister() {
 
 // makes a call (SIP INVITE)
 function sipCall(s_type) {
+    // If a video or screen share call is starting, draw the video UI
+    if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
+        uiVideoDisplayShowHide( true );
+        videoLocal = document.getElementById("video_local");
+        videoRemote = document.getElementById("video_remote");
+        oConfigCall.video_Local = document.getElementById("video_local");
+        oConfigCall.video_Remote = document.getElementById("video_remote");
+    }
     if (oSipStack && !oSipSessionCall && !tsk_string_is_null_or_empty(txtPhoneNumber.value)) {
         if (s_type == 'call-screenshare') {
             if (!SIPml.isScreenShareSupported()) {
@@ -833,14 +832,61 @@ function uiVideoDisplayEvent(b_local, b_added) {
 }
 
 function uiVideoDisplayShowHide(b_show) {
+console.log("Debug 01");
+    var divVideo = document.getElementById( 'divVideo' );
     if (b_show) {
+console.log("Debug 02");
 //        tdVideo.style.height = '340px';
-        divVideo.style.height = navigator.appName == 'Microsoft Internet Explorer' ? '100%' : '340px';
+//        divVideo.style.height = navigator.appName == 'Microsoft Internet Explorer' ? '100%' : '340px';
+
+        divVideo.style.height = '340px';
+        var divVideoRemote = document.createElement('div');
+        divVideoRemote.setAttribute( 'id', 'divVideoRemote' );
+        divVideo.appendChild( divVideoRemote );
+        var videoRemoteElement = document.createElement('video');
+        videoRemoteElement.setAttribute( 'id', 'video_remote' );
+        videoRemoteElement.setAttribute( 'class', 'video' );
+        videoRemoteElement.setAttribute( 'width', '100%' );
+        videoRemoteElement.setAttribute( 'height', '100%' );
+        videoRemoteElement.setAttribute( 'autoplay', 'autoplay' );
+        divVideoRemote.appendChild( videoRemoteElement );
+
+        var divVideoLocalWrapper = document.createElement('div');
+        divVideoLocalWrapper.setAttribute( 'id', 'divVideoLocalWrapper' );
+        divVideo.appendChild( divVideoLocalWrapper );
+        var iframeLocalPreviewVideo = document.createElement('iframe');
+        iframeLocalPreviewVideo.setAttribute( 'class', 'previewvideo' );
+        divVideoLocalWrapper.appendChild( iframeLocalPreviewVideo );
+        var divVideoLocal = document.createElement('div');
+        divVideoLocal.setAttribute( 'id', 'divVideoLocal' );
+        divVideoLocal.setAttribute( 'class', 'previewvideo' );
+        divVideoLocalWrapper.appendChild( divVideoLocal );
+        var videoLocalElement = document.createElement('video');
+        videoLocalElement.setAttribute( 'id', 'video_local' );
+        videoLocalElement.setAttribute( 'class', 'video' );
+        videoLocalElement.setAttribute( 'width', '100%' );
+        videoLocalElement.setAttribute( 'height', '100%' );
+        videoLocalElement.setAttribute( 'autoplay', 'autoplay' );
+        videoLocalElement.setAttribute( 'muted', 'true' );
+        divVideoLocal.appendChild( videoLocalElement );
+        
+        var divScreencastLocalWrapper = document.createElement('div');
+        divVideo.appendChild( divScreencastLocalWrapper );
+        var iframeLocalPreviewScreencast = document.createElement('iframe');
+        iframeLocalPreviewScreencast.setAttribute( 'class', 'previewvideo' );
+        divScreencastLocalWrapper.appendChild( iframeLocalPreviewScreencast );
+        var divScreencastLocal = document.createElement('div');
+        divScreencastLocal.setAttribute( 'id', 'divScreencastLocal' );
+        divScreencastLocal.setAttribute( 'class', 'previewvideo' );
+        divScreencastLocalWrapper.appendChild( divScreencastLocal );
     }
     else {
-//        tdVideo.style.height = '0px';
+console.log("Debug 03");
+        //tdVideo.style.height = '0px';
+        divVideo.innerHTML = '';
         divVideo.style.height = '0px';
     }
+console.log("Debug 04");
     btnFullScreen.disabled = !b_show;
 }
 
