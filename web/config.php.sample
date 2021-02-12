@@ -1,25 +1,48 @@
 <?php
 
 // SIP Realm
-define("REALM","sample realm");
+//define("REALM","sample realm");
 
 // SIP Websocket URL
-define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
+//define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
 
 // SimpleSAMLPhp Provider Name
-define("SAMLSPNAME","saml-sp-name");
+//define("SAMLSPNAME","saml-sp-name");
+
+// Chat - Max Conversation Length
+//define("CHATMAXCONVOLEN","50");
+
+// LDAP Credentials
 
 // LDAP/AD URI
-define("LDAPURI","ldaps://sampleserver.sampledomain.tld:636");
+//define("LDAPURI","ldaps://sampleserver.sampledomain.tld:636");
 
 // LDAP/AD Bind Username
-define("LDAPBINDUSER","sampleusername@sampledomain.tld");
+//define("LDAPBINDUSER","sampleusername@sampledomain.tld");
 
 // LDAP/AD Bind Password
-define("LDAPBINDPASS","samplepassword");
+//define("LDAPBINDPASS","samplepassword");
 
-// LDAB Base DN
-define("LDAPBASEDN","dc=SAMPLEDOMAIN,dc=TLD");
+// LDAP Base DN
+//define("LDAPBASEDN","dc=SAMPLEDOMAIN,dc=TLD");
+
+
+// MySQL Credentials
+
+// MySQL Host
+//define("MYSQLHOST","localhost");
+
+// MySQL User
+//define("MYSQLUSER","svcSipml5Web");
+
+// MySQL Password
+//define("MYSQLPASS","samplemysqlpassword");
+
+// MySQL Port
+//define("MYSQLPORT","3306");
+
+// MySQL DB Name
+//define("MYSQLDBNAME","sipml5_web");
 
 ?>
 

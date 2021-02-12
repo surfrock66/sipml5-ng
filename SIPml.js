@@ -1044,6 +1044,10 @@ SIPml.Stack = function (o_conf) {
         var attachStream = function (bLocal) {
             var o_stream = bLocal ? e.o_session.get_stream_local() : e.o_session.get_stream_remote();
             if (_setStream((bLocal ? oSession.videoLocal : oSession.videoRemote), o_stream, false)) {
+                if ( bLocal ) {
+                    // Auto-muting local video for elements that aren't on the page on page load won't work, so we need to mute it here ot the user will hear themself
+                    oSession.videoLocal.muted = 'true';
+                }
                 dispatchEvent(bLocal ? 'm_stream_video_local_added' : 'm_stream_video_remote_added');
             }
             if (_setStream((bLocal ? oSession.audioLocal : oSession.audioRemote), o_stream, true)) {

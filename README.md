@@ -7,7 +7,7 @@ While moving things to a static config file, we will also attempt to modularize 
 
 We have added sms chat and threaded conversations.
 
-Stretch goals for our organization are to implement presence indication, contacts lookup, chat persistence between sessions (stored in mysql), saveable dialing shortcuts, and a better responsive mobile UI.
+Stretch goals for our organization are to implement presence indication, contacts lookup, saveable dialing shortcuts, and a better responsive mobile UI.
 
 At this time we cannot provide a public demo of our fork, however the demo below from duobango still works for external SIP testing.
 
@@ -16,8 +16,20 @@ Our implementation requires the following:
 1. Ubuntu Linux Server
 2. apache2 web server
 3. php
-4. mysql-server (Optional for shortcuts and SAML integration)
-5. php-curl and php-dom (PHP modules for optional simplesamlphp integration)
+4. php-mysqli
+5. mysql-server (Optional for shortcuts and SAML integration)
+6. php-curl and php-dom (PHP modules for optional simplesamlphp integration)
+
+# Optional - MySQL setup
+
+Optionally, if a MySQL server is configured, several features become enabled:
+1. If AD/LDAP login is enabled through simpleSAMLPHP, the passcode-extension pairs can be stored for automatic SIP registration; this way a user only needs to log in once (through AD/LDAP) and not a second time at SIP registration.
+2. Chat/SMS persistence between sessions, chats are written to the database and can be recalled in subsequent sessions
+3. Shortcut storage, users can configure custom shortcut buttons
+
+A mysql server can be set up on the server hosting this app, or on another system.  All DB configuration is defined in config.php.  To set up the tables and columns, please run the sql commands in mysql_db_setup.sql.  After that, to add a user to the system, run the following in mysql:
+
+INSERT INTO `sipml5_web`.`extensions` (`extension`,`passcode`) VALUES ('1234','1234');
 
 # SIPml5-NG
 On May 14th, 2012 SIPml5, the world's first open Source HTML SIP client was released. SIPml5 had captivated the mind of RTC pioneers
@@ -101,3 +113,9 @@ Once a patch had been accepted - it will be merged back into the upstream reposi
 
 Project home page: [github.com/cloudonix/sipml5-ng](https://github.com/cloudonix/sipml5-ng) <br />
 Download JS API: [SIPml-api.js](https://raw.githubusercontent.com/cloudonix/sipml5-ng/master/release/SIPml-api.js)
+
+# Credits/Acknowledgements
+
+Duobango Telecom, original source for this project, the API, and the demo: [Duobango Telecom](https://www.doubango.org/) [Duobango Telecom GitHub](https://github.com/DoubangoTelecom)
+Cloudonix, who forked SIPml5 into SIPML5-ng, the fork we are using: [Cloudonix](https://cloudonix.io/) [Cloudonix Github](https://github.com/cloudonix)
+WebRTC Experiment by Muaz Khan, whose screen-sharing code was adapted into this: [Muaz Khan Github](https://www.webrtc-experiment.com/) [WebRTC-Experiment](https://www.webrtc-experiment.com/) [Plugin-free WebRTC Screen Sharing](https://www.webrtc-experiment.com/Pluginfree-Screen-Sharing/)

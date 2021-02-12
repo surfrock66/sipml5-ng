@@ -29,18 +29,16 @@
         <meta name="author" content="SEIU Local 1000 Information Technology" />
         
         <!-- Fav and touch icons -->
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-        <!--<link rel="manifest" href="/icons/manifest.json">-->
-        <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5d4183">
-        <link rel="shortcut icon" href="/icons/favicon.ico">
-        <meta name="apple-mobile-web-app-title" content="SEIU1000 Contract">
-        <meta name="application-name" content="SEIU1000 Contract">
-        <meta name="msapplication-TileColor" content="#5d4183">
-        <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png">
-        <meta name="msapplication-config" content="/icons/browserconfig.xml">
-        <meta name="theme-color" content="#5d4183">
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png">
+        <link rel="manifest" href="/images/icons/site.webmanifest">
+        <link rel="mask-icon" href="/images/icons/safari-pinned-tab.svg" color="#8165a6">
+        <link rel="shortcut icon" href="/images/icons/favicon.ico">
+        <meta name="msapplication-TileColor" content="#8165a6">
+        <meta name="msapplication-TileImage" content="/images/icons/mstile-144x144.png">
+        <meta name="msapplication-config" content="/images/icons/browserconfig.xml">
+        <meta name="theme-color" content="#8165a6">
 
         <!-- Google Webfonts -->
         <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -65,6 +63,17 @@
         <!--<link href="./assets/css/bootstrap.css" rel="stylesheet" />-->
         <!--<link href="./assets/css/bootstrap-responsive.css" rel="stylesheet" />-->
 
+        <!-- WebRTC Screehsare Libraries -->
+<!--
+        <script src="./js/ScreenShare.socket.io.js"> </script>
+        <script src="./js/ScreenShare.DetectRTC.js"></script>
+        <script src="./js/ScreenShare.adapter-latest.js"></script>
+        <script src="./js/ScreenShare.CodecsHandler.js"></script>
+        <script src="./js/ScreenShare.BandwidthHandler.js"></script>
+        <script src="./js/ScreenShare.IceServersHandler.js"></script>
+        <script src="./js/ScreenShare.conference.js"> </script>
+-->
+
         <!-- Scripts -->
         <script src="./js/SIPml-api.js" type="text/javascript"> </script>
         <script type="text/javascript">
@@ -80,14 +89,33 @@
             echo "        window.localStorage.setItem('org.doubango.expert.websocket_server_url', '".WEBSOCKETURL."');\r\n";
         }
     }
+    if ( defined ( 'CHATMAXCONVOLEN' ) ) {
+        if ( !empty ( CHATMAXCONVOLEN ) ) {
+            echo "        window.localStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
+        }
+    }
     // 2020.12.16 - Edit by jgullo - Load variables from SAML if it's enabled
     if ( defined ( 'SAMLSPNAME' ) ) {
         if ( !empty ( SAMLSPNAME ) ) {
-            echo "        window.localStorage.setItem('org.doubango.identity.display_name', '".$fullName."')\r\n";
-            echo "        window.localStorage.setItem('org.doubango.identity.impi', '".$privIdValue."')\r\n";
-            echo "        window.localStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."')\r\n";
+            echo "        window.localStorage.setItem('org.doubango.identity.display_name', '".$fullName."');\r\n";
+            echo "        window.localStorage.setItem('org.doubango.identity.impi', '".$privIdValue."');\r\n";
+            echo "        window.localStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."');\r\n";
+            // If database variables are defined, attempt to pre-populate the passcode and prior chat conversations
+            if ( defined ( 'MYSQLHOST' ) && defined ( 'MYSQLUSER' ) && defined ( 'MYSQLPASS' ) && defined ( 'MYSQLPORT' ) && defined ( 'MYSQLDBNAME' ) ) {
+                if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
+                    if ( isset( $privIdValue ) && !empty( $privIdValue ) ) {
+                        // Query the DB for passcode and conversations
+                        $queryExtension = mysqli_query( $con, "SELECT passcode, conversations FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
+                        while( $row = mysqli_fetch_array( $queryExtension ) ) {
+                            echo "        window.localStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
+                            echo "        window.localStorage.setItem('org.doubango.chat.session', '".$row[1]."');\r\n";
+                        }
+                    }
+                }
+            }
         }
     }
+
 ?>
         </script>
         <script type="text/javascript">

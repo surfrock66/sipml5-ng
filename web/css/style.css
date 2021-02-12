@@ -4,46 +4,46 @@ html {
 }
 
 body {
-	padding-top: 4.5rem;
-	margin-bottom: 40px;
-	display: -ms-flexbox;
-	display: flex;
-	/*-ms-flex-align: center;
-	align-items: center;*/
-	background-color: #f5f5f5;
-	font-family: 'Montserrat', sans-serif;  
+  padding-top: 4.5rem;
+  margin-bottom: 40px;
+  display: -ms-flexbox;
+  display: flex;
+  /*-ms-flex-align: center;
+  align-items: center;*/
+  background-color: #f5f5f5;
+  font-family: 'Montserrat', sans-serif;  
 }
 
 .page {
-	margin-top: 40px;	
+  margin-top: 40px;	
 }
 
 .container {
-	max-width: 1360px;
+  max-width: 1360px;
 }
 
 h1, h2, h3, h4 {
-	color: #362886;
+  color: #362886;
 }
 
 h1 {
-	font-size: 30px;
+  font-size: 30px;
 }
 
 h2 {
-	font-size: 24px;
+  font-size: 24px;
 }
 
 h3 {
-	font-size: 24px;
+  font-size: 24px;
 }
 
 li {
-	margin: 5px 0px;
+  margin: 5px 0px;
 }
 
 ul, ol {
-	margin: 16px 0px 16px 0px;
+  margin: 16px 0px 16px 0px;
 }
 
 ol ol,
@@ -54,51 +54,55 @@ ul ol {
 }
 
 table {
-	margin: 20px 0px 20px 0px;
+  margin: 20px 0px 20px 0px;
 }
 
 .form-signin {
-	width: 100%;
-	max-width: 400px;
-	padding: 15px;
-	margin: 150px auto 0;
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  margin: 150px auto 0;
 }
 .form-signin .form-control {
-	position: relative;
-	box-sizing: border-box;
-	height: auto;
-	padding: 10px;
-	font-size: 16px;
-	margin-bottom: 15px;
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 15px;
 }
 .form-signin .form-control:focus {
-	z-index: 2;
+  z-index: 2;
 }
 .form-signin input[type="email"] {
-	margin-bottom: -1px;
-	border-bottom-right-radius: 0;
-	border-bottom-left-radius: 0;
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 .form-signin input[type="password"] {
-	margin-bottom: 10px;
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .lh-condensed { line-height: 1.25; }
 
-.btn-primary, .btn {
+.btn-primary,
+.btn {
   background-color: #362886;
   color: #fff;
   font-size: larger;
 }
 
-.btn-primary:hover, .btn:hover {
+.btn-primary:hover,
+.btn:hover,
+.btn-indicate {
   background-color: #fce36c;
   color: #362886;
   border-color: #362886;
 }
 
-.btn-primary:disabled, .btn:disabled {
+.btn-primary:disabled,
+.btn:disabled {
   background-color: #362886;
   color: #6c757d;
 }
@@ -131,11 +135,12 @@ table {
 }
 
 a.white {
-	color: white!important;
+ color: white!important;
 }
+
 .branding .logo img {
-  height: 21px;
-  width: 234px;
+  max-height: 21px;
+  max-width: 234px;
 }
 
 img, svg {
@@ -157,16 +162,16 @@ label {
 }
 
 label.error {
-	color: red;
-	font-size: 10px;
+  color: red;
+  font-size: 10px;
 }
 
 .remaining {
-	color: #362886;
+  color: #362886;
 }
 
 .remaining-error {
-	color: red;
+  color: red;
 }
 
 .footer {
@@ -180,11 +185,11 @@ label.error {
 }
 
 form.navbar-form {
-	width: 0px;
-	height: 0px;
-	margin: 8px;
-	padding: 0px;
-	display: inline;
+  width: 0px;
+  height: 0px;
+  margin: 8px;
+  padding: 0px;
+  display: inline;
 }
 
 input[type=submit].LogOut {
@@ -193,20 +198,21 @@ input[type=submit].LogOut {
 }
 
 .HighlightLine {
-	background: #FDF1B5;
-	#font-weight: bolder;
-	margin: 1px;
-	#display: block;
-	#padding: 8px 8px 8px 28px;
-	padding: 8px 8px 8px 8px;
-	#margin-left: -28px;
-	border-radius: 10px;
+  background: #FDF1B5;
+  #font-weight: bolder;
+  margin: 1px;
+  #display: block;
+  #padding: 8px 8px 8px 28px;
+  padding: 8px 8px 8px 8px;
+  #margin-left: -28px;
+  border-radius: 10px;
 }
 
 .HighlightTerm {
-	font-weight: bolder;
-	#text-decoration: underline;
+  font-weight: bolder;
+  #text-decoration: underline;
 }
+
 .navbar-inner-red {
   background-color: #600000;
   background-image: none;
@@ -227,14 +233,38 @@ input[type=submit].LogOut {
   position: relative;
 }
 
+.border-top-separator {
+  border-top: thick solid #362886;
+}
+
+
+/* Layout/Div Styles */
+
+#divCallCtrl {
+  vertical-align: middle;
+  text-align:center;
+}
+
+#divStatusMsgs {
+  width: 100%;
+  margin: auto;
+  display: block;
+}
+
 .div-dialer {
   width: 100%;
   margin: 5px 0px;
+  clear: both;
+  text-align: center;
+}
+
+#txtContactInfo {
+  width: 100%;
   text-align: center;
 }
 
 .btn-toolbar {
-  width: 75%;
+  width: 100%;
   margin: auto;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -242,7 +272,20 @@ input[type=submit].LogOut {
   vertical-align: middle;
 }
 
+#divBtnCallGroup {
+  margin: 0 auto;
+}
+
+#divCallWrapper {
+}
+
+#divCallOptions {
+}
+
 .call-options {
+  display: none;
+  margin: 0px 5px;
+  width: 100%;
   padding: 5px;
   background-color: #f0f0f0;
   border: 1px solid #eee;
@@ -261,6 +304,77 @@ input[type=submit].LogOut {
   -o-transition-duration: 2s;
 }
 
+#divVideo {
+}
+
+.div-video {
+  width: 50%;
+  margin: auto;
+  margin-top: 5px;
+  -webkit-transition-property: height;
+  -moz-transition-property: height;
+  -o-transition-property: height;
+  -webkit-transition-duration: 2s;
+  -moz-transition-duration: 2s;
+  -o-transition-duration: 2s;
+}
+
+#divVideoRemoteWrapper,
+#divVideoLocalWrapper,
+#divVideoLocal,
+.previewvideo {
+  border:0px solid #009;
+}
+
+#video_remote,
+#video_local {
+  background-color: #000000;
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 2s;
+}
+
+.divVideoRemote {
+  position:relative;
+  border:1px solid #009;
+  height:100%;
+  width:100%;
+}
+
+.video {
+  z-index: 10;
+}
+
+.previewvideo {
+  position: fixed;
+  right: 5px;
+  bottom: 5px;
+  max-width: 20%;
+  z-index: 20;
+}
+
+#divChat {
+  width:100%;
+  margin: auto;
+  margin-top: 5px;
+  padding-top: 5px;
+  clear: both;
+}
+
+#chatList {
+  test-align: center;
+  margin-bottom: 5px;
+}
+
+.chatListEntry {
+  margin-bottom: 5px;
+  float: left;
+}
+
+.btn-chatClose {
+  margin-bottom: 5px;
+  float: right;
+}
+
 .divMessages {
   width:100%;
   height:250px;
@@ -274,50 +388,6 @@ input[type=submit].LogOut {
 .chatSendBtn {
   float:right;
 }
-
-.tab-video,
-.div-video {
-  width: 75%;
-  margin: auto;
-  margin-top: 5px;
-  height: 0px;
-  -webkit-transition-property: height;
-  -moz-transition-property: height;
-  -o-transition-property: height;
-  -webkit-transition-duration: 2s;
-  -moz-transition-duration: 2s;
-  -o-transition-duration: 2s;
-}
-
-.divVideoRemote {
-  position:relative;
-  border:1px solid #009;
-  height:100%;
-  width:100%;
-  /*z-index: auto; */
-  /*opacity: 1;*/
-}
-
-.video_remote, .video_local {
-  /*opacity: 0;*/
-  background-color: #000000;
-  -webkit-transition-property: opacity;
-  -webkit-transition-duration: 2s;
-}
-
-.divVideoLocalWrapper {
-  margin-left: 0px;
-}
-
-.divScreencastLocalWrapper {
-  margin-left: 90px;
-}
-
-#previewvideo, .divVideoLocal, .divVideoLocalWrapper, .divScreencastLocalWrapper {
-  border:0px solid #009;
-  /*z-index: 1000;*/
-}
-
 
 .label-align {
   display: block;
@@ -357,12 +427,6 @@ input[type=submit].LogOut {
   -webkit-transition-duration: 2s;
   -moz-transition-duration: 2s;
   -o-transition-duration: 2s;
-}
-
-.previewvideo {
-  position: absolute;
-  width: 88px;
-  height: 72px;
 }
 
 /* Start of styles for collapseable side panel */

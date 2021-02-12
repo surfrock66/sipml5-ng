@@ -93,6 +93,7 @@ function adapterFactory() {
       adapter.browserShim = chromeShim;
 
       chromeShim.shimGetUserMedia(window);
+      //chromeShim.shimGetDisplayMedia(window);
       chromeShim.shimMediaStream(window);
       chromeShim.shimPeerConnection(window);
       chromeShim.shimOnTrack(window);
@@ -5829,8 +5830,10 @@ tmedia_session_jsep01.onGetUserMediaSuccess = function (o_stream, _This) {
             tsk_utils_log_warn("onGetUserMediaSuccess but no local sdp request is pending");
             return;
         }
-
+console.log("SIPml5.js - tmedia_session_jsep01.onGetUserMediaSuccess - Debug 01 - o_stream: ",o_stream);
         if (o_stream && !This.b_ro_held) {
+console.log("SIPml5.js - tmedia_session_jsep01.onGetUserMediaSuccess - Debug 02 - o_stream.getAudioTracks: ", o_stream.getAudioTracks() );
+console.log("SIPml5.js - tmedia_session_jsep01.onGetUserMediaSuccess - Debug 03 - o_stream.getVideoTracks: ", o_stream.getVideoTracks() );
             // save stream other next calls
             if (o_stream.getAudioTracks().length > 0 && o_stream.getVideoTracks().length == 0) {
                 __o_jsep_stream_audio = o_stream;
@@ -5839,6 +5842,7 @@ tmedia_session_jsep01.onGetUserMediaSuccess = function (o_stream, _This) {
                 __o_jsep_stream_audiovideo = o_stream;
             }
 
+console.log("SIPml5.js - tmedia_session_jsep01.onGetUserMediaSuccess - Debug 04 - This: ", This );
             if (!This.o_local_stream) {
                 This.o_mgr.callback(tmedia_session_events_e.STREAM_LOCAL_ACCEPTED, this.e_type);
             }
@@ -6087,8 +6091,9 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
             mandatory: {},
             optional: []
         };
-        if ((this.e_type.i_id & tmedia_type_e.SCREEN_SHARE.i_id) == tmedia_type_e.SCREEN_SHARE.i_id) {
-            o_video_constraints.mandatory.chromeMediaSource = 'screen';
+        if ( this.e_type.i_id == tmedia_type_e.SCREEN_SHARE.i_id ) {
+            // Constraints for Screen Share go here
+            //o_video_constraints.mandatory.chromeMediaSource = 'screen';
         }
         if (this.e_type.i_id & tmedia_type_e.VIDEO.i_id) {
             if (this.o_video_size) {
@@ -6160,7 +6165,27 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
         else {
             if (!this.b_lo_held && !this.o_local_stream) {
                 this.o_mgr.callback(tmedia_session_events_e.STREAM_LOCAL_REQUESTED, this.e_type);
-                navigator.getUserMedia(
+                if ( this.e_type == tmedia_type_e.SCREEN_SHARE ) {
+                    let o_stream = null;
+                    try {
+                        navigator.mediaDevices.getDisplayMedia( 
+                            { 
+                                //audio: true,
+                                video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false 
+                            }
+                        ).then(o_stream => tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This) );
+//                        o_stream = navigator.mediaDevices.getDisplayMedia( 
+//                            { 
+//                                //audio: (this.e_type == tmedia_type_e.SCREEN_SHARE) ? false : !!(this.e_type.i_id & tmedia_type_e.AUDIO.i_id) ? o_audio_constraints : false,
+//                                video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false 
+//                            }
+//                        );
+                    } catch ( s_error ) {
+                        tmedia_session_jsep01.onGetUserMediaError(s_error, This);
+                    }
+                    //tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This);
+                } else { 
+                    navigator.getUserMedia(
                         {
                             audio: (this.e_type == tmedia_type_e.SCREEN_SHARE) ? false : !!(this.e_type.i_id & tmedia_type_e.AUDIO.i_id) ? o_audio_constraints : false,
                             video: !!(this.e_type.i_id & tmedia_type_e.VIDEO.i_id) ? o_video_constraints : false, // "SCREEN_SHARE" contains "VIDEO" flag -> (VIDEO & SCREEN_SHARE) = VIDEO
@@ -6169,8 +6194,9 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
                         tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaSuccess : function (o_stream) { tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This); },
                         tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaError : function (s_error) { tmedia_session_jsep01.onGetUserMediaError(s_error, This); }
                     );
+                }
             }
-        }
+        }	
     }
 
     return this.o_sdp_lo;
@@ -56253,7 +56279,14 @@ SIPml.Stack = function (o_conf) {
 
         var attachStream = function (bLocal) {
             var o_stream = bLocal ? e.o_session.get_stream_local() : e.o_session.get_stream_remote();
+console.log("SIPml5-API.js - attachStream - Debug 01 - ", bLocal);
             if (_setStream((bLocal ? oSession.videoLocal : oSession.videoRemote), o_stream, false)) {
+console.log("SIPml5-API.js - attachStream - Debug 02 - ", bLocal);
+                if ( bLocal ) {
+console.log("SIPml5-API.js - attachStream - Debug 03 - ", bLocal);
+                    // Auto-muting local video for elements that aren't on the page on page load won't work, so we need to mute it here ot the user will hear themself
+                    oSession.videoLocal.muted = 'true';
+                }
                 dispatchEvent(bLocal ? 'm_stream_video_local_added' : 'm_stream_video_remote_added');
             }
             if (_setStream((bLocal ? oSession.audioLocal : oSession.audioRemote), o_stream, true)) {

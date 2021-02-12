@@ -92,6 +92,17 @@ window.onload = function () {
             clearInterval(oReadyStateTimer);
             // initialize SIPML5
             preInit();
+    // Having the password in the local storage is our canary that we can auto-login
+console.log( "onLoad - Debug 01", window.localStorage );
+    if ( ( window.localStorage.getItem('org.doubango.identity.password') !== null ) && ( window.localStorage.getItem('org.doubango.identity.password') != "" ) ) {
+console.log( "onLoad - Debug 02" );
+        sipRegister();
+    } else {
+console.log( "onLoad - Debug 03" );
+        var offcanvas_aside = document.getElementById( 'registrationOffcanvas' );
+        $('body').toggleClass("offcanvas-active");
+        offcanvas_aside.classList.add( "show" );
+    }
         }
     },
     500);
@@ -150,7 +161,7 @@ function postInit() {
 
     // checks for WebSocket support
     if (!SIPml.isWebSocketSupported()) {
-        if (confirm('Your browser don\'t support WebSockets.\nDo you want to download a WebSocket-capable browser?')) {
+        if (confirm('Your browser doesn\'t support WebSockets.\nDo you want to download a WebSocket-capable browser?')) {
             window.location = 'https://www.google.com/intl/en/chrome/browser/';
         }
         else {
@@ -159,13 +170,8 @@ function postInit() {
         return;
     }
 
-    // FIXME: displays must be per session
-    // Now that the video div is drawn at call start, these won't be defined yet.
-    //viewVideoLocal = videoLocal;
-    //viewVideoRemote = videoRemote;
-
     if (!SIPml.isWebRtcSupported()) {
-        if (confirm('Your browser don\'t support WebRTC.\naudio/video calls will be disabled.\nDo you want to download a WebRTC-capable browser?')) {
+        if (confirm('Your browser doesn\'t support WebRTC.\naudio/video calls will be disabled.\nDo you want to download a WebRTC-capable browser?')) {
             window.location = 'https://www.google.com/intl/en/chrome/browser/';
         }
     }
@@ -189,19 +195,39 @@ function postInit() {
     };
 }
 
+// Function to globally show/hide chat conversations
+function uiShowHideChat( show ) {
+    var msgDiv = document.getElementById( 'divChat' );
+    var btnChatShowHide = document.getElementById( 'btnChatShowHide' );
+    if ( show ) {
+        msgDiv.style.display = 'block';
+        msgDiv.classList.add( 'border-top-separator' );
+        btnChatShowHide.value = 'Hide Chat';
+        btnChatShowHide.setAttribute( 'onclick', 'uiShowHideChat( 0 )' );
+        if ( btnChatShowHide.classList.contains( 'btn-indicate' ) ) {
+            btnChatShowHide.classList.remove( 'btn-indicate' );
+        }
+    } else {
+        msgDiv.style.display = 'none';
+        msgDiv.classList.remove( 'border-top-separator' );
+        window.localStorage.setItem( 'org.doubango.chat.activeConv', '' );
+        btnChatShowHide.value = 'Show Chat';
+        btnChatShowHide.setAttribute( 'onclick', 'uiShowHideChat( 1 )' );
+    }
+}
 
 // Function to enumerate chat conversations from localstorage object
 function chatEnum() {
-    msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+    msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
     var msgDiv = document.getElementById("divChat");
+    var btnChatShowHide = document.getElementById( 'btnChatShowHide' );
     if ( msgSession.length == 0 ) {
-        msgDiv.style.borderTop = 'none';
+        btnChatShowHide.disabled = true;
     } else {
-        msgDiv.style.borderTop = 'thick solid #362886';
+        btnChatShowHide.disabled = false;
         var msgConvoListDiv = document.getElementById("chatList");
         msgConvoListDiv.innerHTML = "";
         var msgConvoHead = document.createElement('p');
-        msgConvoHead.setAttribute( 'style' , 'test-align: center;margin-bottom: 5px;' );
         msgConvoHead.innerText = "Conversations";
         msgConvoListDiv.appendChild( msgConvoHead );
         msgSession.forEach( msgConversation => {
@@ -212,15 +238,13 @@ function chatEnum() {
                 msgConvoSel.setAttribute( 'id' , 'convo' + msgConversation.contact );
                 msgConvoSel.setAttribute( 'href' , '#' );
                 msgConvoSel.setAttribute( 'onclick' , 'chatDisplay("' + msgConversation.contact + '");' );
-                msgConvoSel.setAttribute( 'style' , 'margin-bottom: 5px;float: left;' );
-                activeChat = JSON.parse(window.localStorage.getItem('org.doubango.chat.activeConv'));
+                activeChat = window.localStorage.getItem('org.doubango.chat.activeConv');
                 msgConvoSel.innerText = msgConversation.displayName;
                 var msgConvoSelClose = document.createElement('a');
-                msgConvoSelClose.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                msgConvoSelClose.setAttribute( 'class' , 'btn btn-primary btn-sm btn-chatClose' );
                 msgConvoSelClose.setAttribute( 'id' , 'convo' + msgConversation.contact );
                 msgConvoSelClose.setAttribute( 'href' , '#' );
                 msgConvoSelClose.setAttribute( 'onclick' , 'chatCloseConvo("' + msgConversation.contact + '");' );
-                msgConvoSelClose.setAttribute( 'style' , 'margin-bottom: 5px;float:right;' );
                 msgConvoSelClose.innerText = 'X';
                 msgConvoListDiv.appendChild( msgConvoEntry );
                 msgConvoEntry.appendChild( msgConvoSel );
@@ -239,8 +263,9 @@ function chatEnum() {
 // Function to display a chat interface from a selected conversation
 function chatDisplay( msgFrom ) {
     if ( msgFrom != '' ) {
+        uiShowHideChat( 1 );
         window.localStorage.setItem( 'org.doubango.chat.activeConv', msgFrom );
-        msgSession = JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) );
+        msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
         var chatConvDiv = document.getElementById( "chatConversation" );
         //chatConvDiv.innerHTML = "";
 
@@ -258,7 +283,9 @@ function chatDisplay( msgFrom ) {
         chatConvHeader.appendChild( chatConvContact );
 
         // Draw the actual messages window
-        let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
+//        if ( JSON.stringify( msgSession ) !== '{}' ) {
+            let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
+//        }
         if ( typeof msgConversation !== 'undefined' ) {
             // If a conversatione xists, prepare to display it
             messages = msgConversation.messages;
@@ -359,14 +386,18 @@ function chatDisplay( msgFrom ) {
 
 // Close and delete a chat conversation
 function chatCloseConvo( msgFrom ) {
-    msgSession = JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) );
+    msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
+console.log("chatCloseConvo - Debug 01");
     for ( var i in msgSession ) {
         if ( msgSession[i].contact == msgFrom ) {
             msgSession.splice( i , 1 );
             break; //Stop this loop, we found it!
         }
     }
+console.log("chatCloseConvo - Debug 02");
     window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+console.log("chatCloseConvo - Debug 03 - save");
+    chatSave();
     if ( msgSession !== 'undefined' && msgSession.length >= 1 ) {
         chatDisplay( msgSession[0].contact );        
     } else {
@@ -374,8 +405,24 @@ function chatCloseConvo( msgFrom ) {
         chatConvListDiv.innerHTML = "";
         var chatConvDiv = document.getElementById( "chatConversation" );
         chatConvDiv.innerHTML = "";
+        uiShowHideChat( 0 );
     }
     chatEnum();
+}
+
+// Write chats to the DB if that's configured for session persistence
+function chatSave() {
+    $.ajax({
+        url: 'includes/saveChat.php',
+        type: 'POST',
+        data: {
+            extension:window.localStorage.getItem( 'org.doubango.identity.impi' ),
+            messages:window.localStorage.getItem( 'org.doubango.chat.session' )
+        },
+        success: function(data) {
+            console.log(data); // Inspect this in your console
+        }
+    });
 }
 
 // Function to send an sms message
@@ -386,7 +433,7 @@ function sipMsg( msgFrom ) {
         oSipSessionMsg = oSipStack.newSession( 'message' );
         var msgMessage = chatInput.value;
         oSipSessionMsg.send( msgFrom , msgMessage , 'text/plain;charset=utf-8');
-        msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+        msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
         let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
         let message = {
             "inOut": 0,
@@ -417,6 +464,7 @@ function sipMsg( msgFrom ) {
             msgSession.push(conversation);
         }
         window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+        chatSave();
         chatDisplay( msgFrom );
     }
 }
@@ -507,6 +555,7 @@ function sipRegister() {
         SIPml.setDebugLevel((window.localStorage && window.localStorage.getItem('org.doubango.expert.disable_debug') == "true") ? "error" : "info");
 
         // create SIP stack
+console.log("sipRegister - Debug 01 - window.localStorage: ", window.localStorage);
         oSipStack = new SIPml.Stack({
             // 2020.12.10 - Edit by jgullo - Edited to pull the value from the config and not from the form
             realm: (window.localStorage ? window.localStorage.getItem('org.doubango.identity.realm') : null),
@@ -525,8 +574,8 @@ function sipRegister() {
             bandwidth: (window.localStorage ? tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.bandwidth')) : null), // could be redefined a session-level
             video_size: (window.localStorage ? tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.video_size')) : null), // could be redefined a session-level
             sip_headers: [
-                { name: 'User-Agent', value: 'IM-client/OMA1.0 sipML5-v1.2016.03.04' },
-                { name: 'Organization', value: 'Doubango Telecom' }
+                { name: 'User-Agent', value: 'IM-client/OMA1.0 sipML5-ng-L1KMakes-v1.2021.02' },
+                { name: 'Organization', value: 'Doubango Telecom, Cloudonix, SEIU Local 1000' }
             ]
         }
         );
@@ -534,8 +583,21 @@ function sipRegister() {
             txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Failed to start the SIP stack</b>';
         }
         else  {
+            // Hide the side-oabel upon registration
+            $(".screen-overlay").removeClass("show");
+            $(".offcanvas").removeClass("show");
+            $("body").removeClass("offcanvas-active");
             // If there are chats stored in the local session, load them
             chatEnum();
+            msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
+            var btnChatShowHide = document.getElementById( 'btnChatShowHide' );
+            if ( msgSession.length == 0 ) {
+                uiShowHideChat( 0 );
+                btnChatShowHide.disabled = true;
+            } else {
+                uiShowHideChat( 1 );
+                btnChatShowHide.disabled = false;
+            }
             return;
         }
     }
@@ -555,14 +617,34 @@ function sipUnRegister() {
 // makes a call (SIP INVITE)
 function sipCall(s_type) {
     // If a video or screen share call is starting, draw the video UI
+console.log("sipCall Debug 01 ");
     if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
-        uiVideoDisplayShowHide( true );
+console.log("sipCall Debug 02 - Video or Screencast Call ");
+//        if ( s_type == 'call-audiovideo' ) {
+        if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
+console.log("sipCall Debug 03 - Video Call ");
+            // Video call, so show remote video, show local video, hide local screenshare
+            uiVideoElementDraw( 1, 1 );
+//        } else if ( s_type == 'call-screenshare' ) {
+console.log("sipCall Debug 04 - Screencast Call ");
+            // Screencast call, so show remote video, hide local video, show local screenshare
+//            uiVideoElementDraw( 1, 0 );
+        }
+
+console.log("sipCall Debug 05: ", oConfigCall );
+        if (window.localStorage) {
+            oConfigCall.bandwidth = tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.bandwidth')); // already defined at stack-level but redifined to use latest values
+            oConfigCall.video_size = tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.video_size')); // already defined at stack-level but redifined to use latest values
+        }
+
+console.log("sipCall Debug 06: ", oConfigCall );
         videoLocal = document.getElementById("video_local");
         videoRemote = document.getElementById("video_remote");
-        oConfigCall.video_Local = document.getElementById("video_local");
-        oConfigCall.video_Remote = document.getElementById("video_remote");
+        oConfigCall.video_local = document.getElementById("video_local");
+        oConfigCall.video_remote = document.getElementById("video_remote");
     }
     if (oSipStack && !oSipSessionCall && !tsk_string_is_null_or_empty(txtPhoneNumber.value)) {
+console.log("sipCall Debug 07 - Make a Call" );
         if (s_type == 'call-screenshare') {
             if (!SIPml.isScreenShareSupported()) {
                 alert('Screen sharing not supported. Are you using chrome 26+?');
@@ -582,15 +664,14 @@ function sipCall(s_type) {
         btnScreenShare.disabled = true;
         btnHangUp.disabled = false;
 
-        if (window.localStorage) {
-            oConfigCall.bandwidth = tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.bandwidth')); // already defined at stack-level but redifined to use latest values
-            oConfigCall.video_size = tsk_string_to_object(window.localStorage.getItem('org.doubango.expert.video_size')); // already defined at stack-level but redifined to use latest values
-        }
+console.log("sipCall Debug 07.5 - window.localStorage: ", window.localStorage);
 
+console.log("sipCall Debug 08 - Create Call Session" );
         // create call session
         oSipSessionCall = oSipStack.newSession(s_type, oConfigCall);
         // make call
         if (oSipSessionCall.call(txtPhoneNumber.value) != 0) {
+console.log("sipCall Debug 09 - Number is Blank" );
             oSipSessionCall = null;
             txtCallStatus.value = 'Failed to make call';
             //btnCall.disabled = false;
@@ -601,42 +682,58 @@ function sipCall(s_type) {
             btnHangUp.disabled = true;
             return;
         }
+console.log("sipCall Debug 10 - Save Call Session" );
         saveCallOptions();
     }
     else if (oSipSessionCall) {
+console.log("sipCall Debug 11 - Answer a Call" );
         txtCallStatus.innerHTML = '<i>Connecting...</i>';
+console.log("sipCall Debug 12 - Accept the call" );
         oSipSessionCall.accept(oConfigCall);
     }
 }
 
 // Share entire desktop aor application using BFCP or WebRTC native implementation
 function sipShareScreen() {
+console.log( "sipShareScreen - Debug 00" );
     if (SIPml.getWebRtcType() === 'w4a') {
+console.log( "sipShareScreen - Debug 01 ", SIPml.getWebRtcType() );
     // Sharing using BFCP -> requires an active session
         if (!oSipSessionCall) {
+console.log( "sipShareScreen - Debug 02 - There is no active session" );
             txtCallStatus.innerHTML = '<i>No active session</i>';
             return;
         }
         if (oSipSessionCall.bfcpSharing) {
+console.log( "sipShareScreen - Debug 03 - bfcpSharing", oSipSessionCall.bfcpSharing );
             if (oSipSessionCall.stopBfcpShare(oConfigCall) != 0) {
+console.log( "sipShareScreen - Debug 04 - Failed to stop BFCP Share" );
                 txtCallStatus.value = 'Failed to stop BFCP share';
             }
             else {
+console.log( "sipShareScreen - Debug 05 - set bfcp sharing to false" );
                 oSipSessionCall.bfcpSharing = false;
             }
         }
         else {
+console.log( "sipShareScreen - Debug 06 - Not BFCPSharing ", oSipSessionCall.bfcpSharing );
             oConfigCall.screencast_window_id = 0x00000000;
+console.log( "sipShareScreen - Debug 07 - Set screencast window ID" );
             if (oSipSessionCall.startBfcpShare(oConfigCall) != 0) {
+console.log( "sipShareScreen - Debug 08 - Failed to start bfcp share" );
                 txtCallStatus.value = 'Failed to start BFCP share';
             }
             else {
+console.log( "sipShareScreen - Debug 09 - set bfcpsharing to true" );
                 oSipSessionCall.bfcpSharing = true;
             }
+console.log( "sipShareScreen - Debug 10" );
         }
     }
     else {
+console.log( "sipShareScreen - Debug 11 - Invoke sipCall" );
         sipCall('call-screenshare');
+console.log( "sipShareScreen - Debug 12 - After sipCall" );
     }
 }
 
@@ -818,76 +915,86 @@ function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: con
     btnHangUp.disabled = !oSipSessionCall;
 }
 
-function uiVideoDisplayEvent(b_local, b_added) {
-    var o_elt_video = b_local ? videoLocal : videoRemote;
-
-    if (b_added) {
-        o_elt_video.style.opacity = 1;
-        uiVideoDisplayShowHide(true);
-    }
-    else {
-        o_elt_video.style.opacity = 0;
-        fullScreen(false);
-    }
-}
-
-function uiVideoDisplayShowHide(b_show) {
-console.log("Debug 01");
+// 3 Params to draw the video elements:
+//  rv_show - Remote Video show flag, 0=hide, 1=show, 2=no change
+//  lvv_show - Loval Video Camera show flag, 0=hide, 1=show, 2=no change
+//  lvs_show - Local Screencast show flag, 0=hide, 1=show, 2=no change
+function uiVideoElementDraw( rv_show, lv_show ) {
+console.log("Debug uiVideoElementDraw 01 ", rv_show, " ", lv_show );
+    var divCallWrapper = document.getElementById( 'divCallWrapper' );
     var divVideo = document.getElementById( 'divVideo' );
-    if (b_show) {
-console.log("Debug 02");
-//        tdVideo.style.height = '340px';
-//        divVideo.style.height = navigator.appName == 'Microsoft Internet Explorer' ? '100%' : '340px';
-
-        divVideo.style.height = '340px';
-        var divVideoRemote = document.createElement('div');
-        divVideoRemote.setAttribute( 'id', 'divVideoRemote' );
-        divVideo.appendChild( divVideoRemote );
-        var videoRemoteElement = document.createElement('video');
-        videoRemoteElement.setAttribute( 'id', 'video_remote' );
-        videoRemoteElement.setAttribute( 'class', 'video' );
-        videoRemoteElement.setAttribute( 'width', '100%' );
-        videoRemoteElement.setAttribute( 'height', '100%' );
-        videoRemoteElement.setAttribute( 'autoplay', 'autoplay' );
-        divVideoRemote.appendChild( videoRemoteElement );
-
-        var divVideoLocalWrapper = document.createElement('div');
-        divVideoLocalWrapper.setAttribute( 'id', 'divVideoLocalWrapper' );
-        divVideo.appendChild( divVideoLocalWrapper );
-        var iframeLocalPreviewVideo = document.createElement('iframe');
-        iframeLocalPreviewVideo.setAttribute( 'class', 'previewvideo' );
-        divVideoLocalWrapper.appendChild( iframeLocalPreviewVideo );
-        var divVideoLocal = document.createElement('div');
-        divVideoLocal.setAttribute( 'id', 'divVideoLocal' );
-        divVideoLocal.setAttribute( 'class', 'previewvideo' );
-        divVideoLocalWrapper.appendChild( divVideoLocal );
-        var videoLocalElement = document.createElement('video');
-        videoLocalElement.setAttribute( 'id', 'video_local' );
-        videoLocalElement.setAttribute( 'class', 'video' );
-        videoLocalElement.setAttribute( 'width', '100%' );
-        videoLocalElement.setAttribute( 'height', '100%' );
-        videoLocalElement.setAttribute( 'autoplay', 'autoplay' );
-        videoLocalElement.setAttribute( 'muted', 'true' );
-        divVideoLocal.appendChild( videoLocalElement );
-        
-        var divScreencastLocalWrapper = document.createElement('div');
-        divVideo.appendChild( divScreencastLocalWrapper );
-        var iframeLocalPreviewScreencast = document.createElement('iframe');
-        iframeLocalPreviewScreencast.setAttribute( 'class', 'previewvideo' );
-        divScreencastLocalWrapper.appendChild( iframeLocalPreviewScreencast );
-        var divScreencastLocal = document.createElement('div');
-        divScreencastLocal.setAttribute( 'id', 'divScreencastLocal' );
-        divScreencastLocal.setAttribute( 'class', 'previewvideo' );
-        divScreencastLocalWrapper.appendChild( divScreencastLocal );
-    }
-    else {
-console.log("Debug 03");
-        //tdVideo.style.height = '0px';
-        divVideo.innerHTML = '';
+    var divVideoRemoteWrapper = document.getElementById( 'divVideoRemoteWrapper' );
+    var divVideoLocalWrapper = document.getElementById( 'divVideoLocalWrapper' );
+    //var divLocalVideoWrapper = document.getElementById( 'divLocalVideoWrapper' );
+    //var divLocalScreencastWrapper = document.getElementById( 'divLocalScreencastWrapper' );
+    if ( rv_show == 0 && lv_show == 0 ) {
+        // If we're hiding everything, clear the 3 divs and set the parent div to 0 height
+console.log("Debug uiVideoElementDraw 02 - Hide All Video");
+        divCallWrapper.classList.remove( 'border-top-separator' );
+        divVideoRemoteWrapper.innerHTML = '';
+        divVideoLocalWrapper.innerHTML = '';
         divVideo.style.height = '0px';
+        btnFullScreen.disabled = true;
+    } else {
+console.log("Debug uiVideoElementDraw 03 - Draw Some Video");
+
+        divCallWrapper.classList.add( 'border-top-separator' );
+        divVideo.style.minheight = '340px';
+console.log("Debug uiVideoElementDraw 04 - Remote Video");
+        if ( rv_show == 1 ) {
+console.log("Debug uiVideoElementDraw 05 - Draw Remote Video");
+            // Draw elements for Remote Video
+            var videoRemoteElement = document.getElementById( 'video_remote' );
+console.log("Debug uiVideoElementDraw 06 - Check if remote video is drawn ", videoRemoteElement );
+            if ( videoRemoteElement == null ) {
+console.log("Debug uiVideoElementDraw 07 - Remote Video isn't Drawn, draw it" );
+                var videoRemoteElement = document.createElement('video');
+                videoRemoteElement.setAttribute( 'id', 'video_remote' );
+                videoRemoteElement.setAttribute( 'class', 'video' );
+                videoRemoteElement.setAttribute( 'width', '100%' );
+                videoRemoteElement.setAttribute( 'height', '100%' );
+                videoRemoteElement.setAttribute( 'autoplay', 'autoplay' );
+                divVideoRemoteWrapper.appendChild( videoRemoteElement );
+                btnFullScreen.disabled = false;
+            }
+        } else if ( rv_show == 0 ) {
+console.log("Debug uiVideoElementDraw 08 - Hide Remote Video");
+            // Hide elements for Remote Video
+            divVideoRemoteWrapper.innerHTML = '';
+            btnFullScreen.disabled = true;
+        }
+
+console.log("Debug uiVideoElementDraw 12 - Local Video");
+        if ( lv_show == 1 ) {
+console.log("Debug uiVideoElementDraw 13 - Show Local Camera Video");
+            // Draw elements for Local Camera Video
+            var divVideoLocal = document.getElementById( 'divVideoLocal' );
+console.log("Debug uiVideoElementDraw 14 - Check if local camera is drawn ", divVideoLocalWrapper );
+            if ( divVideoLocal == null ) {
+console.log("Debug uiVideoElementDraw 15 - Local Camera isn't drawn, draw it");
+                // We're drawing local video so clear the wrapper div
+                var divVideoLocal = document.createElement('div');
+                divVideoLocal.setAttribute( 'id', 'divVideoLocal' );
+                divVideoLocal.setAttribute( 'class', 'previewvideo' );
+                divVideoLocalWrapper.appendChild( divVideoLocal );
+                var videoLocalElement = document.createElement('video');
+                videoLocalElement.setAttribute( 'id', 'video_local' );
+                videoLocalElement.setAttribute( 'class', 'video' );
+                videoLocalElement.setAttribute( 'width', '100%' );
+                videoLocalElement.setAttribute( 'height', '100%' );
+                videoLocalElement.setAttribute( 'autoplay', 'autoplay' );
+                videoLocalElement.setAttribute( 'muted', 'true' );
+                divVideoLocal.appendChild( videoLocalElement );
+                videoLocalElement.muted = 'true';
+            }
+        }
+
+        if ( lv_show == 0 ) {
+            // Hide Local Video
+            divVideoLocalWrapper.innerHTML = '';
+        }
     }
-console.log("Debug 04");
-    btnFullScreen.disabled = !b_show;
+console.log("Debug uiVideoElementDraw 20 - End Function");
 }
 
 function uiDisableCallOptions() {
@@ -903,9 +1010,6 @@ function uiBtnCallSetText(s_text) {
         case "Call":
             {
                 var bDisableCallBtnOptions = (window.localStorage && window.localStorage.getItem('org.doubango.expert.disable_callbtn_options') == "true");
-                //btnCall.value = btnCall.innerHTML = bDisableCallBtnOptions ? 'Call' : 'Call <span id="spanCaret" class="caret">';
-                //btnCall.setAttribute("class", bDisableCallBtnOptions ? "btn btn-primary" : "btn btn-primary dropdown-toggle");
-                //btnCall.onclick = bDisableCallBtnOptions ? function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); } : null;
                 ulCallOptions.style.visibility = bDisableCallBtnOptions ? "hidden" : "visible";
                 if (!bDisableCallBtnOptions && ulCallOptions.parentNode != divBtnCallGroup) {
                     divBtnCallGroup.appendChild(ulCallOptions);
@@ -918,9 +1022,6 @@ function uiBtnCallSetText(s_text) {
             }
         default:
             {
-                //btnCall.value = btnCall.innerHTML = s_text;
-                //btnCall.setAttribute("class", "btn btn-primary");
-                //btnCall.onclick = function () { sipCall(bDisableVideo ? 'call-audio' : 'call-audiovideo'); };
                 ulCallOptions.style.visibility = "hidden";
                 if (ulCallOptions.parentNode == divBtnCallGroup) {
                     document.body.appendChild(ulCallOptions);
@@ -949,27 +1050,32 @@ function uiCallTerminated(s_description) {
     stopRingTone();
 
     txtCallStatus.innerHTML = "<i>" + s_description + "</i>";
-    uiVideoDisplayShowHide(false);
+    // Hide the video element
+    uiVideoElementDraw( 0, 0 );
     // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
-    divCallOptions.style.display = "none";
+    //divCallOptions.style.borderTop = 'none';
+    divCallWrapper.classList.remove( 'border-top-separator' );
+    divCallOptions.style.display = 'none';
 
     if (oNotifICall) {
         oNotifICall.cancel();
         oNotifICall = null;
     }
 
-    uiVideoDisplayEvent(false, false);
-    uiVideoDisplayEvent(true, false);
+    //uiVideoDisplayEvent(false, false);
+    //uiVideoDisplayEvent(true, false);
 
     setTimeout(function () { if (!oSipSessionCall) txtCallStatus.innerHTML = ''; }, 2500);
 }
 
 // Callback function for SIP Stacks
 function onSipEventStack(e /*SIPml.Stack.Event*/) {
+console.log("onSipEventStack - Debug 00 - ", e);
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
             {
+console.log("onSipEventStack - started - Debug 01");
                 // catch exception for IE (DOM not ready)
                 try {
                     // LogIn (REGISTER) as soon as the stack finish starting
@@ -993,6 +1099,7 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                 }
         case 'stopping': case 'stopped': case 'failed_to_start': case 'failed_to_stop':
             {
+console.log("onSipEventStack - stopping, stopped, failed_to_start, failed_to_stop - Debug 01", e.type);
                 var bFailure = (e.type == 'failed_to_start') || (e.type == 'failed_to_stop');
                 oSipStack = null;
                 oSipSessionRegister = null;
@@ -1003,9 +1110,11 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                 stopRingbackTone();
                 stopRingTone();
 
-                uiVideoDisplayShowHide(false);
+                uiVideoElementDraw( 0, 0 );
                 // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
-                divCallOptions.style.display = "none";
+                divCallWrapper.classList.remove( 'border-top-separator' );
+                //divCallOptions.style.borderTop = 'none';
+                divCallOptions.style.display = 'none';
 
                 txtCallStatus.innerHTML = '';
                 txtRegStatus.innerHTML = bFailure ? '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected: <b>' + e.description + '</b></i>' : '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected</i>';
@@ -1014,6 +1123,7 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 
         case 'i_new_call':
             {
+console.log("onSipEventStack - i_new_call - Debug 01");
                 if (oSipSessionCall) {
                     // do not accept the incoming call if we're already 'in call'
                     e.newSession.hangup(); // comment this line for multi-line support
@@ -1043,12 +1153,14 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 
         case 'm_permission_requested':
             {
+console.log("onSipEventStack - m_permission_requested - Debug 01");
                 divGlassPanel.style.visibility = 'visible';
                 break;
             }
         case 'm_permission_accepted':
         case 'm_permission_refused':
             {
+console.log("onSipEventStack - m_permission_accepted, m_permission_refused - Debug 01 ", e.type );
                 divGlassPanel.style.visibility = 'hidden';
                 if (e.type == 'm_permission_refused') {
                     uiCallTerminated('Media stream permission denied');
@@ -1057,7 +1169,7 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
             }
         case 'i_new_message':
             {
-console.log("Raw Message: ", e);
+console.log("onSipEventStack - i_new_message - Debug 01: ", e);
                 //msgFrom = e.o_event.o_message.o_hdr_From.s_display_name;
                 activeChat = window.localStorage.getItem( 'org.doubango.chat.activeConv' );
                 msgFrom = e.o_event.o_message.o_hdr_From.o_uri.s_user_name;
@@ -1066,7 +1178,7 @@ console.log("Raw Message: ", e);
                 msgTimeDate = new Date(msgTimeStamp);
                 msgTimeString = msgTimeDate.toLocaleString()
                 msgMessage = e.getContentString();
-                msgSession = JSON.parse(window.localStorage.getItem('org.doubango.chat.session'));
+                msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
                 let msgConversation = msgSession.find( msgConversation => msgConversation.contact === msgFrom );
                 let message = {
                     "inOut": 1,
@@ -1101,11 +1213,19 @@ console.log("Raw Message: ", e);
                     }
                     msgSession.push(conversation);
                 }
-                window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));
+                window.localStorage.setItem('org.doubango.chat.session', JSON.stringify(msgSession));    
+                var msgDiv = document.getElementById( 'divChat' );
+                var btnChatShowHide = document.getElementById( 'btnChatShowHide' );
+console.log("onSipEventStack - i_new_message - Debug 02: ", window.getComputedStyle( msgDiv ).display);
+                if ( window.getComputedStyle( msgDiv ).display === "none" ) {
+console.log("onSipEventStack - i_new_message - Debug 03: ");
+                    btnChatShowHide.classList.add( 'btn-indicate' );
+                }
                 chatEnum();
                 if ( activeChat == msgFrom ) {
                     chatDisplay( msgFrom );
                 }
+                chatSave();
                 //alert("From: " + msgFrom + " Time: " + msgTimeString + " Message: " + msgMessage);
                 break;
             }
@@ -1116,17 +1236,22 @@ console.log("Raw Message: ", e);
 
 // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
 function onSipEventSession(e /* SIPml.Session.Event */) {
+console.log("onSipEventSession - Debug 00", e);
     tsk_utils_log_info('==session event = ' + e.type);
 
     switch (e.type) {
         case 'connecting': case 'connected':
             {
+console.log("onSipEventSession - connecting, connected - Debug 01", e.type);
                 var bConnected = (e.type == 'connected');
                 if (e.session == oSipSessionRegister) {
+console.log("onSipEventSession - connecting, connected - Debug 02");
                     uiOnConnectionEvent(bConnected, !bConnected);
+console.log("onSipEventSession - connecting, connected - Debug 03");
                     txtRegStatus.innerHTML = '<img src="images/reg-status-connected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
+console.log("onSipEventSession - connecting, connected - Debug 04");
                     btnHangUp.value = 'HangUp';
                     //btnCall.disabled = true;
                     btnAudio.disabled = true;
@@ -1136,31 +1261,48 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     btnTransfer.disabled = false;
                     if (window.btnBFCP) window.btnBFCP.disabled = false;
 
+console.log("onSipEventSession - connecting, connected - Debug 05");
                     if (bConnected) {
+console.log("onSipEventSession - connecting, connected - Debug 06");
                         stopRingbackTone();
                         stopRingTone();
 
                         if (oNotifICall) {
+console.log("onSipEventSession - connecting, connected - Debug 07");
                             oNotifICall.cancel();
                             oNotifICall = null;
                         }
                     }
+console.log("onSipEventSession - connecting, connected - Debug 08");
 
                     txtCallStatus.innerHTML = "<i>" + e.description + "</i>";
                     // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
-                    divCallOptions.style.display = bConnected ? "block" : "none";
-
-                    if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback
-                        uiVideoDisplayEvent(false, true);
-                        uiVideoDisplayEvent(true, true);
+                    if ( bConnected ) {
+                        divCallWrapper.classList.add( 'border-top-separator' );
+                    } else {
+                        divCallWrapper.classList.remove( 'border-top-separator' );
+                        //style.borderTop = bConnected ? 'thick solid #362886' : 'none';
                     }
+                    divCallOptions.style.display = bConnected ? 'block' : 'none';
+
+console.log("onSipEventSession - connecting, connected - Debug 09");
+                    if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback
+console.log("onSipEventSession - connecting, connected - Debug 10");
+                        // Show remote video, show local camera, hide local screencast
+                        uiVideoElementDraw( 1, 1 );
+console.log("onSipEventSession - connecting, connected - Debug 12");
+                    }
+console.log("onSipEventSession - connecting, connected - Debug 13");
                 }
                 break;
             } // 'connecting' | 'connected'
         case 'terminating': case 'terminated':
             {
+console.log("onSipEventSession - terminating, terminated - Debug 01", e.type);
                 if (e.session == oSipSessionRegister) {
+console.log("onSipEventSession - terminating, terminated - Debug 02", e.type);
                     uiOnConnectionEvent(false, false);
+console.log("onSipEventSession - terminating, terminated - Debug 03", e.type);
 
                     oSipSessionCall = null;
                     oSipSessionRegister = null;
@@ -1168,36 +1310,47 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
+console.log("onSipEventSession - terminating, terminated - Debug 04", e.type);
                     uiCallTerminated(e.description);
+console.log("onSipEventSession - terminating, terminated - Debug 05", e.type);
                 }
+console.log("onSipEventSession - terminating, terminated - Debug 06", e.type);
                 break;
             } // 'terminating' | 'terminated'
 
         case 'm_stream_video_local_added':
             {
+console.log("onSipEventSession - m_stream_video_local_added - Debug 01");
                 if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(true, true);
+                    // Don't change remote video, draw local camera, don't change local screencast
+                    uiVideoElementDraw( 2, 1 );
                 }
                 break;
             }
         case 'm_stream_video_local_removed':
             {
+console.log("onSipEventSession - m_stream_video_local_removed - Debug 01");
                 if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(true, false);
+                    // Don't change remote video, hide local camera, don't change local screencast
+                    uiVideoElementDraw( 2, 0 );
                 }
                 break;
             }
         case 'm_stream_video_remote_added':
             {
+console.log("onSipEventSession - m_stream_video_remote_added - Debug 01");
                 if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(false, true);
+                    // Draw remote video, hide local camera, hide local screencast
+                    uiVideoElementDraw( 1, 2 );
                 }
                 break;
             }
         case 'm_stream_video_remote_removed':
             {
+console.log("onSipEventSession - m_stream_video_remote_removed - Debug 01");
                 if (e.session == oSipSessionCall) {
-                    uiVideoDisplayEvent(false, false);
+                    // Hide remote video, don't change local camera, don't change local screencast
+                    uiVideoElementDraw( 0, 2 );
                 }
                 break;
             }
@@ -1207,17 +1360,20 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'm_stream_audio_remote_added':
         case 'm_stream_audio_remote_removed':
             {
+console.log("onSipEventSession - m_stream_audio local/remote added/removed - Debug 01", e.type);
                 break;
             }
 
         case 'i_ect_new_call':
             {
+console.log("onSipEventSession - i_ect_new_call - Debug 01");
                 oSipSessionTransferCall = e.session;
                 break;
             }
 
         case 'i_ao_request':
             {
+console.log("onSipEventSession - i_ao_request - Debug 01");
                 if (e.session == oSipSessionCall) {
                     var iSipResponseCode = e.getSipResponseCode();
                     if (iSipResponseCode == 180 || iSipResponseCode == 183) {
@@ -1230,6 +1386,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
 
         case 'm_early_media':
             {
+console.log("onSipEventSession - m_early_media - Debug 01");
                 if (e.session == oSipSessionCall) {
                     stopRingbackTone();
                     stopRingTone();
@@ -1240,6 +1397,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
 
         case 'm_local_hold_ok':
             {
+console.log("onSipEventSession - m_local_hold_ok - Debug 01");
                 if (e.session == oSipSessionCall) {
                     if (oSipSessionCall.bTransfering) {
                         oSipSessionCall.bTransfering = false;
@@ -1254,6 +1412,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_local_hold_nok':
             {
+console.log("onSipEventSession - m_local_hold_nok - Debug 01");
                 if (e.session == oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.value = 'Hold';
@@ -1264,6 +1423,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_local_resume_ok':
             {
+console.log("onSipEventSession - m_local_resume_ok - Debug 01");
                 if (e.session == oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.value = 'Hold';
@@ -1280,6 +1440,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_local_resume_nok':
             {
+console.log("onSipEventSession - m_local_resume_nok - Debug 01");
                 if (e.session == oSipSessionCall) {
                     oSipSessionCall.bTransfering = false;
                     btnHoldResume.disabled = false;
@@ -1289,6 +1450,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_remote_hold':
             {
+console.log("onSipEventSession - m_remote_hold - Debug 01");
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Placed on hold by remote party</i>';
                 }
@@ -1296,6 +1458,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_remote_resume':
             {
+console.log("onSipEventSession - m_remote_resume - Debug 01");
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Taken off hold by remote party</i>';
                 }
@@ -1303,6 +1466,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'm_bfcp_info':
             {
+console.log("onSipEventSession - m_bfcp_info - Debug 01");
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = 'BFCP Info: <i>' + e.description + '</i>';
                 }
@@ -1311,6 +1475,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
 
         case 'o_ect_trying':
             {
+console.log("onSipEventSession - o_ect_trying - Debug 01");
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Call transfer in progress...</i>';
                 }
@@ -1318,6 +1483,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'o_ect_accepted':
             {
+console.log("onSipEventSession - o_ect_accepted - Debug 01");
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Call transfer accepted</i>';
                 }
@@ -1326,6 +1492,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'o_ect_completed':
         case 'i_ect_completed':
             {
+console.log("onSipEventSession - o_ect_completed, i_ect_completed - Debug 01", e.type);
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Call transfer completed</i>';
                     btnTransfer.disabled = false;
@@ -1339,6 +1506,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'o_ect_failed':
         case 'i_ect_failed':
             {
+console.log("onSipEventSession - o_ect_failed, i_ect_failed - Debug 01", e.type);
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = '<i>Call transfer failed</i>';
                     btnTransfer.disabled = false;
@@ -1348,6 +1516,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'o_ect_notify':
         case 'i_ect_notify':
             {
+console.log("onSipEventSession - o_ect_notify, i_ect_notify - Debug 01", e.type);
                 if (e.session == oSipSessionCall) {
                     txtCallStatus.innerHTML = "<i>Call Transfer: <b>" + e.getSipResponseCode() + " " + e.description + "</b></i>";
                     if (e.getSipResponseCode() >= 300) {
@@ -1361,6 +1530,7 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             }
         case 'i_ect_requested':
             {
+console.log("onSipEventSession - i_ect_requested - Debug 01");
                 if (e.session == oSipSessionCall) {
                     var s_message = "Do you accept call transfer to [" + e.getTransferDestinationFriendlyName() + "]?";//FIXME
                     if (confirm(s_message)) {
