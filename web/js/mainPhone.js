@@ -100,8 +100,11 @@ console.log( "onLoad - Debug 02" );
     } else {
 console.log( "onLoad - Debug 03" );
         var offcanvas_aside = document.getElementById( 'registrationOffcanvas' );
+console.log( "onLoad - Debug 04" );
         $('body').toggleClass("offcanvas-active");
+console.log( "onLoad - Debug 05" );
         offcanvas_aside.classList.add( "show" );
+console.log( "onLoad - Debug 06" );
     }
         }
     },
@@ -195,6 +198,491 @@ function postInit() {
     };
 }
 
+// Function to globally show/hide shortcuts
+function uiShowHideShortcuts( show ) {
+    var divShortcuts = document.getElementById( 'divShortcuts' );
+    var btnShortcutsShowHide = document.getElementById( 'btnShortcutsShowHide' );
+    if ( show ) {
+        divShortcuts.style.display = 'block';
+        divShortcuts.classList.add( 'border-top-separator' );
+        btnShortcutsShowHide.value = 'Hide Shortcuts';
+        btnShortcutsShowHide.setAttribute( 'onclick', 'uiShowHideShortcuts( 0 )' );
+    } else {
+        divShortcuts.style.display = 'none';
+        divShortcuts.classList.remove( 'border-top-separator' );
+        btnShortcutsShowHide.value = 'Show Shortcuts';
+        btnShortcutsShowHide.setAttribute( 'onclick', 'uiShowHideShortcuts( 1 )' );
+    }
+}
+
+// Function to enumerate shortcuts from localstorage object
+function shortcutEnum() {
+    shortcutsObj = ( "" == window.localStorage.getItem( 'org.doubango.shortcuts' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var divShortcuts = document.getElementById("divShortcuts");
+    var divShortcutsButtons = document.getElementById("divShortcutsButtons");
+    var btnShortcutsShowHide = document.getElementById( 'btnShortcutsShowHide' );
+    if ( shortcutsObj.length == 0 ) {
+        btnShortcutsShowHide.disabled = true;
+    } else {
+        btnShortcutsShowHide.disabled = false;
+        divShortcutsButtons.innerHTML = "";
+        shortcutsObj.forEach( shortcut => {
+                var shortcutBtn = document.createElement('input');
+                shortcutBtn.setAttribute( 'type' , 'button' );
+                shortcutBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                shortcutBtn.setAttribute( 'id' , 'shortcut' + shortcut.order );
+                shortcutBtn.setAttribute( 'onclick' , 'shortcutRun("' + shortcut.order + '");' );
+                shortcutBtn.setAttribute( 'value' , shortcut.displayName );
+                divShortcutsButtons.appendChild( shortcutBtn );
+            }
+        );
+    }
+}
+
+// Function to populate shortcut editor pane
+function shortcutsEditDraw() {
+    var divShortcutsEditor = document.getElementById( 'divShortcutsEditor' );
+    divShortcutsEditor.innerHTML = '';
+    shortcutsObj = ( "" == window.localStorage.getItem( 'org.doubango.shortcuts' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    shortcutsObj.forEach( shortcut => {
+            var divShortcutEditBlock = document.createElement( 'div' );
+            divShortcutEditBlock.setAttribute( 'id' , 'shortcutEdit' + shortcut.order );
+            divShortcutEditBlock.setAttribute( 'class', 'shortcutEditBlock' );
+            var divShortcutEditDisplayName = document.createElement( 'div' );
+            divShortcutEditDisplayName.setAttribute( 'class', 'shortcutEditLine' )
+            divShortcutEditBlock.appendChild( divShortcutEditDisplayName );
+            var labelShortcutDisplayName = document.createElement( 'label' );
+            labelShortcutDisplayName.innerText = 'Display Name';
+            divShortcutEditDisplayName.appendChild( labelShortcutDisplayName );
+            var pShortcutDisplayName = document.createElement( 'p' );
+            pShortcutDisplayName.innerText = shortcut.displayName;
+            divShortcutEditDisplayName.appendChild( pShortcutDisplayName );
+            var divShortcutEditNumber = document.createElement( 'div' );
+            divShortcutEditNumber.setAttribute( 'class', 'shortcutEditLine' )
+            divShortcutEditBlock.appendChild( divShortcutEditNumber );
+            var labelShortcutNumber = document.createElement( 'label' );
+            labelShortcutNumber.innerText = 'Number';
+            divShortcutEditNumber.appendChild( labelShortcutNumber );
+            var pShortcutNumber = document.createElement( 'p' );
+            pShortcutNumber.innerText = shortcut.number;
+            divShortcutEditNumber.appendChild( pShortcutNumber );
+            var divShortcutEditAction = document.createElement( 'div' );
+            divShortcutEditAction.setAttribute( 'class', 'shortcutEditLine' )
+            divShortcutEditBlock.appendChild( divShortcutEditAction );
+            var labelShortcutAction = document.createElement( 'label' );
+            labelShortcutAction.innerText = 'Action';
+            divShortcutEditAction.appendChild( labelShortcutAction );
+            var pShortcutAction = document.createElement( 'p' );
+            pShortcutAction.innerText = shortcut.action;
+            divShortcutEditAction.appendChild( pShortcutAction );
+            divShortcutsEditor.appendChild( divShortcutEditBlock );
+            var shortcutEditBtn = document.createElement('input');
+            shortcutEditBtn.setAttribute( 'type' , 'button' );
+            shortcutEditBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            shortcutEditBtn.setAttribute( 'id' , 'shortcutEdit' + shortcut.order );
+            shortcutEditBtn.setAttribute( 'href' , '#' );
+            shortcutEditBtn.setAttribute( 'onclick' , 'shortcutEdit("' + shortcut.order + '");' );
+            shortcutEditBtn.setAttribute( 'value' , 'Edit' );
+            if ( shortcut.noDelete == 1 ) {
+                shortcutEditBtn.disabled = 'true';
+            }    
+            divShortcutEditBlock.appendChild( shortcutEditBtn );
+            var shortcutDeleteBtn = document.createElement('input');
+            shortcutDeleteBtn.setAttribute( 'type' , 'button' );
+            shortcutDeleteBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            shortcutDeleteBtn.setAttribute( 'id' , 'shortcutDelete' + shortcut.order );
+            shortcutDeleteBtn.setAttribute( 'href' , '#' );
+            shortcutDeleteBtn.setAttribute( 'onclick' , 'shortcutDelete("' + shortcut.order + '");' );
+            shortcutDeleteBtn.setAttribute( 'value' , 'Delete' );
+            if ( shortcut.noDelete == 1 ) {
+                shortcutDeleteBtn.disabled = 'true';
+            }    
+            divShortcutEditBlock.appendChild( shortcutDeleteBtn );
+        }
+    );
+    var shortcutAddBtn = document.createElement('input');
+    shortcutAddBtn.setAttribute( 'type' , 'button' );
+    shortcutAddBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutAddBtn.setAttribute( 'id' , 'shortcutAddBtn' );
+    shortcutAddBtn.setAttribute( 'href' , '#' );
+    shortcutAddBtn.setAttribute( 'onclick' , 'shortcutAdd();' );
+    shortcutAddBtn.setAttribute( 'value' , 'Add' );
+    divShortcutsEditor.appendChild( shortcutAddBtn );
+    var shortcutReorderBtn = document.createElement('input');
+    shortcutReorderBtn.setAttribute( 'type' , 'button' );
+    shortcutReorderBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutReorderBtn.setAttribute( 'id' , 'shortcutReorderBtn' );
+    shortcutReorderBtn.setAttribute( 'href' , '#' );
+    shortcutReorderBtn.setAttribute( 'onclick' , 'shortcutsOrderDraw();' );
+    shortcutReorderBtn.setAttribute( 'value' , 'Reorder' );
+    divShortcutsEditor.appendChild( shortcutReorderBtn );
+}
+
+// Function to edit a specific shortcut
+function shortcutEdit( shortcutSelect ) {
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var divShortcutEditBlock = document.getElementById( 'shortcutEdit' + shortcutSelect );
+    if ( shortcutsObj[ shortcutSelect ].noDelete == 1 ) {
+        var pCantEdit = document.createElement( 'p' );
+        pCantEdit.style.textAlign = 'center';
+        pCantEdit.style.fontWeight = 'bold';
+        pCantEdit.innerText = "This shortcut cannot be edited"
+        divShortcutEditBlock.prepend( pCantEdit );
+    } else {
+        divShortcutEditBlock.innerHTML = "";
+        var divShortcutEditDisplayName = document.createElement( 'div' );
+        divShortcutEditDisplayName.setAttribute( 'class', 'shortcutEditLine' )
+        divShortcutEditBlock.appendChild( divShortcutEditDisplayName );
+        var labelShortcutDisplayName = document.createElement( 'label' );
+        labelShortcutDisplayName.innerText = 'Display Name';
+        divShortcutEditDisplayName.appendChild( labelShortcutDisplayName );
+        var inputShortcutDisplayName = document.createElement( 'input' );
+        inputShortcutDisplayName.setAttribute( 'type', 'text' );
+        inputShortcutDisplayName.setAttribute( 'class', 'shortcutEditInput');
+        inputShortcutDisplayName.setAttribute( 'id', 'shortcutEditInputDisplayName' + shortcutSelect );
+        inputShortcutDisplayName.setAttribute( 'value', shortcutsObj[shortcutSelect].displayName );
+        divShortcutEditDisplayName.appendChild( inputShortcutDisplayName );
+        var divShortcutEditNumber = document.createElement( 'div' );
+        divShortcutEditNumber.setAttribute( 'class', 'shortcutEditLine' )
+        divShortcutEditBlock.appendChild( divShortcutEditNumber );
+        var labelShortcutNumber = document.createElement( 'label' );
+        labelShortcutNumber.innerText = 'Number';
+        divShortcutEditNumber.appendChild( labelShortcutNumber );
+        var inputShortcutNumber = document.createElement( 'input' );
+        inputShortcutNumber.setAttribute( 'type', 'text' );
+        inputShortcutNumber.setAttribute( 'class', 'shortcutEditInput');
+        inputShortcutNumber.setAttribute( 'id', 'shortcutEditInputNumber' + shortcutSelect );
+        inputShortcutNumber.setAttribute( 'value', shortcutsObj[shortcutSelect].number );
+        divShortcutEditNumber.appendChild( inputShortcutNumber );
+        var divShortcutEditAction = document.createElement( 'div' );
+        divShortcutEditAction.setAttribute( 'class', 'shortcutEditLine' )
+        divShortcutEditBlock.appendChild( divShortcutEditAction );
+        var labelShortcutAction = document.createElement( 'label' );
+        labelShortcutAction.innerText = 'Action';
+        divShortcutEditAction.appendChild( labelShortcutAction );
+        var inputShortcutAction = document.createElement( 'select' );
+        inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
+        inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutSelect );
+        divShortcutEditAction.appendChild( inputShortcutAction );
+        var optionAudio = document.createElement("option");
+        optionAudio.text = "Audio";
+        inputShortcutAction.add( optionAudio );
+        var optionVideo = document.createElement("option");
+        optionVideo.text = "Video";
+        inputShortcutAction.add( optionVideo );
+        var optionScreenshare = document.createElement("option");
+        optionScreenshare.text = "Screenshare";
+        inputShortcutAction.add( optionScreenshare );
+        var optionChat = document.createElement("option");
+        optionChat.text = "Chat";
+        inputShortcutAction.add( optionChat );
+        var optionDTMF = document.createElement("option");
+        optionDTMF.text = "DTMF";
+        inputShortcutAction.add( optionDTMF );
+        inputShortcutAction.value = shortcutsObj[shortcutSelect].action;
+        var inputShortcutOrder = document.createElement( 'input' );
+        inputShortcutOrder.setAttribute( 'type', 'hidden' );
+        inputShortcutOrder.setAttribute( 'id', 'shortcutEditInputOrder' + shortcutSelect );
+        divShortcutEditBlock.appendChild( inputShortcutOrder );
+                    
+        var shortcutEditSaveBtn = document.createElement('a');
+        shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        shortcutEditSaveBtn.setAttribute( 'id' , 'shortcutEditSave' + shortcutSelect );
+        shortcutEditSaveBtn.setAttribute( 'href' , '#' );
+        shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutSelect + '");' );
+        shortcutEditSaveBtn.innerText = 'Save';
+        divShortcutEditBlock.appendChild( shortcutEditSaveBtn );
+    }
+}
+
+// Function to populate shortcut ordering pane
+function shortcutsOrderDraw() {
+    var divShortcutsEditor = document.getElementById( 'divShortcutsEditor' );
+    divShortcutsEditor.innerHTML = '';
+    var pShortcutInstructions = document.createElement( 'p' );
+    pShortcutInstructions.innerText = 'Please enter the desired order by inputting the new position for each shortcut in the input box, making sure to start at 1 and avoid skipping any numbers.';
+    divShortcutsEditor.appendChild( pShortcutInstructions );
+    shortcutsObj = ( "" == window.localStorage.getItem( 'org.doubango.shortcuts' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    shortcutsObj.forEach( shortcut => {
+
+            var divShortcutOrderBlock = document.createElement( 'div' );
+            divShortcutOrderBlock.setAttribute( 'id' , 'shortcutOrder' + shortcut.order );
+            divShortcutOrderBlock.setAttribute( 'class', 'shortcutOrderBlock row' );
+
+            var divShortcutOrderDisplayName = document.createElement( 'div' );
+            divShortcutOrderDisplayName.setAttribute( 'class', 'shortcutOrderLine col-12' )
+            divShortcutOrderBlock.appendChild( divShortcutOrderDisplayName );
+            var pShortcutDisplayName = document.createElement( 'p' );
+            pShortcutDisplayName.innerText = "Display Name: " + shortcut.displayName;
+            divShortcutOrderDisplayName.appendChild( pShortcutDisplayName );
+
+            var divShortcutOrderNumber = document.createElement( 'div' );
+            divShortcutOrderNumber.setAttribute( 'class', 'shortcutOrderLine col-9' )
+            divShortcutOrderBlock.appendChild( divShortcutOrderNumber );
+            var pShortcutNumber = document.createElement( 'p' );
+            pShortcutNumber.innerText = "Number: " + shortcut.number;
+            divShortcutOrderNumber.appendChild( pShortcutNumber );
+
+            var divShortcutOrderInput = document.createElement( 'div' );
+            divShortcutOrderInput.setAttribute( 'class', 'shortcutOrderLine col-3' );
+            divShortcutOrderBlock.appendChild( divShortcutOrderInput );
+            var inputShortcutOrder = document.createElement( 'input' );
+            inputShortcutOrder.setAttribute( 'type' , 'text' );
+            inputShortcutOrder.setAttribute( 'id', 'shortcutOrderInput' + shortcut.order );
+            inputShortcutOrder.setAttribute( 'class' , 'shortcutOrderInput' );
+            inputShortcutOrder.setAttribute( 'value', shortcut.order + 1 );
+            divShortcutOrderInput.appendChild( inputShortcutOrder );
+
+            var divShortcutOrderAction = document.createElement( 'div' );
+            divShortcutOrderAction.setAttribute( 'class', 'shortcutOrderLine col-12' )
+            divShortcutOrderBlock.appendChild( divShortcutOrderAction );
+            var pShortcutAction = document.createElement( 'p' );
+            pShortcutAction.innerText = "Action: " + shortcut.action;
+            divShortcutOrderAction.appendChild( pShortcutAction );
+
+            var inputShortcutOrderOld = document.createElement( 'input' );
+            inputShortcutOrderOld.setAttribute( 'type', 'hidden' );
+            inputShortcutOrderOld.setAttribute( 'id', 'shortcutOrderOld' + shortcut.order );
+            divShortcutOrderBlock.appendChild( inputShortcutOrderOld );
+
+            divShortcutsEditor.appendChild( divShortcutOrderBlock );
+
+        }
+    );
+    var shortcutOrderSaveBtn = document.createElement('input');
+    shortcutOrderSaveBtn.setAttribute( 'type' , 'button' );
+    shortcutOrderSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutOrderSaveBtn.setAttribute( 'id' , 'shortcutOrderSaveBtn' );
+    shortcutOrderSaveBtn.setAttribute( 'href' , '#' );
+    shortcutOrderSaveBtn.setAttribute( 'onclick' , 'shortcutOrderSave();' );
+    shortcutOrderSaveBtn.setAttribute( 'value' , 'Save' );
+    divShortcutsEditor.appendChild( shortcutOrderSaveBtn );
+}
+
+// Function to save reordering of shortcuts
+function shortcutOrderSave() {
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var shortcutsObjNew = [];
+    var shortcutCount = shortcutsObj.length;
+    var divShortcutsEditor = document.getElementById( 'divShortcutsEditor' );
+    var i;
+    for ( i = 0; i < shortcutCount; i++ ) {
+        var j;
+        for ( j = 0; j < shortcutCount; j++ ) {
+            var thisShortcutId = document.getElementById( 'shortcutOrderInput' + j );
+            var newIndex = document.getElementById( 'shortcutOrderInput' + j ).value - 1;
+            if ( newIndex == i ) {
+                shortcutsObjNew.push( shortcutsObj[j] );
+                shortcutsObjNew[ i ].order = i;
+                break;
+            }
+        };
+        if ( shortcutsObjNew.length != i + 1 ) {
+            alert( "Invalid shortcut order, please make sure the shortcuts are ordered starting at 1 with no skipped numbers" );
+            return;
+        }
+    }
+    window.localStorage.setItem( 'org.doubango.shortcuts', JSON.stringify( shortcutsObjNew ) );
+    $.ajax({
+        url: 'includes/saveShortcuts.php',
+        type: 'POST',
+        data: {
+            extension:window.localStorage.getItem( 'org.doubango.identity.impi' ),
+            shortcuts:window.localStorage.getItem( 'org.doubango.shortcuts' )
+        },
+        success: function(data) {
+            console.log("shortcut Deletion - Successfully Saved", data); // Inspect this in your console
+        }
+    });
+    shortcutEnum();
+    shortcutsEditDraw();
+}
+
+// Function to idelete a specific shortcut
+function shortcutDelete( shortcutSelect ) {
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var divShortcutEditBlock = document.getElementById( 'shortcutEdit' + shortcutSelect );
+    if ( shortcutsObj[ shortcutSelect ].noDelete == 1 ) {
+        var pCantDel = document.createElement( 'p' );
+        pCantDel.style.textAlign = 'center';
+        pCantDel.style.fontWeight = 'bold';
+        pCantDel.innerText = "This shortcut cannot be deleted"
+        divShortcutEditBlock.prepend( pCantDel );
+    } else {
+        shortcutsObj.splice( shortcutSelect, 1 );
+        var order = 0;
+        shortcutsObj.forEach( shortcut => {
+                shortcut.order = order++;
+            }
+        );
+        window.localStorage.setItem('org.doubango.shortcuts', JSON.stringify(shortcutsObj));
+        $.ajax({
+            url: 'includes/saveShortcuts.php',
+            type: 'POST',
+            data: {
+                extension:window.localStorage.getItem( 'org.doubango.identity.impi' ),
+                shortcuts:window.localStorage.getItem( 'org.doubango.shortcuts' )
+            },
+            success: function(data) {
+                console.log("shortcut Deletion - Successfully Saved", data); // Inspect this in your console
+            }
+        });
+        shortcutEnum();
+        shortcutsEditDraw();
+    }
+}
+
+// Function to write changes to a shortcut
+function shortcutEditSave( shortcutSelect ) {
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var shortcutNextOrder = shortcutsObj.length;
+    if ( document.getElementById( 'shortcutEditInputAction' + shortcutSelect ).value == 'DTMF' ) {
+        if ( ! /^[0-9A-D#\*]+$/.test(  document.getElementById( 'shortcutEditInputNumber' + shortcutSelect ).value ) ) {
+            alert( "Invalid DTMF Character, Please only use 0-9. A-D, * or #" );
+            return;
+        }
+    }
+    if ( shortcutNextOrder == shortcutSelect ) {
+        let shortcut = {
+            "order": Number(shortcutSelect),
+            "number": document.getElementById( 'shortcutEditInputNumber' + shortcutSelect ).value,
+            "displayName": document.getElementById( 'shortcutEditInputDisplayName' + shortcutSelect ).value,
+            "noDelete": 0,
+            "action": document.getElementById( 'shortcutEditInputAction' + shortcutSelect ).value
+        }
+        shortcutsObj.push( shortcut );
+    } else {
+        shortcutsObj[ shortcutSelect ].displayName = document.getElementById( 'shortcutEditInputDisplayName' + shortcutSelect ).value;
+        shortcutsObj[ shortcutSelect ].number = document.getElementById( 'shortcutEditInputNumber' + shortcutSelect ).value;
+        shortcutsObj[ shortcutSelect ].action = document.getElementById( 'shortcutEditInputAction' + shortcutSelect ).value;
+    }
+    window.localStorage.setItem('org.doubango.shortcuts', JSON.stringify(shortcutsObj));
+    $.ajax({
+        url: 'includes/saveShortcuts.php',
+        type: 'POST',
+        data: {
+            extension:window.localStorage.getItem( 'org.doubango.identity.impi' ),
+            shortcuts:window.localStorage.getItem( 'org.doubango.shortcuts' )
+        },
+        success: function(data) {
+            console.log("Shortcut Edit - Successfully Saved", data);
+        }
+    });
+    shortcutEnum();
+    shortcutsEditDraw();
+}
+
+// Function to add a shortcut
+function shortcutAdd() {
+    shortcutAddBtn = document.getElementById( 'shortcutAddBtn' );
+    shortcutAddBtn.remove();
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+    var shortcutNextOrder = shortcutsObj.length;
+    var divShortcutEditBlock = document.createElement( 'div' );
+    divShortcutEditBlock.setAttribute( 'id' , 'shortcutEdit' + shortcutNextOrder );
+    divShortcutEditBlock.setAttribute( 'class', 'shortcutEditBlock' );
+    divShortcutsEditor.appendChild( divShortcutEditBlock );
+    var divShortcutEditDisplayName = document.createElement( 'div' );
+    divShortcutEditDisplayName.setAttribute( 'class', 'shortcutEditLine' )
+    divShortcutEditBlock.appendChild( divShortcutEditDisplayName );
+    var labelShortcutDisplayName = document.createElement( 'label' );
+    labelShortcutDisplayName.innerText = 'Display Name';
+    divShortcutEditDisplayName.appendChild( labelShortcutDisplayName );
+    var inputShortcutDisplayName = document.createElement( 'input' );
+    inputShortcutDisplayName.setAttribute( 'type', 'text' );
+    inputShortcutDisplayName.setAttribute( 'class', 'shortcutEditInput');
+    inputShortcutDisplayName.setAttribute( 'id', 'shortcutEditInputDisplayName' + shortcutNextOrder );
+    divShortcutEditDisplayName.appendChild( inputShortcutDisplayName );
+    var divShortcutEditNumber = document.createElement( 'div' );
+    divShortcutEditNumber.setAttribute( 'class', 'shortcutEditLine' )
+    divShortcutEditBlock.appendChild( divShortcutEditNumber );
+    var labelShortcutNumber = document.createElement( 'label' );
+    labelShortcutNumber.innerText = 'Number';
+    divShortcutEditNumber.appendChild( labelShortcutNumber );
+    var inputShortcutNumber = document.createElement( 'input' );
+    inputShortcutNumber.setAttribute( 'type', 'text' );
+    inputShortcutNumber.setAttribute( 'class', 'shortcutEditInput');
+    inputShortcutNumber.setAttribute( 'id', 'shortcutEditInputNumber' + shortcutNextOrder );
+    divShortcutEditNumber.appendChild( inputShortcutNumber );
+    var divShortcutEditAction = document.createElement( 'div' );
+    divShortcutEditAction.setAttribute( 'class', 'shortcutEditLine' )
+    divShortcutEditBlock.appendChild( divShortcutEditAction );
+    var labelShortcutAction = document.createElement( 'label' );
+    labelShortcutAction.innerText = 'Action';
+    divShortcutEditAction.appendChild( labelShortcutAction );
+    var inputShortcutAction = document.createElement( 'select' );
+    inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
+    inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutNextOrder );
+    divShortcutEditAction.appendChild( inputShortcutAction );
+    var optionAudio = document.createElement("option");
+    optionAudio.text = "Audio";
+    inputShortcutAction.add( optionAudio );
+    var optionVideo = document.createElement("option");
+    optionVideo.text = "Video";
+    inputShortcutAction.add( optionVideo );
+    var optionScreenshare = document.createElement("option");
+    optionScreenshare.text = "Screenshare";
+    inputShortcutAction.add( optionScreenshare );
+    var optionChat = document.createElement("option");
+    optionChat.text = "Chat";
+    inputShortcutAction.add( optionChat );
+    var optionDTMF = document.createElement("option");
+    optionDTMF.text = "DTMF";
+    inputShortcutAction.add( optionDTMF );
+    var inputShortcutOrder = document.createElement( 'input' );
+    inputShortcutOrder.setAttribute( 'type', 'hidden' );
+    inputShortcutOrder.setAttribute( 'id', 'shortcutEditInputOrder' + shortcutNextOrder );
+    divShortcutEditBlock.appendChild( inputShortcutOrder );
+                    
+    var shortcutEditSaveBtn = document.createElement('a');
+    shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutEditSaveBtn.setAttribute( 'id' , 'shortcutEditSave' + shortcutNextOrder );
+    shortcutEditSaveBtn.setAttribute( 'href' , '#' );
+    shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutNextOrder + '");' );
+    shortcutEditSaveBtn.innerText = 'Save';
+    divShortcutEditBlock.appendChild( shortcutEditSaveBtn );
+}
+
+// Activate a selected shortcut
+async function shortcutRun( shortcutSelect ) {
+    var shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+console.log("shortcutRun - Debug 01 - shortcutsObj: ", shortcutsObj);
+console.log("shortcutRun - Debug 02 - shortcutSelect: ", shortcutSelect);
+    var shortcutNumber = shortcutsObj[ shortcutSelect ].number;
+console.log("shortcutRun - Debug 03 - shortcutNumber: ", shortcutNumber);
+    var shortcutAction = shortcutsObj[ shortcutSelect ].action;
+console.log("shortcutRun - Debug 04 - shortcutAction: ", shortcutAction);
+console.log("shortcutRun - Debug 05 - Wrote Input Field");
+    window.localStorage.setItem( 'org.doubango.call.phone_number', shortcutNumber );
+console.log("shortcutRun - Debug 06 - Set localstorage item");
+    if ( shortcutAction == 'DTMF' ) {
+console.log("shortcutRun - Debug 07 - This is a DTMF Shortcut");
+        for (var i = 0; i < shortcutNumber.length; i++) {
+console.log("shortcutRun - Debug 08 - Sending Key ", shortcutNumber.charAt(i) );
+            sipSendDTMF( shortcutNumber.charAt(i) );
+console.log("shortcutRun - Debug 09 - Sleeping for 200ms");
+            await new Promise(r => setTimeout(r, 200));
+        }
+    } else {
+        document.getElementById( 'txtPhoneNumber' ).value = shortcutNumber;
+        if ( shortcutAction == 'Audio' ) {
+console.log("shortcutRun - Debug 10 - Making Audio Call");
+            sipCall("call-audio");
+        } else if ( shortcutAction == 'Video' ) {
+console.log("shortcutRun - Debug 11 - Making Video Call");
+            sipCall("call-audiovideo");
+        } else if ( shortcutAction == 'Screenshare' ) {
+console.log("shortcutRun - Debug 12 - Making Screenshare Call");
+            sipShareScreen();
+        } else if ( shortcutAction == 'Chat' ) {
+console.log("shortcutRun - Debug 13 - Making Chat");
+            chatDisplay( shortcutNumber );
+        } else {
+            console.log( 'shortcutRun - Debug - Shortcut Action Not Recognized!!!' );
+        }
+    }
+}
+
 // Function to globally show/hide chat conversations
 function uiShowHideChat( show ) {
     var msgDiv = document.getElementById( 'divChat' );
@@ -204,8 +692,8 @@ function uiShowHideChat( show ) {
         msgDiv.classList.add( 'border-top-separator' );
         btnChatShowHide.value = 'Hide Chat';
         btnChatShowHide.setAttribute( 'onclick', 'uiShowHideChat( 0 )' );
-        if ( btnChatShowHide.classList.contains( 'btn-indicate' ) ) {
-            btnChatShowHide.classList.remove( 'btn-indicate' );
+        if ( btnChatShowHide.classList.contains( 'btnBlink' ) ) {
+            btnChatShowHide.classList.remove( 'btnBlink' );
         }
     } else {
         msgDiv.style.display = 'none';
@@ -250,10 +738,14 @@ function chatEnum() {
                 msgConvoEntry.appendChild( msgConvoSel );
                 msgConvoEntry.appendChild( msgConvoSelClose );
                 if ( activeChat != msgConversation.contact && msgConversation.unread == 1 ) {
-                    document.getElementById( 'convo' + msgConversation.contact ).style.textDecoration = 'underline';
+                    msgConvoSel.classList.add( 'btnBlink' );
+                    //document.getElementById( 'convo' + msgConversation.contact ).classList.add( 'btnBlink' );
                 } else if ( activeChat == msgConversation.contact ) {
-                    document.getElementById( 'convo' + msgConversation.contact ).style.backgroundColor = '#fce36c';
-                    document.getElementById( 'convo' + msgConversation.contact ).style.color = '#000000';
+                    if ( msgConvoSel.classList.contains( 'btnBlink' ) ) {
+                    //if ( document.getElementById( 'convo' + msgConversation.contact ).classList.contains( 'btnBlink' ) ) {
+                        msgConvoSel.classList.remove( 'btnBlink' );
+                        //document.getElementById( 'convo' + msgConversation.contact ).classList.remove( 'btnBlink' );
+                    }
                 }
             }
         );
@@ -373,6 +865,7 @@ function chatDisplay( msgFrom ) {
         for ( var i in msgSession ) {
             if (msgSession[i].contact == msgFrom) {
                 msgSession[i].unread = 0;
+                chatSave();
                 break; //Stop this loop, we found it!
             }
         }
@@ -587,6 +1080,9 @@ console.log("sipRegister - Debug 01 - window.localStorage: ", window.localStorag
             $(".screen-overlay").removeClass("show");
             $(".offcanvas").removeClass("show");
             $("body").removeClass("offcanvas-active");
+console.log("sipRegister - Debug 02 - window.localStorage.getItem( 'org.doubango.shortcuts' ): ", window.localStorage.getItem( 'org.doubango.shortcuts' ));
+            shortcutsObj = ( JSON.parse( window.localStorage.getItem( 'org.doubango.shortcuts' ) ) );
+            shortcutEnum();
             // If there are chats stored in the local session, load them
             chatEnum();
             msgSession = ( "" == window.localStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.localStorage.getItem( 'org.doubango.chat.session' ) ) );
@@ -644,7 +1140,7 @@ console.log("sipCall Debug 06: ", oConfigCall );
         oConfigCall.video_remote = document.getElementById("video_remote");
     }
     if (oSipStack && !oSipSessionCall && !tsk_string_is_null_or_empty(txtPhoneNumber.value)) {
-console.log("sipCall Debug 07 - Make a Call" );
+console.log("sipCall Debug 07 - Make a Call to ", txtPhoneNumber.value );
         if (s_type == 'call-screenshare') {
             if (!SIPml.isScreenShareSupported()) {
                 alert('Screen sharing not supported. Are you using chrome 26+?');
@@ -686,8 +1182,15 @@ console.log("sipCall Debug 10 - Save Call Session" );
         saveCallOptions();
     }
     else if (oSipSessionCall) {
+        // Answer an incoming call
 console.log("sipCall Debug 11 - Answer a Call" );
         txtCallStatus.innerHTML = '<i>Connecting...</i>';
+        if ( btnAudio.classList.contains( 'btnBlink' ) ) {
+            btnAudio.classList.remove( 'btnBlink' );
+        }
+        if ( btnVideo.classList.contains( 'btnBlink' ) ) {
+            btnVideo.classList.remove( 'btnBlink' );
+        }
 console.log("sipCall Debug 12 - Accept the call" );
         oSipSessionCall.accept(oConfigCall);
     }
@@ -950,7 +1453,7 @@ console.log("Debug uiVideoElementDraw 06 - Check if remote video is drawn ", vid
 console.log("Debug uiVideoElementDraw 07 - Remote Video isn't Drawn, draw it" );
                 var videoRemoteElement = document.createElement('video');
                 videoRemoteElement.setAttribute( 'id', 'video_remote' );
-                videoRemoteElement.setAttribute( 'class', 'video' );
+                videoRemoteElement.setAttribute( 'class', 'video col-xl-6 col-lg-6 col-md-12 col-sm-12' );
                 videoRemoteElement.setAttribute( 'width', '100%' );
                 videoRemoteElement.setAttribute( 'height', '100%' );
                 videoRemoteElement.setAttribute( 'autoplay', 'autoplay' );
@@ -1137,7 +1640,9 @@ console.log("onSipEventStack - i_new_call - Debug 01");
                     btnHangUp.value = 'Reject';
                     //btnCall.disabled = false;
                     btnAudio.disabled = false;
+                    btnAudio.classList.add( 'btnBlink' );
                     btnVideo.disabled = false;
+                    btnVideo.classList.add( 'btnBlink' );
                     btnScreenShare.disabled = false;
                     btnChat.disabled = false;
                     btnHangUp.disabled = false;
@@ -1163,6 +1668,12 @@ console.log("onSipEventStack - m_permission_requested - Debug 01");
 console.log("onSipEventStack - m_permission_accepted, m_permission_refused - Debug 01 ", e.type );
                 divGlassPanel.style.visibility = 'hidden';
                 if (e.type == 'm_permission_refused') {
+                    if ( btnAudio.classList.contains( 'btnBlink' ) ) {
+                        btnAudio.classList.remove( 'btnBlink' );
+                    }
+                    if ( btnVideo.classList.contains( 'btnBlink' ) ) {
+                        btnVideo.classList.remove( 'btnBlink' );
+                    }
                     uiCallTerminated('Media stream permission denied');
                 }
                 break;
@@ -1219,7 +1730,7 @@ console.log("onSipEventStack - i_new_message - Debug 01: ", e);
 console.log("onSipEventStack - i_new_message - Debug 02: ", window.getComputedStyle( msgDiv ).display);
                 if ( window.getComputedStyle( msgDiv ).display === "none" ) {
 console.log("onSipEventStack - i_new_message - Debug 03: ");
-                    btnChatShowHide.classList.add( 'btn-indicate' );
+                    btnChatShowHide.classList.add( 'btnBlink' );
                 }
                 chatEnum();
                 if ( activeChat == msgFrom ) {

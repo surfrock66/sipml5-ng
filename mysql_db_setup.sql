@@ -7,5 +7,6 @@ CREATE TABLE `extensions` (
     `extension` INT NOT NULL COMMENT 'Phone Extension',
     `passcode` INT COMMENT 'Optional Stored Passcode',
     `conversations` JSON COMMENT 'Optional saved chat conversations',
+    `shortcuts` JSON COMMENT 'Optional saved shortcuts',
     PRIMARY KEY (`id`)
 );

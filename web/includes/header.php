@@ -105,10 +105,23 @@
                 if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
                     if ( isset( $privIdValue ) && !empty( $privIdValue ) ) {
                         // Query the DB for passcode and conversations
-                        $queryExtension = mysqli_query( $con, "SELECT passcode, conversations FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
-                        while( $row = mysqli_fetch_array( $queryExtension ) ) {
+                        $queryExtension = mysqli_query( $con, "SELECT passcode, conversations, shortcuts FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
+                        while ( $row = mysqli_fetch_array( $queryExtension ) ) {
                             echo "        window.localStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
-                            echo "        window.localStorage.setItem('org.doubango.chat.session', '".$row[1]."');\r\n";
+                            echo "        window.localStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
+                            if ( $row[2] == "" ) {
+                                if ( defined ( 'DEFAULTSHORTCUTS' ) ) {
+                                    if ( !empty ( DEFAULTSHORTCUTS ) ) {
+                                        echo "        window.localStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
+                                    } else {
+                                        echo "        window.localStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                    }
+                                } else {
+                                    echo "        window.localStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                }
+                            } else {
+                                echo "        window.localStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
+                            }
                         }
                     }
                 }
@@ -128,6 +141,9 @@
                     $(offcanvas_id).toggleClass("show");
                     $('body').toggleClass("offcanvas-active");
                     $(".screen-overlay").toggleClass("show");
+                    if( offcanvas_id = 'shortcutsOffcanvas' ) {
+                         shortcutsEditDraw();
+                    }
                 }); 
 
                 // Close menu when pressing ESC
@@ -282,23 +298,36 @@
                 &nbsp;
                 <input type="button" class="btn-danger" id="btnRevert" value="Revert" onclick='settingsRevert();' />
             </div>
-
+        </aside>
+        <aside class="offcanvas offcanvas-right" id="shortcutsOffcanvas">
+            <header class="p-3 navbar-seiu-yellow">
+                <button class="btn btn-sm btn-primary btn-close"> Close </button>
+                <h3 class="mb-0">Shortcut Editor</h3>
+            </header>
+            <div id="divShortcutsEditor" class="p-3 container">
+            </div>
         </aside>
         <!-- offcanvas panel .end -->
         <div class="fixed-top navbar-seiu">
             <div class="container h-100">
                 <div class="row align-items-center h-100">
-                    <div class="col-6 col-sm-6 col-lg-6">
-                        <div class="float-left mx-2">
-                            <img height=36px data-trigger="#registrationOffcanvas" src="./images/menu.png" alt="Menu Icon" />
-                        </div>
-                        <div class="branding mt-1">
-                            <div class="logo">
-                                <img src="/images/logo.svg" alt="SEIU Local 1000" />
+                    <div class="col-8 col-sm-8 col-lg-6">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="menuBtn">
+                                        <img height=36px data-trigger="#registrationOffcanvas" src="./images/menu.png" alt="Menu Icon" />
+                                    </div>
+                                </div>
+                                <div class="col-10 branding mt-1">
+                                    <div class="logo">
+                                        <img src="/images/logo.svg" alt="SEIU Local 1000" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 col-sm-6 col-lg-6">
+                    <div class="col-4 col-sm-4 col-lg-6">
                         <div class="float-right">
                             <form class="navbar-form" action="index.php" method="get">
                                 <input type="hidden" name="logout" value="true" />

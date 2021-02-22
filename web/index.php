@@ -83,6 +83,7 @@
                             <input type="button" class="btn btn-primary btn-sm" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
                             &nbsp;&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
+                            <input type="button" class="btn btn-primary btn-sm" id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
                         </div>
                     </div>
                     <div id='divCallWrapper'>
@@ -95,6 +96,14 @@
                         <div id="divVideo" class="div-video">
                             <div id="divVideoRemoteWrapper"></div>
                             <div id="divVideoLocalWrapper"></div>
+                        </div>
+                    </div>
+                    <div id="divShortcuts" class="border-top-separator">
+                        <div id="divShortcutsHeader">
+                            <a class="btn btn-primary btn-sm" href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
+                            <p style="text-align: center; width: 100%;">Shortcuts</p>
+                        </div>
+                        <div id="divShortcutsButtons">
                         </div>
                     </div>
                     <div id="divChat" class="container">

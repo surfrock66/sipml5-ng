@@ -6,6 +6,28 @@
 // SIP Websocket URL
 //define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
 
+// Default Shortcuts
+//  These are applied to everyone and are used to seed the list of
+//  user-saved shortcuts. Order must be unique, and the eligible
+//  actions are "Audio", "Video", "Screenshare", "Chat" or "DTMF".
+//define("DEFAULTSHORTCUTS",array(
+//        '0' => array(
+//            'order' => '0',
+//            'number' => '850',
+//            'displayName' => 'Voicemail',
+//            'noDelete' => '1',
+//            'action' => 'Audio',
+//        ),
+//        '1' => array(
+//            'order' => '1',
+//            'number' => '1234',
+//            'displayName' => 'Video Call John Doe',
+//            'noDelete' => '0',
+///           'action' => 'Video',
+//        )
+//    )
+//);
+
 // SimpleSAMLPhp Provider Name
 //define("SAMLSPNAME","saml-sp-name");
 
