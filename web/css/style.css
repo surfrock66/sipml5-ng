@@ -338,6 +338,10 @@ input[type=submit].LogOut {
   margin: 0 auto;
 }
 
+#divBtnCallGroup input[type=button] {
+  margin-bottom: 5px;
+}
+
 #divCallWrapper {
 }
 
@@ -429,6 +433,7 @@ input[type=submit].LogOut {
 #divShortcutsButtons input[type=button] { 
   margin-left: 5px;
   margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 #divShortcutsEditor {
@@ -510,14 +515,14 @@ input[type=submit].LogOut {
   float: right;
 }
 
-.divMessages {
-  width:100%;
-  height:250px;
+#divChatMessages {
+  width: 100%;
+  max-height: 250px;
 }
 
 .chatInput {
-  width:75%;
-  float:left;
+  width: 75%;
+  float: left;
 }
 
 .chatSendBtn {

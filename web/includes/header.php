@@ -81,25 +81,25 @@
     // Pass our PHP defined variables to the local javascript session
     if ( defined ( 'REALM' ) ) {
         if ( !empty ( REALM ) ) {
-            echo "        window.localStorage.setItem('org.doubango.identity.realm', '".REALM."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.identity.realm', '".REALM."');\r\n";
         }
     }
     if ( defined ( 'WEBSOCKETURL' ) ) {
         if ( !empty ( WEBSOCKETURL ) ) {
-            echo "        window.localStorage.setItem('org.doubango.expert.websocket_server_url', '".WEBSOCKETURL."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.expert.websocket_server_url', '".WEBSOCKETURL."');\r\n";
         }
     }
     if ( defined ( 'CHATMAXCONVOLEN' ) ) {
         if ( !empty ( CHATMAXCONVOLEN ) ) {
-            echo "        window.localStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
         }
     }
     // 2020.12.16 - Edit by jgullo - Load variables from SAML if it's enabled
     if ( defined ( 'SAMLSPNAME' ) ) {
         if ( !empty ( SAMLSPNAME ) ) {
-            echo "        window.localStorage.setItem('org.doubango.identity.display_name', '".$fullName."');\r\n";
-            echo "        window.localStorage.setItem('org.doubango.identity.impi', '".$privIdValue."');\r\n";
-            echo "        window.localStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.identity.display_name', '".$fullName."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.identity.impi', '".$privIdValue."');\r\n";
+            echo "        window.sessionStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."');\r\n";
             // If database variables are defined, attempt to pre-populate the passcode and prior chat conversations
             if ( defined ( 'MYSQLHOST' ) && defined ( 'MYSQLUSER' ) && defined ( 'MYSQLPASS' ) && defined ( 'MYSQLPORT' ) && defined ( 'MYSQLDBNAME' ) ) {
                 if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
@@ -107,20 +107,20 @@
                         // Query the DB for passcode and conversations
                         $queryExtension = mysqli_query( $con, "SELECT passcode, conversations, shortcuts FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
                         while ( $row = mysqli_fetch_array( $queryExtension ) ) {
-                            echo "        window.localStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
-                            echo "        window.localStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
+                            echo "        window.sessionStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
+                            echo "        window.sessionStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
                             if ( $row[2] == "" ) {
                                 if ( defined ( 'DEFAULTSHORTCUTS' ) ) {
                                     if ( !empty ( DEFAULTSHORTCUTS ) ) {
-                                        echo "        window.localStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
+                                        echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
                                     } else {
-                                        echo "        window.localStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                        echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
                                     }
                                 } else {
-                                    echo "        window.localStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                    echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
                                 }
                             } else {
-                                echo "        window.localStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
+                                echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
                             }
                         }
                     }
