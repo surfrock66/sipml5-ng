@@ -1,15 +1,15 @@
 # Local 1000 Implementation
 SEIU Local 1000 is adopting this project as part of a transition to an open-source and maintainable communications stack.  Our changes in this repository intend to take this reference implementaion and library to a usable product for our organization and other organizations.  While it is being built to be targeted for our environment and stack, we are keeping modularity in mind so other organizations could use this with their own requirements.  
 
-Our environment uses asterisk as a back end and has many web resources protected by SAML (specifically simplesamlphp), which are key integration points for this implementation.  The SAML login will hopefully bypass SIP registration by providing credentials in the background, so all other SIP parameters (realm, websocket server, proxy) will be provided by a configuration file and will NOT be user configurable.  Where possible we may make this configurable; settings are hidden if they're set in the config but available in a pop-out menu if they are not set.
+Our environment uses Asterisk as a SIP back end and has many web resources protected by SAML (specifically simplesamlphp), which are key integration points for this implementation.  The SAML login pre-populates SIP attributes which are populated in Active Directory, and if the passcode is stored in the optional MySQL databse, automatic SIP registration happens by providing credentials in the background, so all other SIP parameters (realm, websocket server, proxy) will be provided by a configuration file and will NOT be user configurable.  Effectively, a user can register with SIP using their AD Credentials.  Where possible we made everything configurable; settings are hidden if they're set in the config but available in a pop-out menu if they are not set.
 
-While moving things to a static config file, we will also attempt to modularize theming and metadata with the hope tha most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
+While moving settings to a single static config file, we will also attempt to modularize theming and metadata with the hope tha most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
 
-We have added sms chat and threaded conversations.
+We have added sms chat and threaded conversations, chat persistence (if configured with the optional MySQL DB), custom shortcut buttons, user-editable custom shortcuts (if configured with the optional MySQL DB), pop-up notifications indicating incoming chats or calls, and a more responsive mobile UI.
 
 Stretch goals for our organization are to implement presence indication, contacts lookup, saveable dialing shortcuts, and a better responsive mobile UI.
 
-At this time we cannot provide a public demo of our fork, however the demo below from duobango still works for external SIP testing.
+At this time we cannot provide a public demo of our fork as it is protected behind ActiveDirectory logins through SAML, however the demo below from duobango still works for external SIP testing.
 
 # Installation Requirements
 Our implementation requires the following:
@@ -111,8 +111,8 @@ The code is released under BSD terms. For more information: https://github.com/c
 If you have a patch for this project, please submit a pull request. Pull requests will be tested and verified for proper functionality and stability. 
 Once a patch had been accepted - it will be merged back into the upstream repository.
 
-Project home page: [github.com/cloudonix/sipml5-ng](https://github.com/cloudonix/sipml5-ng) <br />
-Download JS API: [SIPml-api.js](https://raw.githubusercontent.com/cloudonix/sipml5-ng/master/release/SIPml-api.js)
+Project home page: [github.com/L1kMakes/sipml5-ng](https://github.com/L1kMakes/sipml5-ng) <br />
+Download JS API: [SIPml-api.js](https://raw.githubusercontent.com/L1kMakes/sipml5-ng/master/release/SIPml-api.js)
 
 # Credits/Acknowledgements
 
