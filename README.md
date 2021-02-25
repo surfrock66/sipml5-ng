@@ -1,9 +1,9 @@
 # Local 1000 Implementation
 SEIU Local 1000 is adopting this project as part of a transition to an open-source and maintainable communications stack.  Our changes in this repository intend to take this reference implementaion and library to a usable product for our organization and other organizations.  While it is being built to be targeted for our environment and stack, we are keeping modularity in mind so other organizations could use this with their own requirements.  
 
-Our environment uses Asterisk as a SIP back end and has many web resources protected by SAML (specifically simplesamlphp), which are key integration points for this implementation.  The SAML login pre-populates SIP attributes which are populated in Active Directory, and if the passcode is stored in the optional MySQL databse, automatic SIP registration happens by providing credentials in the background, so all other SIP parameters (realm, websocket server, proxy) will be provided by a configuration file and will NOT be user configurable.  Effectively, a user can register with SIP using their AD Credentials.  Where possible we made everything configurable; settings are hidden if they're set in the config but available in a pop-out menu if they are not set.
+Our environment uses Asterisk as a SIP back end and has many web resources protected by SAML (specifically simplesamlphp), which are key integration points for this implementation.  The SAML login pre-populates SIP attributes which are defined in Active Directory, and if the passcode is stored in the optional MySQL databse, automatic SIP registration happens by providing credentials in the background, so all other SIP parameters (realm, websocket server, proxy) will be provided by a configuration file and will NOT be user configurable.  Effectively, a user can register with SIP using their AD Credentials.  Where possible we made everything configurable; settings are hidden if they're set in the config but available in a pop-out menu if they are not set.
 
-While moving settings to a single static config file, we will also attempt to modularize theming and metadata with the hope tha most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
+While moving settings to a single static config file, we will also attempt to modularize theming and metadata with the hope that most configuration can be placed in just the config.php file, which will make implementation by other groups MUCH easier.
 
 We have added sms chat and threaded conversations, chat persistence (if configured with the optional MySQL DB), custom shortcut buttons, user-editable custom shortcuts (if configured with the optional MySQL DB), pop-up notifications indicating incoming chats or calls, and a more responsive mobile UI.
 
@@ -13,11 +13,11 @@ At this time we cannot provide a public demo of our fork as it is protected behi
 
 # Installation Requirements
 Our implementation requires the following:
-1. Ubuntu Linux Server
-2. apache2 web server
-3. php
-4. php-mysqli
-5. mysql-server (Optional for shortcuts and SAML integration)
+1. Linux Server (Tested on Ubuntu 20.04.1)
+2. apache2 web server (Tested on 2.4.41)
+3. php (Tested on 7.4.3)
+4. php-mysqli (Optional for shortcuts, persistent chat and auto-registration via SAML)
+5. mysql-server (Tested on 8.0.23, optional for shortcuts, persistent chat and auto-registration via SAML)
 6. php-curl and php-dom (PHP modules for optional simplesamlphp integration)
 
 # Optional - MySQL setup
