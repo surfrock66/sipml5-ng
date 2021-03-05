@@ -4221,7 +4221,7 @@ function tsk_utils_log_fatal(s_msg) {
     if(__i_debug_level >= 1) {
         tsk_utils_log_error(s_msg);
     }
-}tsk_utils_log_info('SIPML5-NG API version = 3.0.0');
+}tsk_utils_log_info('SIPML5-NG API version = 3.0.9');
 ﻿/*
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
@@ -4694,6 +4694,9 @@ function tmedia_defaults_get_media_type() {
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
 * This file is part of Open Source sipML5 solution <http://www.sipml5.org>
+* 
+* Modified 2021.03.03 by jgullo of SEIU Local 1000 as mart of the 
+*  modernization of the screensharing WebRTC code
 */
 
 var __o_peerconnection_class = undefined;
@@ -5045,9 +5048,13 @@ tmedia_session_mgr.prototype.set_ro = function (o_sdp, b_is_offer) {
             e_new_mediatype = tmedia_type_from_id(i_new_mediatype);
 	    }
 
+        if (e_new_mediatype == tmedia_type_e.AUDIO_VIDEO && this.e_type == tmedia_type_e.SCREEN_SHARE) { // "SCREEN_SHARE" will be identified in the SDP as Video when using get_media_type()
+            e_new_mediatype = this.e_type;
+        }
         if (e_new_mediatype == tmedia_type_e.VIDEO && this.e_type == tmedia_type_e.SCREEN_SHARE) { // "SCREEN_SHARE" will be identified in the SDP as Video when using get_media_type()
             e_new_mediatype = this.e_type;
         }
+
         if ((b_is_mediatype_changed = (e_new_mediatype != this.e_type))) {
             this.set_media_type(e_new_mediatype);
             tsk_utils_log_info("media type has changed");
@@ -5340,10 +5347,15 @@ if(!window.__b_release_mode){
         'src/tinyMEDIA/src/tmedia_session_roap.js',
         'src/tinyMEDIA/src/tmedia_session_ghost.js'
     );
-}﻿/*
+}
+/*
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
-* This file is part of Open Source sipML5 solution <http://www.sipml5.org>
+* This file is part of Open Source sipML5 solution <http://www.sipml5.org>a
+* 
+* Modified 2021.03.03 by jgullo of SEIU Local 1000 as part of the effort
+*  to modernize the HTML5 webRTC calls around media permissions, specifically
+*  the camera, microphone, notification, and screen-sharing API's.
 */
 // http://tools.ietf.org/html/draft-uberti-rtcweb-jsep-02
 // JSEP00: webkitPeerConnection00 (http://www.w3.org/TR/2012/WD-webrtc-20120209/)
@@ -5838,6 +5850,9 @@ tmedia_session_jsep01.onGetUserMediaSuccess = function (o_stream, _This) {
             else if (o_stream.getAudioTracks().length > 0 && o_stream.getVideoTracks().length > 0) {
                 __o_jsep_stream_audiovideo = o_stream;
             }
+            else if (o_stream.getAudioTracks().length == 0 && o_stream.getVideoTracks().length > 0) {
+                __o_jsep_stream_audiovideo = o_stream;
+            }
 
             if (!This.o_local_stream) {
                 This.o_mgr.callback(tmedia_session_events_e.STREAM_LOCAL_ACCEPTED, this.e_type);
@@ -6087,8 +6102,9 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
             mandatory: {},
             optional: []
         };
-        if ((this.e_type.i_id & tmedia_type_e.SCREEN_SHARE.i_id) == tmedia_type_e.SCREEN_SHARE.i_id) {
-            o_video_constraints.mandatory.chromeMediaSource = 'screen';
+        if ( this.e_type.i_id == tmedia_type_e.SCREEN_SHARE.i_id ) {
+            // Constraints for Screen Share go here
+            //o_video_constraints.mandatory.chromeMediaSource = 'screen';
         }
         if (this.e_type.i_id & tmedia_type_e.VIDEO.i_id) {
             if (this.o_video_size) {
@@ -6160,15 +6176,65 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
         else {
             if (!this.b_lo_held && !this.o_local_stream) {
                 this.o_mgr.callback(tmedia_session_events_e.STREAM_LOCAL_REQUESTED, this.e_type);
-                navigator.getUserMedia(
+                if ( this.e_type == tmedia_type_e.SCREEN_SHARE ) {
+                    // Plugin-less screen share using WebRTC requires "getDisplayMedia" instead of "getUserMedia"
+                    //  Because of this, audio constraints become limited, and we have to use async to deal with
+                    //  the promise variable for the mediastream.  This is a change since Chrome 71.  We are able
+                    //  to use the .then aspect of the promise to call a second mediaStream, then attach the audio
+                    //  from that to the video of our second screenshare mediaStream, enabling plugin-less screen
+                    //  sharing with audio.
+                    let o_stream = null;
+                    let o_streamAudio = null;
+                    let o_streamVideo = null;
+                    let o_streamAudioTrack = null;
+                    let o_streamVideoTrack = null;
+
+                    navigator.mediaDevices.getDisplayMedia(
+                        {
+                            audio: false,
+                            video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false
+                        }
+                    ).then( o_streamVideo => 
+                        {
+                            o_streamVideoTrack = o_streamVideo.getVideoTracks()[0];
+                            navigator.mediaDevices.getUserMedia(
+                                {
+                                    audio: o_audio_constraints,
+                                    video: false
+                                }
+                            ).then( o_streamAudio => 
+                                {
+                                    o_streamAudioTrack = o_streamAudio.getAudioTracks()[0];
+                                    o_stream = new MediaStream( [ o_streamVideoTrack , o_streamAudioTrack ] );
+                                    tmedia_session_jsep01.onGetUserMediaSuccess( o_stream, This );
+                                }
+                            ).catch( s_error => 
+                                {
+                                    tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                                }
+                            );
+                        }
+                    ).catch( s_error => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                        }
+                    );
+                } else {
+                    navigator.mediaDevices.getUserMedia(
                         {
                             audio: (this.e_type == tmedia_type_e.SCREEN_SHARE) ? false : !!(this.e_type.i_id & tmedia_type_e.AUDIO.i_id) ? o_audio_constraints : false,
-                            video: !!(this.e_type.i_id & tmedia_type_e.VIDEO.i_id) ? o_video_constraints : false, // "SCREEN_SHARE" contains "VIDEO" flag -> (VIDEO & SCREEN_SHARE) = VIDEO
-                            data: false
-                        },
-                        tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaSuccess : function (o_stream) { tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This); },
-                        tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaError : function (s_error) { tmedia_session_jsep01.onGetUserMediaError(s_error, This); }
+                            video: !!(this.e_type.i_id & tmedia_type_e.VIDEO.i_id) ? o_video_constraints : false // "SCREEN_SHARE" contains "VIDEO" flag -> (VIDEO & SCREEN_SHARE) = VIDEO
+                        }
+                    ).then( o_stream => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaSuccess( o_stream, This );
+                        }
+                    ).catch ( s_error => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                        }
                     );
+                }
             }
         }
     }
@@ -56254,6 +56320,10 @@ SIPml.Stack = function (o_conf) {
         var attachStream = function (bLocal) {
             var o_stream = bLocal ? e.o_session.get_stream_local() : e.o_session.get_stream_remote();
             if (_setStream((bLocal ? oSession.videoLocal : oSession.videoRemote), o_stream, false)) {
+                if ( bLocal ) {
+                    // Auto-muting local video for elements that aren't on the page on page load won't work, so we need to mute it here ot the user will hear themself
+                    oSession.videoLocal.muted = 'true';
+                }
                 dispatchEvent(bLocal ? 'm_stream_video_local_added' : 'm_stream_video_remote_added');
             }
             if (_setStream((bLocal ? oSession.audioLocal : oSession.audioRemote), o_stream, true)) {

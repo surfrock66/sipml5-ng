@@ -52,7 +52,6 @@
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 
         <!-- Popper.js -->
-        <!--<script src="https://unpkg.com/@popperjs/core@2"></script>-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>    
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -60,19 +59,6 @@
 
         <!-- CSS -->
         <link rel="stylesheet" href="css/style.css">
-        <!--<link href="./assets/css/bootstrap.css" rel="stylesheet" />-->
-        <!--<link href="./assets/css/bootstrap-responsive.css" rel="stylesheet" />-->
-
-        <!-- WebRTC Screehsare Libraries -->
-<!--
-        <script src="./js/ScreenShare.socket.io.js"> </script>
-        <script src="./js/ScreenShare.DetectRTC.js"></script>
-        <script src="./js/ScreenShare.adapter-latest.js"></script>
-        <script src="./js/ScreenShare.CodecsHandler.js"></script>
-        <script src="./js/ScreenShare.BandwidthHandler.js"></script>
-        <script src="./js/ScreenShare.IceServersHandler.js"></script>
-        <script src="./js/ScreenShare.conference.js"> </script>
--->
 
         <!-- Scripts -->
         <script src="./js/SIPml-api.js" type="text/javascript"> </script>
@@ -81,25 +67,86 @@
     // Pass our PHP defined variables to the local javascript session
     if ( defined ( 'REALM' ) ) {
         if ( !empty ( REALM ) ) {
-            echo "        window.sessionStorage.setItem('org.doubango.identity.realm', '".REALM."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.identity.realm', '".REALM."');\r\n";
+        }
+    }
+    if ( defined ( 'DISABLEVIDEO' ) ) {
+        if ( !empty ( DISABLEVIDEO ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.disable_video', '".DISABLEVIDEO."');\r\n";
+        }
+    }
+    if ( defined ( 'ENABLERTCWEBBREAKER' ) ) {
+        if ( !empty ( ENABLERTCWEBBREAKER ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.enable_rtcweb_breaker', '".ENABLERTCWEBBREAKER."');\r\n";
         }
     }
     if ( defined ( 'WEBSOCKETURL' ) ) {
         if ( !empty ( WEBSOCKETURL ) ) {
-            echo "        window.sessionStorage.setItem('org.doubango.expert.websocket_server_url', '".WEBSOCKETURL."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.expert.websocket_server_url', '".WEBSOCKETURL."');\r\n";
+        }
+    }
+    if ( defined ( 'SIPOUTBOUNDPROXYURL' ) ) {
+        if ( !empty ( SIPOUTBOUNDPROXYURL ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.sip_outboundproxy_url', '".SIPOUTBOUNDPROXYURL."');\r\n";
+        }
+    }
+    if ( defined ( 'ICESERVERS' ) ) {
+        if ( !empty ( ICESERVERS ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.ice_servers', '".ICESERVERS."');\r\n";
+        }
+    }
+    if ( defined ( 'BANDWIDTH' ) ) {
+        if ( !empty ( BANDWIDTH ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.bandwidth', '".BANDWIDTH."');\r\n";
+        }
+    }
+    if ( defined ( 'VIDEOSIZE' ) ) {
+        if ( !empty ( VIDEOSIZE ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.video_size', '".VIDEOSIZE."');\r\n";
+        }
+    }
+    if ( defined ( 'DISABLEEARLYIMS' ) ) {
+        if ( !empty ( DISABLEEARLYIMS ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.disable_early_ims', '".DISABLEEARLYIMS."');\r\n";
+        }
+    }
+    if ( defined ( 'DISABLEDEBUG' ) ) {
+        if ( !empty ( DISABLEDEBUG ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.disable_debug', '".DISABLEDEBUG."');\r\n";
+        }
+    }
+    if ( defined ( 'ENABLEMEDIACACHING' ) ) {
+        if ( !empty ( ENABLEMEDIACACHING ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.enable_media_caching', '".ENABLEMEDIACACHING."');\r\n";
+        }
+    }
+    if ( defined ( 'DISABLECALLBTNOPTIONS' ) ) {
+        if ( !empty ( DISABLECALLBTNOPTIONS ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', '".DISABLECALLBTNOPTIONS."');\r\n";
         }
     }
     if ( defined ( 'CHATMAXCONVOLEN' ) ) {
         if ( !empty ( CHATMAXCONVOLEN ) ) {
-            echo "        window.sessionStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
         }
+    }
+    // If database variables are defined, set a flag for the app to use later to enable/disable features
+    if ( defined ( 'MYSQLHOST' ) && defined ( 'MYSQLUSER' ) && defined ( 'MYSQLPASS' ) && defined ( 'MYSQLPORT' ) && defined ( 'MYSQLDBNAME' ) ) {
+        if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.dbenabled', 'true');\r\n";
+        } else {
+
+            echo "            window.sessionStorage.setItem('org.doubango.dbenabled', 'false');\r\n";
+        }
+    } else {
+        echo "            window.sessionStorage.setItem('org.doubango.dbenabled', 'false');\r\n";
     }
     // 2020.12.16 - Edit by jgullo - Load variables from SAML if it's enabled
     if ( defined ( 'SAMLSPNAME' ) ) {
         if ( !empty ( SAMLSPNAME ) ) {
-            echo "        window.sessionStorage.setItem('org.doubango.identity.display_name', '".$fullName."');\r\n";
-            echo "        window.sessionStorage.setItem('org.doubango.identity.impi', '".$privIdValue."');\r\n";
-            echo "        window.sessionStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.identity.display_name', '".$fullName."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.identity.impi', '".$privIdValue."');\r\n";
+            echo "            window.sessionStorage.setItem('org.doubango.identity.impu', '".$pubIdValue."');\r\n";
             // If database variables are defined, attempt to pre-populate the passcode and prior chat conversations
             if ( defined ( 'MYSQLHOST' ) && defined ( 'MYSQLUSER' ) && defined ( 'MYSQLPASS' ) && defined ( 'MYSQLPORT' ) && defined ( 'MYSQLDBNAME' ) ) {
                 if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
@@ -107,20 +154,20 @@
                         // Query the DB for passcode and conversations
                         $queryExtension = mysqli_query( $con, "SELECT passcode, conversations, shortcuts FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
                         while ( $row = mysqli_fetch_array( $queryExtension ) ) {
-                            echo "        window.sessionStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
-                            echo "        window.sessionStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
+                            echo "            window.sessionStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
+                            echo "            window.sessionStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
                             if ( $row[2] == "" ) {
                                 if ( defined ( 'DEFAULTSHORTCUTS' ) ) {
                                     if ( !empty ( DEFAULTSHORTCUTS ) ) {
-                                        echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
+                                        echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
                                     } else {
-                                        echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                        echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
                                     }
                                 } else {
-                                    echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                    echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
                                 }
                             } else {
-                                echo "        window.sessionStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
+                                echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
                             }
                         }
                     }
@@ -189,6 +236,7 @@
 
             // Function for what to do if a contact is chosen from the dropdown
             function selectContact(event) {
+                // If the LDAP contacts aren't defined, 
                 // This does a search in the ADContacts array to see if the input
                 //  value corresponds to an actual contact and stores it to a variable.
                 //  If the lookup returns nothing it becomes "undefined"

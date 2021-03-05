@@ -67,7 +67,18 @@
                     </div>
                     <div class="div-dialer">
                         <h2>Call control</h2>
+<?php
+    // Remove the onchange function if ldap paramaters are not defined as AD contact lookup will be disabled
+    if ( !defined ( 'LDAPURI' ) || !defined ( 'LDAPBINDUSER' ) || !defined ( 'LDAPBINDPASS' ) || !defined ( 'LDAPBASEDN' ) ) {
+?>
+                        <input type="text" style="width: 100%;" id="txtPhoneNumber" value="" placeholder="Enter phone number or type a name to search" list="ADContacts" />
+<?php
+    } else {
+?>
                         <input type="text" style="width: 100%;" id="txtPhoneNumber" value="" placeholder="Enter phone number or type a name to search" list="ADContacts" onchange="selectContact(event)" />
+<?php
+    }
+?>
                         <datalist id="ADContacts">
                             <option data-value="Enter phone number or type a name to search" value=""></option>
                         </datalist>
@@ -77,7 +88,7 @@
                         <div id="divBtnCallGroup">
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnAudio" href="#" value="Audio" onclick="sipCall(&quot;call-audio&quot;);" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnVideo" href="#" value="Video" onclick="sipCall(&quot;call-audiovideo&quot;);" />&nbsp;
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnScreenShare" href="#" value="Screen Share" onclick="sipShareScreen();" />&nbsp;
+                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnScreenShare" href="#" value="Screen Share" onclick="sipCall(&quot;call-screenshare&quot;);" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnChat" href="#" value="Chat" onclick="chatDisplay( txtPhoneNumber.value );" />&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnHangUp" value="HangUp" onclick='sipHangUp();' />&nbsp;
                             <input type="button" class="btn btn-primary btn-sm" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
@@ -100,7 +111,7 @@
                     </div>
                     <div id="divShortcuts" class="border-top-separator">
                         <div id="divShortcutsHeader">
-                            <a class="btn btn-primary btn-sm" href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
+                            <a id="shortcutEditBtn" class="btn btn-primary btn-sm" href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
                             <p style="text-align: center; width: 100%;">Shortcuts</p>
                         </div>
                         <div id="divShortcutsButtons">

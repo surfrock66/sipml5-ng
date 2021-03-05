@@ -3,8 +3,41 @@
 // SIP Realm
 //define("REALM","sample realm");
 
+// SIP Disable Video
+//define("DISABLEVIDEO","false");
+
+// SIP Enable RTCWeb Breaker
+//define("ENABLERTCWEBBREAKER","false");
+
 // SIP Websocket URL
 //define("WEBSOCKETURL","wss://sample websocket url:8089/ws");
+
+// SIP Outbound Proxy URL
+//define("SIPOUTBOUNDPROXYURL","udp://sipml5.org:5060");
+
+// SIP ICE Servers
+//define("ICESERVERS","udp://sipml5.org:5060");
+
+// SIP Max Bandwidth (kbps)
+//define("BANDWIDTH","{maxWidth: 640, maxHeight:480 }");
+
+// SIP Video Size
+//define("VIDEOSIZE","{minWidth: 640, minHeight:480, maxWidth: 640, maxHeight:480 }");
+
+// SIP Disable 3GPP Early IMS
+//define("DISABLEEARLYIMS","false");
+
+// SIP Dsiable debug messages: 
+//define("DISABLEDEBUG","true");
+
+// SIP Cache the media stream
+//define("ENABLEMEDIACACHING","false");
+
+// SIP Disable call button options
+//define("DISABLECALLBTNOPTIONS","false");
+
+// Chat - Max Conversation Length
+//define("CHATMAXCONVOLEN","50");
 
 // Default Shortcuts
 //  These are applied to everyone and are used to seed the list of
@@ -28,11 +61,10 @@
 //    )
 //);
 
+
+
 // SimpleSAMLPhp Provider Name
 //define("SAMLSPNAME","saml-sp-name");
-
-// Chat - Max Conversation Length
-//define("CHATMAXCONVOLEN","50");
 
 // LDAP Credentials
 

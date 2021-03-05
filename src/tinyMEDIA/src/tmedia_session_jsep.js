@@ -1,7 +1,11 @@
-﻿/*
+/*
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
-* This file is part of Open Source sipML5 solution <http://www.sipml5.org>
+* This file is part of Open Source sipML5 solution <http://www.sipml5.org>a
+* 
+* Modified 2021.03.03 by jgullo of SEIU Local 1000 as part of the effort
+*  to modernize the HTML5 webRTC calls around media permissions, specifically
+*  the camera, microphone, notification, and screen-sharing API's.
 */
 // http://tools.ietf.org/html/draft-uberti-rtcweb-jsep-02
 // JSEP00: webkitPeerConnection00 (http://www.w3.org/TR/2012/WD-webrtc-20120209/)
@@ -496,6 +500,9 @@ tmedia_session_jsep01.onGetUserMediaSuccess = function (o_stream, _This) {
             else if (o_stream.getAudioTracks().length > 0 && o_stream.getVideoTracks().length > 0) {
                 __o_jsep_stream_audiovideo = o_stream;
             }
+            else if (o_stream.getAudioTracks().length == 0 && o_stream.getVideoTracks().length > 0) {
+                __o_jsep_stream_audiovideo = o_stream;
+            }
 
             if (!This.o_local_stream) {
                 This.o_mgr.callback(tmedia_session_events_e.STREAM_LOCAL_ACCEPTED, this.e_type);
@@ -822,34 +829,60 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
                 if ( this.e_type == tmedia_type_e.SCREEN_SHARE ) {
                     // Plugin-less screen share using WebRTC requires "getDisplayMedia" instead of "getUserMedia"
                     //  Because of this, audio constraints become limited, and we have to use async to deal with
-                    //  the promise variable for the mediastream.  This is a change since Chrome 71.
+                    //  the promise variable for the mediastream.  This is a change since Chrome 71.  We are able
+                    //  to use the .then aspect of the promise to call a second mediaStream, then attach the audio
+                    //  from that to the video of our second screenshare mediaStream, enabling plugin-less screen
+                    //  sharing with audio.
                     let o_stream = null;
-                    try {
-                        navigator.mediaDevices.getDisplayMedia(
-                            {
-                                audio: true,
-                                video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false
-                            }
-                        ).then(o_stream => tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This) );
-//                        o_stream = navigator.mediaDevices.getDisplayMedia(
-//                            {
-//                                //audio: (this.e_type == tmedia_type_e.SCREEN_SHARE) ? false : !!(this.e_type.i_id & tmedia_type        _e.AUDIO.i_id) ? o_audio_constraints : false,
-//                                video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false
-//                            }
-//                        );
-                    } catch ( s_error ) {
-                        tmedia_session_jsep01.onGetUserMediaError(s_error, This);
-                    }
-                    //tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This);
+                    let o_streamAudio = null;
+                    let o_streamVideo = null;
+                    let o_streamAudioTrack = null;
+                    let o_streamVideoTrack = null;
+
+                    navigator.mediaDevices.getDisplayMedia(
+                        {
+                            audio: false,
+                            video: !!( this.e_type.i_id & tmedia_type_e.VIDEO.i_id ) ? o_video_constraints : false
+                        }
+                    ).then( o_streamVideo => 
+                        {
+                            o_streamVideoTrack = o_streamVideo.getVideoTracks()[0];
+                            navigator.mediaDevices.getUserMedia(
+                                {
+                                    audio: o_audio_constraints,
+                                    video: false
+                                }
+                            ).then( o_streamAudio => 
+                                {
+                                    o_streamAudioTrack = o_streamAudio.getAudioTracks()[0];
+                                    o_stream = new MediaStream( [ o_streamVideoTrack , o_streamAudioTrack ] );
+                                    tmedia_session_jsep01.onGetUserMediaSuccess( o_stream, This );
+                                }
+                            ).catch( s_error => 
+                                {
+                                    tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                                }
+                            );
+                        }
+                    ).catch( s_error => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                        }
+                    );
                 } else {
-                    navigator.getUserMedia(
+                    navigator.mediaDevices.getUserMedia(
                         {
                             audio: (this.e_type == tmedia_type_e.SCREEN_SHARE) ? false : !!(this.e_type.i_id & tmedia_type_e.AUDIO.i_id) ? o_audio_constraints : false,
-                            video: !!(this.e_type.i_id & tmedia_type_e.VIDEO.i_id) ? o_video_constraints : false, // "SCREEN_SHARE" contains "VIDEO" flag -> (VIDEO & SCREEN_SHARE) = VIDEO
-                            data: false
-                        },
-                        tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaSuccess : function (o_stream) { tmedia_session_jsep01.onGetUserMediaSuccess(o_stream, This); },
-                        tmedia_session_jsep01.mozThis ? tmedia_session_jsep01.onGetUserMediaError : function (s_error) { tmedia_session_jsep01.onGetUserMediaError(s_error, This); }
+                            video: !!(this.e_type.i_id & tmedia_type_e.VIDEO.i_id) ? o_video_constraints : false // "SCREEN_SHARE" contains "VIDEO" flag -> (VIDEO & SCREEN_SHARE) = VIDEO
+                        }
+                    ).then( o_stream => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaSuccess( o_stream, This );
+                        }
+                    ).catch ( s_error => 
+                        {
+                            tmedia_session_jsep01.onGetUserMediaError( s_error, This );
+                        }
                     );
                 }
             }

@@ -2,6 +2,9 @@
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
 * This file is part of Open Source sipML5 solution <http://www.sipml5.org>
+* 
+* Modified 2021.03.03 by jgullo of SEIU Local 1000 as mart of the 
+*  modernization of the screensharing WebRTC code
 */
 
 var __o_peerconnection_class = undefined;
@@ -353,9 +356,13 @@ tmedia_session_mgr.prototype.set_ro = function (o_sdp, b_is_offer) {
             e_new_mediatype = tmedia_type_from_id(i_new_mediatype);
 	    }
 
+        if (e_new_mediatype == tmedia_type_e.AUDIO_VIDEO && this.e_type == tmedia_type_e.SCREEN_SHARE) { // "SCREEN_SHARE" will be identified in the SDP as Video when using get_media_type()
+            e_new_mediatype = this.e_type;
+        }
         if (e_new_mediatype == tmedia_type_e.VIDEO && this.e_type == tmedia_type_e.SCREEN_SHARE) { // "SCREEN_SHARE" will be identified in the SDP as Video when using get_media_type()
             e_new_mediatype = this.e_type;
         }
+
         if ((b_is_mediatype_changed = (e_new_mediatype != this.e_type))) {
             this.set_media_type(e_new_mediatype);
             tsk_utils_log_info("media type has changed");

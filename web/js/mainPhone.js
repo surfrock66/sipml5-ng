@@ -1,7 +1,22 @@
-﻿// to avoid caching
-//if (window.location.href.indexOf("svn=") == -1) {
-//    window.location.href += (window.location.href.indexOf("?") == -1 ? "svn=236" : "&svn=229");
-//}
+﻿/*
+* Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
+* License: BSD
+* This file is part of Open Source sipML5 solution <http://www.sipml5.org>
+*
+* Modified by jgullo of SEIU Local 1000 as part of the development of
+*  the reference implementation into a complete and usable SIP webphone.
+*  This code was originally embedded in the call.html file as part of
+*  doubango's demo, but has been split into its own js file and many 
+*  features have been added:
+*  - SMS, with persistence between sessions
+*  - Pop-up notifications for SMS and calls
+*  - Admin controlled custom shortcuts
+*  - User editable and saveable custom shortcuts
+*  - More modern HTML5 WebRTC adaptive interface
+*  - Modular theming so other organizations can customize the appearance
+*  - Switch from 'localStorage' to 'sessionStorage' for security
+*  - Added function for microphone audio to be accompanied with screen share
+*/
 
 // Variables from the main phone functions
 var sTransferNumber;
@@ -30,9 +45,6 @@ C =
 window.onload = function () {
     window.console && window.console.info && window.console.info("location=" + window.location);
 
-    // These have been rearchitected to only get put to the DOM when a call starts, so we can't set them here
-    //videoLocal = document.getElementById("video_local");
-    //videoRemote = document.getElementById("video_remote");
     audioRemote = document.getElementById("audio_remote");
 
     document.onkeyup = onKeyUp;
@@ -46,7 +58,7 @@ window.onload = function () {
     loadCallOptions();
 
     // Initialize call button
-    uiBtnCallSetText("Call");
+    //uiBtnCallSetText("Call");
 
     var getPVal = function (PName) {
         var query = window.location.search.substring(1);
@@ -82,9 +94,6 @@ window.onload = function () {
         if (s_mbwd) SIPml.setMaxBandwidthDown(parseFloat(s_mbwd));
         if (s_za) SIPml.setZeroArtifacts(s_za === "true");
         if (s_ndb == "true") SIPml.startNativeDebug();
-        //var rinningApps = SIPml.getRunningApps();
-        //var _rinningApps = Base64.decode(rinningApps);
-        //tsk_utils_log_info(_rinningApps);
     }
 
     oReadyStateTimer = setInterval(function () {
@@ -92,31 +101,24 @@ window.onload = function () {
             clearInterval(oReadyStateTimer);
             // initialize SIPML5
             preInit();
-    // Having the password in the local storage is our canary that we can auto-login
-    if ( ( window.sessionStorage.getItem('org.doubango.identity.password') !== null ) && ( window.sessionStorage.getItem('org.doubango.identity.password') != "" ) ) {
-        sipRegister();
-    } else {
-        var offcanvas_aside = document.getElementById( 'registrationOffcanvas' );
-        $('body').toggleClass("offcanvas-active");
-        offcanvas_aside.classList.add( "show" );
-    }
+            // If DB isn't enabled, don't let users edit shortcuts
+            var btnShortcutEdit = document.getElementById( 'shortcutEditBtn' );
+            if ( ! window.sessionStorage.getItem( 'org.doubango.dbenabled' ) ) {
+                btnShortcutEdit.style.display = "none";
+            }
+            // Having the password in the local storage is our canary that we can auto-login
+            if ( ( window.sessionStorage.getItem('org.doubango.identity.password') !== null ) && ( window.sessionStorage.getItem('org.doubango.identity.password') != "" ) ) {
+                sipRegister();
+            } else {
+                var offcanvas_aside = document.getElementById( 'registrationOffcanvas' );
+                $('body').toggleClass("offcanvas-active");
+                offcanvas_aside.classList.add( "show" );
+            }
         }
     },
     500);
 
-    /*if (document.readyState === "complete") {
-        preInit();
-    }
-    else {
-        document.onreadystatechange = function () {
-            if (document.readyState === "complete") {
-                preInit();
-            }
-        }
-    }*/
-
     // The following code is for the Expert Settings Panel
-
     cbVideoDisable = document.getElementById("cbVideoDisable");
     cbRTCWebBreaker = document.getElementById("cbRTCWebBreaker");
     txtWebsocketServerUrl = document.getElementById("txtWebsocketServerUrl");
@@ -130,6 +132,7 @@ window.onload = function () {
     if(window.sessionStorage){
         settingsRevert(true);
     }
+
 };
 
 function postInit() {
@@ -188,6 +191,7 @@ function postInit() {
             { name: 'language', value: '\"en,fr\"' }
         ]
     };
+
 }
 
 // Function to globally show/hide shortcuts
@@ -477,7 +481,6 @@ function shortcutOrderSave() {
     window.sessionStorage.setItem( 'org.doubango.shortcuts', JSON.stringify( shortcutsObjNew ) );
     $.ajax({
         url: 'includes/saveToDB.php',
-        //url: 'includes/saveShortcuts.php',
         type: 'POST',
         data: {
             action:'saveShortcuts',
@@ -485,7 +488,7 @@ function shortcutOrderSave() {
             shortcuts:window.sessionStorage.getItem( 'org.doubango.shortcuts' )
         },
         success: function(data) {
-            console.log("shortcut Deletion - Successfully Saved", data); // Inspect this in your console
+            console.log("shortcut Deletion - Successfully Saved", data);
         }
     });
     shortcutEnum();
@@ -511,7 +514,6 @@ function shortcutDelete( shortcutSelect ) {
         );
         window.sessionStorage.setItem('org.doubango.shortcuts', JSON.stringify(shortcutsObj));
         $.ajax({
-            //url: 'includes/saveShortcuts.php',
             url: 'includes/saveToDB.php',
             type: 'POST',
             data: {
@@ -520,7 +522,7 @@ function shortcutDelete( shortcutSelect ) {
                 shortcuts:window.sessionStorage.getItem( 'org.doubango.shortcuts' )
             },
             success: function(data) {
-                console.log("shortcut Deletion - Successfully Saved", data); // Inspect this in your console
+                console.log("shortcut Deletion - Successfully Saved", data); 
             }
         });
         shortcutEnum();
@@ -554,7 +556,6 @@ function shortcutEditSave( shortcutSelect ) {
     }
     window.sessionStorage.setItem('org.doubango.shortcuts', JSON.stringify(shortcutsObj));
     $.ajax({
-        //url: 'includes/saveShortcuts.php',
         url: 'includes/saveToDB.php',
         type: 'POST',
         data: {
@@ -882,7 +883,6 @@ function chatCloseConvo( msgFrom ) {
 function chatSave() {
     $.ajax({
         url: 'includes/saveToDB.php',
-        //url: 'includes/saveChat.php',
         type: 'POST',
         data: {
             action:'saveChat',
@@ -890,7 +890,7 @@ function chatSave() {
             messages:window.sessionStorage.getItem( 'org.doubango.chat.session' )
         },
         success: function(data) {
-            console.log(data); // Inspect this in your console
+            console.log(data); 
         }
     });
 }
@@ -961,7 +961,6 @@ function saveCallOptions() {
 
 function loadCredentials() {
     if (window.sessionStorage) {
-        // IE retuns 'null' if not defined
         var s_value;
         if ((s_value = window.sessionStorage.getItem('org.doubango.identity.display_name'))) txtDisplayName.value = s_value;
         if ((s_value = window.sessionStorage.getItem('org.doubango.identity.impi'))) txtPrivateIdentity.value = s_value;
@@ -971,12 +970,7 @@ function loadCredentials() {
         //if ((s_value = window.sessionStorage.getItem('org.doubango.identity.realm'))) txtRealm.value = s_value;
     }
     else {
-        //txtDisplayName.value = "005";
-        //txtPrivateIdentity.value = "005";
-        //txtPublicIdentity.value = "sip:005@sip2sip.info";
-        //txtPassword.value = "005";
-        //txtRealm.value = "sip2sip.info";
-        //txtPhoneNumber.value = "701020";
+        // Set default values if you must, though this is no longer used
     }
 };
 
@@ -1000,13 +994,10 @@ function saveCredentials() {
 //  notifyReplyTo - If we need to know who caused the notification, pass it.
 function sipNotify( notifyTitle, notifyText, notifyTimeout, notifyAction, notifyReplyTo ) {
     if ( notifyTimeout === undefined ) notifyTimeout = 6;
-console.log("sipNotify - Debug 01 - Function Start");
     if ( ! document.hasFocus() ) {
         if (!window.Notification) {
-console.log("sipNotify - Debug 02 - Not supported");
             console.log('Browser does not support notifications.');
         } else {
-console.log("sipNotify - Debug 03 - Notifications Supported");
             // check if permission is already granted
             if (Notification.permission === 'granted') {
                 var notificationObj = new Notification( notifyTitle , {
@@ -1059,9 +1050,7 @@ async function sipRegister() {
         }
 
         // enable notifications if not already done
-console.log( "sipRegister - Debug 01 - Requesting Notification Permission");
         let permission = await Notification.requestPermission();
-console.log( "sipRegister - Debug 02 - Requested Notification Permission: ", permission);
         // 2021.01.20 - Edit by jgullo - Adding initialization for chat array variable.
         let msgSession = [];
         if ( window.sessionStorage ) {
@@ -1107,7 +1096,6 @@ console.log( "sipRegister - Debug 02 - Requested Notification Permission: ", per
             $(".screen-overlay").removeClass("show");
             $(".offcanvas").removeClass("show");
             $("body").removeClass("offcanvas-active");
-console.log("sipRegister - Debug 02 - window.sessionStorage.getItem( 'org.doubango.shortcuts' ): ", window.sessionStorage.getItem( 'org.doubango.shortcuts' ));
             shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
             shortcutEnum();
             // If there are chats stored in the local session, load them
@@ -1182,8 +1170,8 @@ function sipCall(s_type) {
             oSipSessionCall = null;
             txtCallStatus.value = 'Failed to make call';
             btnAudio.disabled = false;
-            btnVideo.disabled = false;
-            btnScreenShare.disabled = false;
+            btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+            btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
             btnChat.disabled = false;
             btnHangUp.disabled = true;
             return;
@@ -1203,38 +1191,9 @@ function sipCall(s_type) {
             btnHangUp.classList.remove( 'btnBlink' );
         }
         btnAudio.disabled = false;
-        btnVideo.disabled = false;
+        btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
         oSipSessionCall.accept(oConfigCall);
-    }
-}
-
-// Share entire desktop aor application using BFCP or WebRTC native implementation
-function sipShareScreen() {
-    if (SIPml.getWebRtcType() === 'w4a') {
-    // Sharing using BFCP -> requires an active session
-        if (!oSipSessionCall) {
-            txtCallStatus.innerHTML = '<i>No active session</i>';
-            return;
-        }
-        if (oSipSessionCall.bfcpSharing) {
-            if (oSipSessionCall.stopBfcpShare(oConfigCall) != 0) {
-                txtCallStatus.value = 'Failed to stop BFCP share';
-            }
-            else {
-                oSipSessionCall.bfcpSharing = false;
-            }
-        }
-        else {
-            oConfigCall.screencast_window_id = 0x00000000;
-            if (oSipSessionCall.startBfcpShare(oConfigCall) != 0) {
-                txtCallStatus.value = 'Failed to start BFCP share';
-            }
-            else {
-                oSipSessionCall.bfcpSharing = true;
-            }
-        }
-    } else {
-        sipCall('call-screenshare');
     }
 }
 
@@ -1300,7 +1259,8 @@ function sipHangUp() {
             btnHangUp.classList.remove( 'btnBlink' );
         }
         btnAudio.disabled = false;
-        btnVideo.disabled = false;
+        btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     }
 }
 
@@ -1333,11 +1293,12 @@ function stopRingbackTone() {
 }
 
 function toggleFullScreen() {
-    if (videoRemote.webkitSupportsFullscreen) {
-        fullScreen(!videoRemote.webkitDisplayingFullscreen);
-    }
-    else {
-        fullScreen(!bFullScreen);
+    if ( document.fullscreenEnabled ) {
+        if ( document.fullscreenElement ) {
+            fullScreen( false ); 
+        } else {
+            fullScreen( true );
+        }
     }
 }
 
@@ -1357,12 +1318,14 @@ function closeKeyPad() {
 
 function fullScreen(b_fs) {
     bFullScreen = b_fs;
-    if (tsk_utils_have_webrtc4native() && bFullScreen && videoRemote.webkitSupportsFullscreen) {
+    if ( tsk_utils_have_webrtc4native() && bFullScreen && document.fullscreenEnabled ) {
         if (bFullScreen) {
-            videoRemote.webkitEnterFullScreen();
+            videoRemote.requestFullscreen().catch(err => {
+                alert('Error attempting to enable full-screen mode: ${err.message} (${err.name})i');
+            });
         }
         else {
-            videoRemote.webkitExitFullscreen();
+            document.exitFullscreen();
         }
     }
     else {
@@ -1394,8 +1357,8 @@ function onDivCallCtrlMouseMove(evt) {
     try { // IE: DOM not ready
         if (tsk_utils_have_stream()) {
             btnAudio.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
-            btnVideo.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
-            btnScreenShare.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
+            btnVideo.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
+            btnScreenShare.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
             btnChat.disabled = (!tsk_utils_have_stream() || !oSipSessionRegister || !oSipSessionRegister.is_connected());
             document.getElementById("divCallCtrl").onmousemove = null; // unsubscribe
         }
@@ -1406,9 +1369,9 @@ function onDivCallCtrlMouseMove(evt) {
 function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: connecting, connected, terminating, terminated
     btnRegister.disabled = b_connected || b_connecting;
     btnUnRegister.disabled = !b_connected && !b_connecting;
-    btnAudio.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
-    btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
-    btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
+    btnAudio.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()); 
+    btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
+    btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
     btnChat.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnHangUp.disabled = !oSipSessionCall;
 }
@@ -1430,6 +1393,7 @@ function uiVideoElementDraw( rv_show, lv_show ) {
         btnFullScreen.disabled = true;
     } else {
         divCallWrapper.classList.add( 'border-top-separator' );
+        divVideo.style.height = null;
         divVideo.style.minheight = '340px';
         if ( rv_show == 1 ) {
             // Draw elements for Remote Video
@@ -1479,45 +1443,19 @@ function uiVideoElementDraw( rv_show, lv_show ) {
 function uiDisableCallOptions() {
     if (window.sessionStorage) {
         window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', 'true');
-        uiBtnCallSetText('Call');
+        btnVideo.disabled = 'true';
+        btnScreenShare.disabled = 'true';
         alert('Use expert view to enable the options again (/!\\requires re-loading the page)');
     }
 }
 
-function uiBtnCallSetText(s_text) {
-    switch (s_text) {
-        case "Call":
-            {
-                var bDisableCallBtnOptions = (window.sessionStorage && window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') == "true");
-                ulCallOptions.style.visibility = bDisableCallBtnOptions ? "hidden" : "visible";
-                if (!bDisableCallBtnOptions && ulCallOptions.parentNode != divBtnCallGroup) {
-                    divBtnCallGroup.appendChild(ulCallOptions);
-                }
-                else if (bDisableCallBtnOptions && ulCallOptions.parentNode == divBtnCallGroup) {
-                    document.body.appendChild(ulCallOptions);
-                }
-
-                break;
-            }
-        default:
-            {
-                ulCallOptions.style.visibility = "hidden";
-                if (ulCallOptions.parentNode == divBtnCallGroup) {
-                    document.body.appendChild(ulCallOptions);
-                }
-                break;
-            }
-    }
-}
-
 function uiCallTerminated(s_description) {
-    uiBtnCallSetText("Call");
     btnHangUp.value = 'HangUp';
     btnHoldResume.value = 'hold';
     btnMute.value = "Mute";
     btnAudio.disabled = false;
-    btnVideo.disabled = false;
-    btnScreenShare.disabled = false;
+    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     btnChat.disabled = false;
     btnHangUp.disabled = true;
     if (window.btnBFCP) window.btnBFCP.disabled = true;
@@ -1542,7 +1480,6 @@ function uiCallTerminated(s_description) {
 
 // Callback function for SIP Stacks
 function onSipEventStack(e /*SIPml.Stack.Event*/) {
-console.log("onSipEventStack - Debug 00 - ", e);
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
@@ -1567,7 +1504,7 @@ console.log("onSipEventStack - Debug 00 - ", e);
                     btnRegister.disabled = false;
                 }
                 break;
-                }
+            }
         case 'stopping': case 'stopped': case 'failed_to_start': case 'failed_to_stop':
             {
                 var bFailure = (e.type == 'failed_to_start') || (e.type == 'failed_to_stop');
@@ -1605,12 +1542,14 @@ console.log("onSipEventStack - Debug 00 - ", e);
                         btnAudio.disabled = false;
                         btnAudio.classList.add( 'btnBlink' );
                         btnVideo.disabled = true;
+                        btnScreenShare.disabled = true;
                         sipNotify( "Incoming Audio Call!", "Incoming audio call from " + sRemoteNumber, 20, "Audio", sRemoteNumber );
                         txtCallStatus.innerHTML = "<i>Incoming audio call from [<b>" + sRemoteNumber + "</b>]</i>";
                     } else if ( incomingCallType == 'audio/video' ) {
                         btnVideo.disabled = false;
                         btnVideo.classList.add( 'btnBlink' );
                         btnAudio.disabled = true;
+                        btnScreenShare.disabled = true;
                         sipNotify( "Incoming Video Call!", "Incoming video call from " + sRemoteNumber, 20, "Video", sRemoteNumber );
                         txtCallStatus.innerHTML = "<i>Incoming video call from [<b>" + sRemoteNumber + "</b>]</i>";
                     }
@@ -1647,7 +1586,8 @@ console.log("onSipEventStack - Debug 00 - ", e);
                         btnHangUp.classList.remove( 'btnBlink' );
                     }
                     btnAudio.disabled = false;
-                    btnVideo.disabled = false;
+                    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
                     uiCallTerminated('Media stream permission denied');
                 }
                 break;
@@ -1712,17 +1652,14 @@ console.log("onSipEventStack - Debug 00 - ", e);
                 }
                 chatSave();
                 sipNotify( "New chat message", "New message from " + msgFrom, 5, "Chat", msgFrom );
-                //alert("From: " + msgFrom + " Time: " + msgTimeString + " Message: " + msgMessage);
                 break;
             }
-
         case 'starting': default: break;
     }
 };
 
 // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
 function onSipEventSession(e /* SIPml.Session.Event */) {
-console.log("onSipEventSession - Debug 00", e);
     tsk_utils_log_info('==session event = ' + e.type);
 
     switch (e.type) {
@@ -1791,7 +1728,8 @@ console.log("onSipEventSession - Debug 00", e);
                     btnHangUp.classList.remove( 'btnBlink' );
                 }
                 btnAudio.disabled = false;
-                btnVideo.disabled = false;
+                btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
                 break;
             } // 'terminating' | 'terminated'
 
@@ -2003,8 +1941,8 @@ console.log("onSipEventSession - Debug 00", e);
 
 // Functions for the Expert Settings form
 function settingsSave() {
-    window.sessionStorage.setItem('org.doubango.expert.disable_video', cbVideoDisable.checked ? "true" : "false");
-    window.sessionStorage.setItem('org.doubango.expert.enable_rtcweb_breaker', cbRTCWebBreaker.checked ? "true" : "false");
+    window.sessionStorage.setItem('org.doubango.expert.disable_video', cbVideoDisable.checked ? true : false);
+    window.sessionStorage.setItem('org.doubango.expert.enable_rtcweb_breaker', cbRTCWebBreaker.checked ? true : false);
     if (!txtWebsocketServerUrl.disabled) {
         window.sessionStorage.setItem('org.doubango.expert.websocket_server_url', txtWebsocketServerUrl.value);
     }
@@ -2012,29 +1950,37 @@ function settingsSave() {
     window.sessionStorage.setItem('org.doubango.expert.ice_servers', txtIceServers.value);
     window.sessionStorage.setItem('org.doubango.expert.bandwidth', txtBandwidth.value);
     window.sessionStorage.setItem('org.doubango.expert.video_size', txtSizeVideo.value);
-    window.sessionStorage.setItem('org.doubango.expert.disable_early_ims', cbEarlyIMS.checked ? "true" : "false");
-    window.sessionStorage.setItem('org.doubango.expert.disable_debug', cbDebugMessages.checked ? "true" : "false");
-    window.sessionStorage.setItem('org.doubango.expert.enable_media_caching', cbCacheMediaStream.checked ? "true" : "false");
-    window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', cbCallButtonOptions.checked ? "true" : "false");
-
-    txtInfo.innerHTML = '<i>Saved</i>';
+    window.sessionStorage.setItem('org.doubango.expert.disable_early_ims', cbEarlyIMS.checked ? true : false);
+    window.sessionStorage.setItem('org.doubango.expert.disable_debug', cbDebugMessages.checked ? true : false);
+    window.sessionStorage.setItem('org.doubango.expert.enable_media_caching', cbCacheMediaStream.checked ? true : false);
+    window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', cbCallButtonOptions.checked ? true : false);
+    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    txtCallStatus.innerHTML = '<i>Saved</i>';
+    $(".screen-overlay").removeClass("show");
+    $(".offcanvas").removeClass("show");
+    $("body").removeClass("offcanvas-active");
 }
 
 function settingsRevert(bNotUserAction) {
-    cbVideoDisable.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_video') == "true");
-    cbRTCWebBreaker.checked = (window.sessionStorage.getItem('org.doubango.expert.enable_rtcweb_breaker') == "true");
+    cbVideoDisable.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_video') == true);
+    cbRTCWebBreaker.checked = (window.sessionStorage.getItem('org.doubango.expert.enable_rtcweb_breaker') == true);
     txtWebsocketServerUrl.value = (window.sessionStorage.getItem('org.doubango.expert.websocket_server_url') || "");
     txtSIPOutboundProxyUrl.value = (window.sessionStorage.getItem('org.doubango.expert.sip_outboundproxy_url') || "");
     txtIceServers.value = (window.sessionStorage.getItem('org.doubango.expert.ice_servers') || "");
     txtBandwidth.value = (window.sessionStorage.getItem('org.doubango.expert.bandwidth') || "");
     txtSizeVideo.value = (window.sessionStorage.getItem('org.doubango.expert.video_size') || "");
-    cbEarlyIMS.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_early_ims') == "true");
-    cbDebugMessages.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_debug') == "true");
-    cbCacheMediaStream.checked = (window.sessionStorage.getItem('org.doubango.expert.enable_media_caching') == "true");
-    cbCallButtonOptions.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') == "true");
-
+    cbEarlyIMS.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_early_ims') == true);
+    cbDebugMessages.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_debug') == true);
+    cbCacheMediaStream.checked = (window.sessionStorage.getItem('org.doubango.expert.enable_media_caching') == true);
+    cbCallButtonOptions.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') == true);
+    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
 
     if (!bNotUserAction) {
-        txtInfo.innerHTML = '<i>Reverted</i>';
+        txtCallStatus.innerHTML = '<i>Reverted</i>';
     }
+    $(".screen-overlay").removeClass("show");
+    $(".offcanvas").removeClass("show");
+    $("body").removeClass("offcanvas-active");
 }
