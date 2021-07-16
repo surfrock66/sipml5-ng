@@ -211,6 +211,20 @@ function uiShowHideShortcuts( show ) {
     }
 }
 
+// Utility  function to detect iOS, because the notification API doesn't work there
+function iOS() {
+    return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ].includes(navigator.platform)
+    // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
+
 // Function to enumerate shortcuts from localstorage object
 function shortcutEnum() {
     shortcutsObj = ( "" == window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ? [] : JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
@@ -830,6 +844,8 @@ function chatDisplay( msgFrom ) {
             chatInput = document.createElement('input');
             chatInput.setAttribute( 'type', 'text' );
             chatInput.setAttribute( 'id', 'chatInput' );
+            chatInput.setAttribute( 'autocomplete', 'off' );
+            chatInput.setAttribute( 'name', 'chatMessage' );
             chatConvSend.appendChild( chatInput );
             var chatSendBtn = document.createElement('input');
             chatSendBtn.setAttribute( 'href' , '#' );
@@ -995,7 +1011,7 @@ function saveCredentials() {
 function sipNotify( notifyTitle, notifyText, notifyTimeout, notifyAction, notifyReplyTo ) {
     if ( notifyTimeout === undefined ) notifyTimeout = 6;
     if ( ! document.hasFocus() ) {
-        if (!window.Notification) {
+        if (!window.Notification || !iOS() ) {
             console.log('Browser does not support notifications.');
         } else {
             // check if permission is already granted
@@ -1050,7 +1066,12 @@ async function sipRegister() {
         }
 
         // enable notifications if not already done
-        let permission = await Notification.requestPermission();
+
+        if (!window.Notification || !iOS() ) {
+            console.log('Browser does not support notifications.');
+        } else {
+            let permission = await Notification.requestPermission();
+        }
         // 2021.01.20 - Edit by jgullo - Adding initialization for chat array variable.
         let msgSession = [];
         if ( window.sessionStorage ) {

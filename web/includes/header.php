@@ -298,7 +298,7 @@
                 <input type="text" style="width: 100%; height: 100%" id="txtPublicIdentity" value="<?php echo $pubIdValue; ?>" placeholder="<?php echo $pubIdPlaceholder; ?>" />
                 <br />
                 <label style="height: 100%">Password:</label>
-                <input type="password" style="width: 100%; height: 100%" id="txtPassword" value="" />
+                <input type="password" style="width: 100%; height: 100%" id="txtPassword" value="" name="sipPassword" autocomplete="off" />
                 <br />
                 <label style="height: 100%">Realm<sup>*</sup>:</label>
                 <input type="text" style="width: 100%; height: 100%" id="txtRealm" value="<?php echo $realm; ?>" placeholder="<?php echo $realm;?>" />
