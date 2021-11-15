@@ -1011,9 +1011,10 @@ function saveCredentials() {
 function sipNotify( notifyTitle, notifyText, notifyTimeout, notifyAction, notifyReplyTo ) {
     if ( notifyTimeout === undefined ) notifyTimeout = 6;
     if ( ! document.hasFocus() ) {
-        if (!window.Notification || !iOS() ) {
+        if (!window.Notification || iOS() ) {
             console.log('Browser does not support notifications.');
         } else {
+            console.log('Browser supports notifications.');
             // check if permission is already granted
             if (Notification.permission === 'granted') {
                 var notificationObj = new Notification( notifyTitle , {
@@ -1067,9 +1068,10 @@ async function sipRegister() {
 
         // enable notifications if not already done
 
-        if (!window.Notification || !iOS() ) {
+        if (!window.Notification || iOS() ) {
             console.log('Browser does not support notifications.');
         } else {
+            console.log('Browser supports notifications.');
             let permission = await Notification.requestPermission();
         }
         // 2021.01.20 - Edit by jgullo - Adding initialization for chat array variable.
@@ -1472,7 +1474,7 @@ function uiDisableCallOptions() {
 
 function uiCallTerminated(s_description) {
     btnHangUp.value = 'HangUp';
-    btnHoldResume.value = 'hold';
+    btnHoldResume.value = 'Hold';
     btnMute.value = "Mute";
     btnAudio.disabled = false;
     btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
