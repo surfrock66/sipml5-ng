@@ -119,7 +119,7 @@
                     </div>
                     <div id="divChat" class="container">
                         <div class="row">
-                            <div id="chatList" class="col-2"></div>
+                            <div id="chatList" class="col-2 border-right-separator"></div>
                             <div id="chatConversation" class="col-10"></div>
                         </div>
                     </div>

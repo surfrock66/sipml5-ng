@@ -88,6 +88,17 @@ table {
   border-top-right-radius: 0;
 }
 
+button, input, optgroup, select, textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 20px;
+  border-width: 1px;
+  border-radius: 3px;
+  padding: 4px 8px;
+  margin: 0px 2px;
+}
+
 .lh-condensed { line-height: 1.25; }
 
 .btn-primary,
@@ -95,6 +106,7 @@ table {
   background-color: #362886;
   color: #fff;
   font-size: larger;
+  vertical-align: top;
 }
 
 .btn-primary:hover,
@@ -114,8 +126,7 @@ table {
 .btn-sm {
   padding: .25rem .5rem;
   font-size: .875rem;
-  line-height: 1.5;
-  border-radius: .2rem;
+  line-height: 20px;
 }
 
 .btnDialpad {
@@ -299,6 +310,10 @@ input[type=submit].LogOut {
   border-top: thick solid #362886;
 }
 
+.border-right-separator {
+  border-right: thin solid #362886;
+}
+
 
 /* Layout/Div Styles */
 
@@ -342,10 +357,11 @@ input[type=submit].LogOut {
   margin-bottom: 5px;
 }
 
-#divCallWrapper {
+#divCallWrapper {a
 }
 
 #divCallOptions {
+  padding-top: 15px;
 }
 
 .call-options {
@@ -421,7 +437,7 @@ input[type=submit].LogOut {
 #divShortcuts {
   text-align: center;
   margin-bottom: 5px;
-  padding-top: 5px;
+  padding-top: 15px;
 }
 
 #divShortcutsHeader {
@@ -496,7 +512,7 @@ input[type=submit].LogOut {
   width:100%;
   margin: auto;
   margin-top: 5px;
-  padding-top: 5px;
+  padding-top: 15px;
   clear: both;
 }
 
