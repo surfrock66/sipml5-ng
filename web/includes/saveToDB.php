@@ -10,15 +10,18 @@
                 if ( isset( $_POST[ 'action' ] ) ) {
                     if ( $_POST[ 'action' ] == "saveChat" && isset( $_POST[ 'messages' ] ) ) {
                         $queryUpdateChatsSql = "UPDATE extensions SET conversations='" . mysqli_real_escape_string( $con, $_POST['messages'] ) . "' WHERE extension=" . $_POST['extension'];
-                        //$queryUpdateChatsSql = "UPDATE extensions SET conversations='" . addcslashes( $_POST['messages'], "'\"" ) . "' WHERE extension=" . $_POST['extension'];
                         $queryUpdateChats = mysqli_query( $con, $queryUpdateChatsSql );
                         mysqli_query( $con, $queryUpdateChats ) or die( mysqli_error( $con ) );
                     }
                     if ( $_POST[ 'action' ] == "saveShortcuts" && isset( $_POST[ 'shortcuts' ] ) ) {
                         $queryUpdateShortcutsSql = "UPDATE extensions SET shortcuts='" . mysqli_real_escape_string( $con, $_POST['shortcuts'] ) . "' WHERE extension=" . $_POST['extension'];
-                        //$queryUpdateShortcutsSql = "UPDATE extensions SET shortcuts='" . addcslashes( $_POST['shortcuts'], "'\"" ) . "' WHERE extension=" . $_POST['extension'];
                         $queryUpdateShortcuts = mysqli_query( $con, $queryUpdateShortcutsSql );
                         mysqli_query( $con, $queryUpdateShortcuts ) or die( mysqli_error( $con ) );
+                    }
+                    if ( $_POST[ 'action' ] == "saveHistory" && isset( $_POST[ 'history' ] ) ) {
+                        $queryUpdateHistorySql = "UPDATE extensions SET history='" . mysqli_real_escape_string( $con, $_POST['history'] ) . "' WHERE extension=" . $_POST['extension'];
+                        $queryUpdateHistory = mysqli_query( $con, $queryUpdateHistorySql );
+                        mysqli_query( $con, $queryUpdateHistory ) or die( mysqli_error( $con ) );
                     }
                 } else {
                     echo "Error: No action is defined, cannot decide what to write.";

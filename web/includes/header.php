@@ -125,9 +125,29 @@
             echo "            window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', '".DISABLECALLBTNOPTIONS."');\r\n";
         }
     }
+    if ( defined ( 'ENABLEMULTILINE' ) ) {
+        if ( !empty ( ENABLEMULTILINE ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.expert.enable_multi_line', '".ENABLEMULTILINE."');\r\n";
+        }
+    }
+    if ( defined ( 'INTEXTMAXLEN' ) ) {
+        if ( !empty ( INTEXTMAXLEN ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.internal_ext_max_length', '".INTEXTMAXLEN."');\r\n";
+        }
+    }
+    if ( defined ( 'DIALOUTPREFIX' ) ) {
+        if ( !empty ( DIALOUTPREFIX ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.dialout_prefix', '".DIALOUTPREFIX."');\r\n";
+        }
+    }
     if ( defined ( 'CHATMAXCONVOLEN' ) ) {
         if ( !empty ( CHATMAXCONVOLEN ) ) {
             echo "            window.sessionStorage.setItem('org.doubango.chat.max_convo_len', '".CHATMAXCONVOLEN."');\r\n";
+        }
+    }
+    if ( defined ( 'HISTORYMAXENTRIES' ) ) {
+        if ( !empty ( HISTORYMAXENTRIES ) ) {
+            echo "            window.sessionStorage.setItem('org.doubango.history.max_entries', '".HISTORYMAXENTRIES."');\r\n";
         }
     }
     // If database variables are defined, set a flag for the app to use later to enable/disable features
@@ -152,7 +172,7 @@
                 if ( !empty ( MYSQLHOST ) && !empty ( MYSQLUSER ) && !empty ( MYSQLPASS ) && !empty ( MYSQLPORT ) && !empty ( MYSQLDBNAME ) ) {
                     if ( isset( $privIdValue ) && !empty( $privIdValue ) ) {
                         // Query the DB for passcode and conversations
-                        $queryExtension = mysqli_query( $con, "SELECT passcode, conversations, shortcuts FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
+                        $queryExtension = mysqli_query( $con, "SELECT passcode, conversations, shortcuts, history FROM extensions WHERE extension=$privIdValue LIMIT 1" ) or die( mysqli_error( $con ) );
                         while ( $row = mysqli_fetch_array( $queryExtension ) ) {
                             echo "            window.sessionStorage.setItem('org.doubango.identity.password', '".$row[0]."');\r\n";
                             echo "            window.sessionStorage.setItem('org.doubango.chat.session', '".addcslashes( $row[1], "'\"" )."');\r\n";
@@ -168,6 +188,11 @@
                                 }
                             } else {
                                 echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";
+                            }
+                            if ( $row[3] == "" ) {
+                                echo "            window.sessionStorage.setItem('org.doubango.history', '');\r\n";
+                            } else {
+                                echo "            window.sessionStorage.setItem('org.doubango.history', '".addcslashes( $row[3], "'\"" )."');\r\n";
                             }
                         }
                     }

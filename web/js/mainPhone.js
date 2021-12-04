@@ -106,6 +106,13 @@ window.onload = function () {
             if ( ! window.sessionStorage.getItem( 'org.doubango.dbenabled' ) ) {
                 btnShortcutEdit.style.display = "none";
             }
+            // If DB isn't enabled, don't let users see history
+            var divHistory = document.getElementById( 'divHistory' );
+            var btnHistoryShowHide = document.getElementById( 'btnHistoryShowHide' );
+            if ( ! window.sessionStorage.getItem( 'org.doubango.dbenabled' ) ) {
+                divHistory.style.display = "none";
+                btnHistoryShowHide.style.display = "none";
+            }
             // Having the password in the local storage is our canary that we can auto-login
             if ( ( window.sessionStorage.getItem('org.doubango.identity.password') !== null ) && ( window.sessionStorage.getItem('org.doubango.identity.password') != "" ) ) {
                 sipRegister();
@@ -194,6 +201,25 @@ function postInit() {
 
 }
 
+
+function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+    var min = a.getMinutes().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+    var sec = a.getSeconds().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+    var ampm = 'AM';
+    if( hour > 12 ) {
+        hour = hour - 12;
+        ampm = 'PM';
+    }
+    var time = month + ' ' + date + ', ' + year + ' - ' + hour + ':' + min + ':' + sec + ' ' + ampm;
+    return time;
+}
+
 // Function to globally show/hide shortcuts
 function uiShowHideShortcuts( show ) {
     var divShortcuts = document.getElementById( 'divShortcuts' );
@@ -211,6 +237,23 @@ function uiShowHideShortcuts( show ) {
     }
 }
 
+// Function to globally show/hide history
+function uiShowHideHistory( show ) {
+    var divHistory = document.getElementById( 'divHistory' );
+    var btnHistoryShowHide = document.getElementById( 'btnHistoryShowHide' );
+    if ( show ) {
+        divHistory.style.display = 'block';
+        divHistory.classList.add( 'border-top-separator' );
+        btnHistoryShowHide.value = 'Hide History';
+        btnHistoryShowHide.setAttribute( 'onclick', 'uiShowHideHistory( 0 )' );
+    } else {
+        divHistory.style.display = 'none';
+        divHistory.classList.remove( 'border-top-separator' );
+        btnHistoryShowHide.value = 'Show History';
+        btnHistoryShowHide.setAttribute( 'onclick', 'uiShowHideHistory( 1 )' );
+    }
+}
+
 // Utility  function to detect iOS, because the notification API doesn't work there
 function iOS() {
     return [
@@ -223,6 +266,179 @@ function iOS() {
     ].includes(navigator.platform)
     // iPad on iOS 13 detection
     || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
+
+// Function to enumerate call history from localstorage object
+function historyEnum() {
+    var btnHistoryShowHide = document.getElementById( 'btnHistoryShowHide' );
+    historyLog = ( "" == window.sessionStorage.getItem( 'org.doubango.history' ) ? [] : JSON.parse( window.sessionStorage.getItem( 'org.doubango.history' ) ) );
+    if ( historyLog.length == 0 ) {
+        btnHistoryShowHide.disabled = true;
+    } else {
+        btnHistoryShowHide.disabled = false;
+        let historyEntries = historyLog[0];
+        // Check if we are at the limit for stored history
+        if ( typeof historyEntries !== 'undefined' ) {
+            var historyDiv = document.getElementById("divHistory");
+            var btnHistoryShowHide = document.getElementById( 'btnHistoryShowHide' );
+            var historyListDiv = document.getElementById( 'divHistoryList' );
+            historyListDiv.innerText = "";
+            var historyListTable = document.createElement( 'table' );
+            historyListTable.setAttribute( 'border' , '1' );
+            historyListTable.setAttribute( 'id' , 'historyListTable' );
+            var historyListTableRow = document.createElement( 'tr' );
+            historyListTable.appendChild( historyListTableRow );
+            var historyListTableCol1 = document.createElement( 'th' );
+            historyListTableCol1.innerText = "Direction";
+            historyListTableRow.appendChild( historyListTableCol1 );
+            var historyListTableCol2 = document.createElement( 'th' );
+            historyListTableCol2.innerText = "Type";
+            historyListTableRow.appendChild( historyListTableCol2 );
+            var historyListTableCol3 = document.createElement( 'th' );
+            historyListTableCol3.innerText = "Timestamp";
+            historyListTableRow.appendChild( historyListTableCol3 );
+            var historyListTableCol4 = document.createElement( 'th' );
+            historyListTableCol4.innerText = "Phone Number";
+            historyListTableRow.appendChild( historyListTableCol4 );
+            var historyListTableCol5 = document.createElement( 'th' );
+            historyListTableCol5.innerText = "ID";
+            historyListTableRow.appendChild( historyListTableCol5 );
+            var historyListTableCol6 = document.createElement( 'th' );
+            historyListTableCol6.innerText = "";
+            historyListTableRow.appendChild( historyListTableCol6 );
+            historyListDiv.appendChild( historyListTable );
+            historyEntries.slice().reverse().forEach( historyEntry => {
+                    var historyListTableRow = document.createElement( 'tr' );
+                    var historyListTableCol1 = document.createElement( 'td' );
+                    historyListTableCol1.innerText = historyEntry.inOut;
+                    historyListTableRow.appendChild( historyListTableCol1 );
+                    var historyListTableCol2 = document.createElement( 'td' );
+                    historyListTableCol2.innerText = historyEntry.type;
+                    historyListTableRow.appendChild( historyListTableCol2 );
+                    var historyListTableCol3 = document.createElement( 'td' );
+                    historyListTableCol3.innerText = timeConverter( historyEntry.timestamp );
+                    historyListTableRow.appendChild( historyListTableCol3 );
+                    var historyListTableCol4 = document.createElement( 'td' );
+                    historyListTableCol4.innerText = historyEntry.callTarget;
+                    historyListTableRow.appendChild( historyListTableCol4 );
+                    var historyListTableCol5 = document.createElement( 'td' );
+                    historyListTableCol5.innerText = historyEntry.callID;
+                    historyListTableRow.appendChild( historyListTableCol5 );
+                    var historyListTableCol6 = document.createElement( 'td' );
+                    historyListTableRow.appendChild( historyListTableCol6 );
+                    // Audio Call Button
+                    var hisAudBtn = document.createElement('button');
+                    hisAudBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisAudBtn.setAttribute( 'title' , 'Audio' );
+                    hisAudBtn.setAttribute( 'id' , 'historyAudio' + historyEntry.callTarget );
+                    hisAudBtn.setAttribute( 'onclick' , 'historyRun("Audio", "' + historyEntry.callTarget + '");' );
+                    historyListTableCol6.appendChild( hisAudBtn );
+                    var hisAudBtnImg = document.createElement('img');
+                    hisAudBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.phone.png');
+                    hisAudBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisAudBtn.appendChild( hisAudBtnImg );
+                    // Video Call Button
+                    var hisVidBtn = document.createElement('button');
+                    hisVidBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisVidBtn.setAttribute( 'title' , 'Video' );
+                    hisVidBtn.setAttribute( 'id' , 'historyVideo' + historyEntry.callTarget );
+                    hisVidBtn.setAttribute( 'onclick' , 'historyRun("Video", "' + historyEntry.callTarget + '");' );
+                    if ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false ) {
+                        hisVidBtn.disabled = 'true';
+                    }
+                    historyListTableCol6.appendChild( hisVidBtn );
+                    var hisVidBtnImg = document.createElement('img');
+                    hisVidBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.video.png');
+                    hisVidBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisVidBtn.appendChild( hisVidBtnImg );
+                    // Screenshare Call Button
+                    var hisScrBtn = document.createElement('button');
+                    hisScrBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisScrBtn.setAttribute( 'title' , 'Screenshare' );
+                    hisScrBtn.setAttribute( 'id' , 'historyScreenshare' + historyEntry.callTarget );
+                    hisScrBtn.setAttribute( 'onclick' , 'historyRun("Screenshare", "' + historyEntry.callTarget + '");' );
+                    if ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false ) {
+                        hisScrBtn.disabled = 'true';
+                    }
+                    historyListTableCol6.appendChild( hisScrBtn );
+                    var hisScrBtnImg = document.createElement('img');
+                    hisScrBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.screenshare.png');
+                    hisScrBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisScrBtn.appendChild( hisScrBtnImg );
+                    historyListTable.appendChild( historyListTableRow );
+                }
+            );
+        }
+    }
+}
+
+// Function to append a history entry to the history log
+function historyAppendLog( hisDirection, hisType, hisTime, hisExt, hisID ) {
+    // Create call history entry
+    historyLog = ( "" == window.sessionStorage.getItem( 'org.doubango.history' ) ? [] : JSON.parse( window.sessionStorage.getItem( 'org.doubango.history' ) ) );
+    maxHistory = ( "" == window.sessionStorage.getItem( 'org.doubango.history.max_entries' ) ? "" : window.sessionStorage.getItem( 'org.doubango.history.max_entries' ) );
+    var callType = "Audio";
+    // If a video or screen share call is starting, draw the video UI
+    if ( hisType == 'call-audiovideo' || hisType == 'call-screenshare' ) {
+        // Video call, so show remote video, show local video, hide local screenshare
+        if ( hisType == 'call-audiovideo' ) {
+            callType = "Video";
+        } else if ( hisType == 'call-screenshare' ) {
+            callType = "Screenshare";
+        }
+    }
+    let historyEntries = historyLog[0];
+    let historyEntry = {
+        "inOut": hisDirection,
+        "type": callType,
+        "timestamp": hisTime,
+        "callTarget": hisExt,
+        "callID": hisID
+    }
+    // Check if we are at the limit for stored history
+    if ( typeof historyEntries !== 'undefined' ) {
+        if ( maxHistory != "" && maxHistory == historyEntries.length ) {
+            historyEntries.shift();
+        }
+    } else {
+        historyEntries = [];
+    }
+    historyEntries.push(historyEntry);
+    historyLog.push(historyEntries);
+    window.sessionStorage.setItem('org.doubango.history', JSON.stringify(historyLog));
+    historyEnum();
+    historySave();
+}
+
+// Dial a history item
+function historyRun( callType, callTarget ) {
+    window.sessionStorage.setItem( 'org.doubango.call.phone_number', callTarget );
+    document.getElementById( 'txtPhoneNumber' ).value = callTarget;
+    if ( callType == 'Audio' ) {
+        sipCall("call-audio");
+    } else if ( callType == 'Video' ) {
+        sipCall("call-audiovideo");
+    } else if ( callType == 'Screenshare' ) {
+        sipShareScreen();
+    } else {
+        console.log( 'historyRun - Debug - Dialing Action Not Recognized!!!' );
+    }
+}
+
+// Write history to the DB if that's configured for session persistence
+function historySave() {
+    $.ajax({
+        url: 'includes/saveToDB.php',
+        type: 'POST',
+        data: {
+            action:'saveHistory',
+            extension:window.sessionStorage.getItem( 'org.doubango.identity.impi' ),
+            history:window.sessionStorage.getItem( 'org.doubango.history' )
+        },
+        success: function(data) {
+            console.log(data); 
+        }
+    });
 }
 
 // Function to enumerate shortcuts from localstorage object
@@ -1132,6 +1348,7 @@ async function sipRegister() {
                 uiShowHideChat( 1 );
                 btnChatShowHide.disabled = false;
             }
+            historyEnum();
             btnRegister.disabled = false;
             return;
         }
@@ -1152,10 +1369,8 @@ function sipUnRegister() {
 function sipCall(s_type) {
     // If a video or screen share call is starting, draw the video UI
     if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
-        if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
-            // Video call, so show remote video, show local video, hide local screenshare
-            uiVideoElementDraw( 1, 1 );
-        }
+        // Video call, so show remote video, show local video, hide local screenshare
+        uiVideoElementDraw( 1, 1 );
 
         if (window.sessionStorage) {
             oConfigCall.bandwidth = tsk_string_to_object(window.sessionStorage.getItem('org.doubango.expert.bandwidth')); // already defined at stack-level but redifined to use latest values
@@ -1185,16 +1400,30 @@ function sipCall(s_type) {
         btnVideo.disabled = true;
         btnScreenShare.disabled = true;
         btnHangUp.disabled = false;
+        historyAppendLog( "Outgoing", s_type, Date.now(), txtPhoneNumber.value, "" );
 
         // create call session
         oSipSessionCall = oSipStack.newSession(s_type, oConfigCall);
         // make call
-        if (oSipSessionCall.call(txtPhoneNumber.value) != 0) {
+        var internalExtMaxLen = window.sessionStorage.getItem('org.doubango.internal_ext_max_length')
+        internalExtMaxLen = ( "" == window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) ? "" : window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) );
+        dialoutPrefix = ( "" == window.sessionStorage.getItem( 'org.doubango.dialout_prefix' ) ? "" : window.sessionStorage.getItem( 'org.doubango.dialout_prefix' ) );
+        if ( internalExtMaxLen == null || dialoutPrefix == null ) {
+            callResult = oSipSessionCall.call(txtPhoneNumber.value);
+        } else {
+            if ( txtPhoneNumber.value.length > internalExtMaxLen ) {
+                callResult = oSipSessionCall.call(dialoutPrefix + txtPhoneNumber.value);
+            } else {
+                callResult = oSipSessionCall.call(txtPhoneNumber.value);
+            }
+        }
+        //if (oSipSessionCall.call(txtPhoneNumber.value) != 0) {
+        if ( callResult != 0) {
             oSipSessionCall = null;
             txtCallStatus.value = 'Failed to make call';
             btnAudio.disabled = false;
-            btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-            btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+            btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+            btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
             btnChat.disabled = false;
             btnHangUp.disabled = true;
             return;
@@ -1214,8 +1443,9 @@ function sipCall(s_type) {
             btnHangUp.classList.remove( 'btnBlink' );
         }
         btnAudio.disabled = false;
-        btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-        btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        historyAppendLog( "Incoming", s_type, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
         oSipSessionCall.accept(oConfigCall);
     }
 }
@@ -1282,8 +1512,8 @@ function sipHangUp() {
             btnHangUp.classList.remove( 'btnBlink' );
         }
         btnAudio.disabled = false;
-        btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-        btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+        btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     }
 }
 
@@ -1393,8 +1623,8 @@ function uiOnConnectionEvent(b_connected, b_connecting) { // should be enum: con
     btnRegister.disabled = b_connected || b_connecting;
     btnUnRegister.disabled = !b_connected && !b_connecting;
     btnAudio.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()); 
-    btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
-    btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video');
+    btnVideo.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video');
+    btnScreenShare.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream()) || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video');
     btnChat.disabled = !(b_connected && tsk_utils_have_webrtc() && tsk_utils_have_stream());
     btnHangUp.disabled = !oSipSessionCall;
 }
@@ -1477,8 +1707,8 @@ function uiCallTerminated(s_description) {
     btnHoldResume.value = 'Hold';
     btnMute.value = "Mute";
     btnAudio.disabled = false;
-    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     btnChat.disabled = false;
     btnHangUp.disabled = true;
     if (window.btnBFCP) window.btnBFCP.disabled = true;
@@ -1503,6 +1733,10 @@ function uiCallTerminated(s_description) {
 
 // Callback function for SIP Stacks
 function onSipEventStack(e /*SIPml.Stack.Event*/) {
+console.log("DEBUG00 - onSipEventStack");
+console.log(e);
+console.log(oSipStack);
+console.log(oSipSessionCall);
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
@@ -1552,8 +1786,14 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
         case 'i_new_call':
             {
                 if (oSipSessionCall) {
-                    // do not accept the incoming call if we're already 'in call'
-                    e.newSession.hangup(); // comment this line for multi-line support
+                    if ( "true" == window.sessionStorage.getItem( 'org.doubango.expert.enable_multi_line' ) ) {
+                    }
+                    else {
+                        // do not accept the incoming call if we're already 'in call'
+                        e.newSession.hangup(); // comment this line for multi-line support
+                        divGlassPanel.style.visibility = 'hidden';
+                    }
+
                 }
                 else {
                     oSipSessionCall = e.newSession;
@@ -1609,8 +1849,8 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                         btnHangUp.classList.remove( 'btnBlink' );
                     }
                     btnAudio.disabled = false;
-                    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-                    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                    btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                    btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
                     uiCallTerminated('Media stream permission denied');
                 }
                 break;
@@ -1683,6 +1923,10 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 
 // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
 function onSipEventSession(e /* SIPml.Session.Event */) {
+console.log("DEBUG00 - onSipEventSession");
+console.log(e);
+console.log(oSipStack);
+console.log(oSipSessionCall);
     tsk_utils_log_info('==session event = ' + e.type);
 
     switch (e.type) {
@@ -1730,6 +1974,14 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
             } // 'connecting' | 'connected'
         case 'terminating': case 'terminated':
             {
+                if ( e.description == "Request Cancelled" ) {
+                    // Detect if a call is missed, then log a missed call
+                    historyAppendLog( "Missed", oSipSessionCall.o_session.media.e_type.s_name, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
+                }
+                else if ( e.description == "Call Rejected" ) {
+                    // Detect a "Declined" Call, then log it
+                    historyAppendLog( "Declined", oSipSessionCall.o_session.media.e_type.s_name, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
+                }
                 if (e.session == oSipSessionRegister) {
                     uiOnConnectionEvent(false, false);
 
@@ -1751,8 +2003,8 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     btnHangUp.classList.remove( 'btnBlink' );
                 }
                 btnAudio.disabled = false;
-                btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-                btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
                 break;
             } // 'terminating' | 'terminated'
 
@@ -1977,8 +2229,8 @@ function settingsSave() {
     window.sessionStorage.setItem('org.doubango.expert.disable_debug', cbDebugMessages.checked ? true : false);
     window.sessionStorage.setItem('org.doubango.expert.enable_media_caching', cbCacheMediaStream.checked ? true : false);
     window.sessionStorage.setItem('org.doubango.expert.disable_callbtn_options', cbCallButtonOptions.checked ? true : false);
-    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     txtCallStatus.innerHTML = '<i>Saved</i>';
     $(".screen-overlay").removeClass("show");
     $(".offcanvas").removeClass("show");
@@ -1997,8 +2249,8 @@ function settingsRevert(bNotUserAction) {
     cbDebugMessages.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_debug') == true);
     cbCacheMediaStream.checked = (window.sessionStorage.getItem('org.doubango.expert.enable_media_caching') == true);
     cbCallButtonOptions.checked = (window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') == true);
-    btnVideo.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-    btnScreenShare.disabled = ( window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+    btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
 
     if (!bNotUserAction) {
         txtCallStatus.innerHTML = '<i>Reverted</i>';

@@ -95,6 +95,7 @@
                             &nbsp;&nbsp;
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
                             <input type="button" class="btn btn-primary btn-sm" id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
+                            <input type="button" class="btn btn-primary btn-sm" id="btnHistoryShowHide" value="Hide History" onclick='uiShowHideHistory( 0 );' />
                         </div>
                     </div>
                     <div id='divCallWrapper'>
@@ -121,6 +122,13 @@
                         <div class="row">
                             <div id="chatList" class="col-2 border-right-separator"></div>
                             <div id="chatConversation" class="col-10"></div>
+                        </div>
+                    </div>
+                    <div id="divHistory" class="border-top-separator">
+                        <div id="divHistoryHeader">
+                            <p style="text-align: center; width: 100%;">Call History</p>
+                        </div>
+                        <div id="divHistoryList">
                         </div>
                     </div>
 

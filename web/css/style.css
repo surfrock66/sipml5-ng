@@ -434,13 +434,40 @@ input[type=submit].LogOut {
   z-index: 20;
 }
 
-#divShortcuts {
+#divShortcuts,
+#divHistory {
   text-align: center;
   margin-bottom: 5px;
   padding-top: 15px;
 }
 
-#divShortcutsHeader {
+#divShortcutsHeader,
+#divHistoryHeader {
+}
+
+#historyListTable {
+  margin: auto;
+  padding: 10px 2px;
+  border: 2px solid #362886;
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-collapse: separate;
+}
+
+#historyListTable td,
+#historyListTable th {
+  padding: 2px 10px;
+  border: none;
+}
+
+#historyListTable th {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.historyIcon {
+  width: 20px;
+  height: 20px;
 }
 
 #divShortcutsButtons {

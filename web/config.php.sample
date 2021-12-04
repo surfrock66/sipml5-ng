@@ -36,8 +36,24 @@
 // SIP Disable call button options
 //define("DISABLECALLBTNOPTIONS","false");
 
+// SIP Enable Multi-Line
+//define("ENABLEMULTILINE","true");
+
+// SIP Dialout Prefix - Both of the following settings must be
+//  enabled for this to work
+// SIP Internal Extension Max Length
+//define("INTEXTMAXLEN","4");
+// SIP Dialout Prefix
+//define("DIALOUTPREFIX","9");
+
+
 // Chat - Max Conversation Length
 //define("CHATMAXCONVOLEN","50");
+
+
+// History - Max History Entries
+//define("HISTORYMAXENTRIES","20");
+
 
 // Default Shortcuts
 //  These are applied to everyone and are used to seed the list of
