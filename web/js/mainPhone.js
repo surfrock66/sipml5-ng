@@ -37,11 +37,6 @@ var txtWebsocketServerUrl;
 var txtSIPOutboundProxyUrl;
 var txtInfo;
 
-C =
-{
-    divKeyPadWidth: 220
-};
-
 window.onload = function () {
     window.console && window.console.info && window.console.info("location=" + window.location);
 
@@ -198,26 +193,54 @@ function postInit() {
             { name: 'language', value: '\"en,fr\"' }
         ]
     };
-
 }
 
-
-function timeConverter(UNIX_timestamp){
+// Function to convert a unix timestamp to a formatted time, either long or short
+function timeConverter( UNIX_timestamp, displayType ){
     var a = new Date(UNIX_timestamp);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var year = a.getFullYear();
-    var month = months[a.getMonth()];
+    var month = a.getMonth();
     var date = a.getDate();
     var hour = a.getHours().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
     var min = a.getMinutes().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
     var sec = a.getSeconds().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
     var ampm = 'AM';
-    if( hour > 12 ) {
-        hour = hour - 12;
+    if( hour >= 12 ) {
+        if ( hour > 12 ) {
+            hour = hour - 12;
+        }
         ampm = 'PM';
     }
-    var time = month + ' ' + date + ', ' + year + ' - ' + hour + ':' + min + ':' + sec + ' ' + ampm;
+    if ( displayType == "short" ) {
+        month = month + 1;
+        var time = month + '/' + date + '/' + year + ' ' + hour + ':' + min + ':' + sec + ' ' + ampm;
+    }
+    else {
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var month = months[a.getMonth()];
+        var time = month + ' ' + date + ', ' + year + ' - ' + hour + ':' + min + ':' + sec + ' ' + ampm;
+    }
+    
     return time;
+}
+
+// Function to globally show/hide keypad
+function uiShowHideKeyPad( show ) {
+    var divKeyPad = document.getElementById( 'divKeyPad' );
+    var btnKeyPadShowHide = document.getElementById( 'btnKeyPadShowHide' );
+    if ( show ) {
+        window.localStorage.setItem('org.doubango.uiPref.keypadVisible', "1");
+        divKeyPad.style.display = 'block';
+        divKeyPad.classList.add( 'border-top-separator' );
+        btnKeyPadShowHide.value = 'Hide KeyPad';
+        btnKeyPadShowHide.setAttribute( 'onclick', 'uiShowHideKeyPad( 0 )' );
+    } else {
+        window.localStorage.setItem('org.doubango.uiPref.keypadVisible', "0");
+        divKeyPad.style.display = 'none';
+        divKeyPad.classList.remove( 'border-top-separator' );
+        btnKeyPadShowHide.value = 'Show KeyPad';
+        btnKeyPadShowHide.setAttribute( 'onclick', 'uiShowHideKeyPad( 1 )' );
+    }
 }
 
 // Function to globally show/hide shortcuts
@@ -225,11 +248,13 @@ function uiShowHideShortcuts( show ) {
     var divShortcuts = document.getElementById( 'divShortcuts' );
     var btnShortcutsShowHide = document.getElementById( 'btnShortcutsShowHide' );
     if ( show ) {
+        window.localStorage.setItem('org.doubango.uiPref.shortcutsVisible', "1");
         divShortcuts.style.display = 'block';
         divShortcuts.classList.add( 'border-top-separator' );
         btnShortcutsShowHide.value = 'Hide Shortcuts';
         btnShortcutsShowHide.setAttribute( 'onclick', 'uiShowHideShortcuts( 0 )' );
     } else {
+        window.localStorage.setItem('org.doubango.uiPref.shortcutsVisible', "0");
         divShortcuts.style.display = 'none';
         divShortcuts.classList.remove( 'border-top-separator' );
         btnShortcutsShowHide.value = 'Show Shortcuts';
@@ -242,11 +267,13 @@ function uiShowHideHistory( show ) {
     var divHistory = document.getElementById( 'divHistory' );
     var btnHistoryShowHide = document.getElementById( 'btnHistoryShowHide' );
     if ( show ) {
+        window.localStorage.setItem('org.doubango.uiPref.historyVisible', "1");
         divHistory.style.display = 'block';
         divHistory.classList.add( 'border-top-separator' );
         btnHistoryShowHide.value = 'Hide History';
         btnHistoryShowHide.setAttribute( 'onclick', 'uiShowHideHistory( 0 )' );
     } else {
+        window.localStorage.setItem('org.doubango.uiPref.historyVisible', "0");
         divHistory.style.display = 'none';
         divHistory.classList.remove( 'border-top-separator' );
         btnHistoryShowHide.value = 'Show History';
@@ -316,7 +343,7 @@ function historyEnum() {
                     historyListTableCol2.innerText = historyEntry.type;
                     historyListTableRow.appendChild( historyListTableCol2 );
                     var historyListTableCol3 = document.createElement( 'td' );
-                    historyListTableCol3.innerText = timeConverter( historyEntry.timestamp );
+                    historyListTableCol3.innerText = timeConverter( historyEntry.timestamp , "full" );
                     historyListTableRow.appendChild( historyListTableCol3 );
                     var historyListTableCol4 = document.createElement( 'td' );
                     historyListTableCol4.innerText = historyEntry.callTarget;
@@ -335,7 +362,7 @@ function historyEnum() {
                     historyListTableCol6.appendChild( hisAudBtn );
                     var hisAudBtnImg = document.createElement('img');
                     hisAudBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.phone.png');
-                    hisAudBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisAudBtnImg.setAttribute( 'class', 'icon' );
                     hisAudBtn.appendChild( hisAudBtnImg );
                     // Video Call Button
                     var hisVidBtn = document.createElement('button');
@@ -349,7 +376,7 @@ function historyEnum() {
                     historyListTableCol6.appendChild( hisVidBtn );
                     var hisVidBtnImg = document.createElement('img');
                     hisVidBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.video.png');
-                    hisVidBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisVidBtnImg.setAttribute( 'class', 'icon' );
                     hisVidBtn.appendChild( hisVidBtnImg );
                     // Screenshare Call Button
                     var hisScrBtn = document.createElement('button');
@@ -363,7 +390,7 @@ function historyEnum() {
                     historyListTableCol6.appendChild( hisScrBtn );
                     var hisScrBtnImg = document.createElement('img');
                     hisScrBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.screenshare.png');
-                    hisScrBtnImg.setAttribute( 'class', 'historyIcon' );
+                    hisScrBtnImg.setAttribute( 'class', 'icon' );
                     hisScrBtn.appendChild( hisScrBtnImg );
                     historyListTable.appendChild( historyListTableRow );
                 }
@@ -904,6 +931,7 @@ function uiShowHideChat( show ) {
     var msgDiv = document.getElementById( 'divChat' );
     var btnChatShowHide = document.getElementById( 'btnChatShowHide' );
     if ( show ) {
+        window.localStorage.setItem('org.doubango.uiPref.chatVisible', "1");
         msgDiv.style.display = 'block';
         msgDiv.classList.add( 'border-top-separator' );
         btnChatShowHide.value = 'Hide Chat';
@@ -912,6 +940,7 @@ function uiShowHideChat( show ) {
             btnChatShowHide.classList.remove( 'btnBlink' );
         }
     } else {
+        window.localStorage.setItem('org.doubango.uiPref.chatVisible', "0");
         msgDiv.style.display = 'none';
         msgDiv.classList.remove( 'border-top-separator' );
         window.sessionStorage.setItem( 'org.doubango.chat.activeConv', '' );
@@ -1034,6 +1063,15 @@ function chatDisplay( msgFrom ) {
                 }
                 chatMsgLine.innerText = message.message;
                 divChatMessages.appendChild( chatMsgLine );
+                var chatMsgLineTime = document.createElement('p');
+                chatMsgLineTime.setAttribute( 'class' , 'msgLineTime' );
+                if ( message.inOut == 1 ) {
+                    chatMsgLineTime.setAttribute( 'style' , 'text-align: left;' );
+                } else {
+                    chatMsgLineTime.setAttribute( 'style' , 'text-align: right;' );
+                }
+                chatMsgLineTime.innerText = timeConverter( message.timestamp, "short" ) ;
+                divChatMessages.appendChild( chatMsgLineTime );
             }
         );
         divChatMessages.scrollTop = divChatMessages.scrollHeight;
@@ -1335,8 +1373,17 @@ async function sipRegister() {
             $(".screen-overlay").removeClass("show");
             $(".offcanvas").removeClass("show");
             $("body").removeClass("offcanvas-active");
+
+            // Display shortcuts
             shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
             shortcutEnum();
+            if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.shortcutsVisible' ) ) {
+                uiShowHideShortcuts( 0 );
+            } 
+            else {
+                uiShowHideShortcuts( 1 );
+            }
+
             // If there are chats stored in the local session, load them
             chatEnum();
             msgSession = ( "" == window.sessionStorage.getItem( 'org.doubango.chat.session' ) ? [] : JSON.parse( window.sessionStorage.getItem( 'org.doubango.chat.session' ) ) );
@@ -1344,11 +1391,34 @@ async function sipRegister() {
             if ( msgSession.length == 0 ) {
                 uiShowHideChat( 0 );
                 btnChatShowHide.disabled = true;
-            } else {
-                uiShowHideChat( 1 );
+            } 
+            else {
+                if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.chatVisible' ) ) {
+                    uiShowHideChat( 0 );
+                } 
+                else {
+                    uiShowHideChat( 1 );
+                }
                 btnChatShowHide.disabled = false;
             }
+
+            // Display History
             historyEnum();
+            if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.historyVisible' ) ) {
+                uiShowHideHistory( 0 );
+            } 
+            else {
+                uiShowHideHistory( 1 );
+            }
+
+            // Display KeyPad
+            if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.keypadVisible' ) ) {
+                uiShowHideKeyPad( 0 );
+            } 
+            else {
+                uiShowHideKeyPad( 1 );
+            }
+
             btnRegister.disabled = false;
             return;
         }
@@ -1555,20 +1625,6 @@ function toggleFullScreen() {
     }
 }
 
-function openKeyPad() {
-    divKeyPad.style.visibility = 'visible';
-    divKeyPad.style.left = ((document.body.clientWidth - C.divKeyPadWidth) >> 1) + 'px';
-    divKeyPad.style.top = '70px';
-    divGlassPanel.style.visibility = 'visible';
-}
-
-function closeKeyPad() {
-    divKeyPad.style.left = '0px';
-    divKeyPad.style.top = '0px';
-    divKeyPad.style.visibility = 'hidden';
-    divGlassPanel.style.visibility = 'hidden';
-}
-
 function fullScreen(b_fs) {
     bFullScreen = b_fs;
     if ( tsk_utils_have_webrtc4native() && bFullScreen && document.fullscreenEnabled ) {
@@ -1703,7 +1759,7 @@ function uiDisableCallOptions() {
 }
 
 function uiCallTerminated(s_description) {
-    btnHangUp.value = 'HangUp';
+    btnHangUp.title = 'Hang Up';
     btnHoldResume.value = 'Hold';
     btnMute.value = "Mute";
     btnAudio.disabled = false;
@@ -1817,7 +1873,7 @@ console.log(oSipSessionCall);
                         txtCallStatus.innerHTML = "<i>Incoming video call from [<b>" + sRemoteNumber + "</b>]</i>";
                     }
                     txtPhoneNumber.value = '';
-                    btnHangUp.value = 'Reject';
+                    btnHangUp.title = 'Reject';
                     btnHangUp.classList.add( 'btnBlink' );
                     btnScreenShare.disabled = false;
                     btnChat.disabled = false;
@@ -1938,7 +1994,7 @@ console.log(oSipSessionCall);
                     txtRegStatus.innerHTML = '<img src="images/reg-status-connected.png" height="24" /><i>' + e.description + '</i>';
                 }
                 else if (e.session == oSipSessionCall) {
-                    btnHangUp.value = 'HangUp';
+                    btnHangUp.title = 'Hang Up';
                     btnAudio.disabled = true;
                     btnVideo.disabled = true;
                     btnScreenShare.disabled = true;

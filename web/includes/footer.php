@@ -20,45 +20,6 @@
         </footer>
         <!-- Glass Panel -->
         <div id='divGlassPanel' class='glass-panel' style='visibility:hidden'></div>
-        <!-- KeyPad Div -->
-        <div id='divKeyPad' class='span2 well div-keypad' style="left:0px; top:0px; width:250; height:240; visibility:hidden">
-            <table style="width: 100%; height: 100%">
-                <tr>
-                    <td>
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="1" onclick="sipSendDTMF('1');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="2" onclick="sipSendDTMF('2');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="3" onclick="sipSendDTMF('3');" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="4" onclick="sipSendDTMF('4');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="5" onclick="sipSendDTMF('5');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="6" onclick="sipSendDTMF('6');" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="7" onclick="sipSendDTMF('7');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="8" onclick="sipSendDTMF('8');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="9" onclick="sipSendDTMF('9');" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="*" onclick="sipSendDTMF('*');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="0" onclick="sipSendDTMF('0');" />
-                        <input type="button" style="width: 31%" class="btn btnDialpad" value="#" onclick="sipSendDTMF('#');" />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan=3>
-                        <input type="button" style="width: 100%" class="btn btn-medium btn-danger btnDialpad" value="close" onclick="closeKeyPad();" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-
         <!-- Audios -->
         <audio id="audio_remote" autoplay="autoplay"> </audio>
         <audio id="ringtone" loop src="./sounds/ringtone.wav"> </audio>

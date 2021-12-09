@@ -226,7 +226,15 @@ img, svg {
 
 .msgLine {
   font-size: 12px;
+  margin: 0px 10px 0px 10px;
+  width: 95%;
+}
+
+.msgLineTime {
+  font-size: 8px;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0px 10px 5px 10px;
+  color: #717476;
   width: 95%;
 }
 
@@ -435,10 +443,15 @@ input[type=submit].LogOut {
 }
 
 #divShortcuts,
-#divHistory {
+#divHistory,
+#divChat,
+#divKeyPad {
+  width:100%;
   text-align: center;
-  margin-bottom: 5px;
+  margin:auto;
+  margin-top: 5px;
   padding-top: 15px;
+  clear: both;
 }
 
 #divShortcutsHeader,
@@ -465,7 +478,7 @@ input[type=submit].LogOut {
   text-decoration: underline;
 }
 
-.historyIcon {
+.icon {
   width: 20px;
   height: 20px;
 }
@@ -535,14 +548,6 @@ input[type=submit].LogOut {
   text-align: left;
 }
 
-#divChat {
-  width:100%;
-  margin: auto;
-  margin-top: 5px;
-  padding-top: 15px;
-  clear: both;
-}
-
 #chatList {
   text-align: center;
   margin-bottom: 5px;
@@ -600,16 +605,6 @@ input[type=submit].LogOut {
   left: 0;
   opacity: 0.8;
   background-color: Gray;
-}
-
-.div-keypad {
-  z-index: 100;
-  position: fixed;
-  -moz-transition-property: left top;
-  -o-transition-property: left top;
-  -webkit-transition-duration: 2s;
-  -moz-transition-duration: 2s;
-  -o-transition-duration: 2s;
 }
 
 /* Start of styles for collapseable side panel */

@@ -86,13 +86,22 @@
                     <label id="txtContactInfo"></label>
                     <div class="btn-toolbar">
                         <div id="divBtnCallGroup">
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnAudio" href="#" value="Audio" onclick="sipCall(&quot;call-audio&quot;);" />&nbsp;
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnVideo" href="#" value="Video" onclick="sipCall(&quot;call-audiovideo&quot;);" />&nbsp;
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnScreenShare" href="#" value="Screen Share" onclick="sipCall(&quot;call-screenshare&quot;);" />&nbsp;
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnChat" href="#" value="Chat" onclick="chatDisplay( txtPhoneNumber.value );" />&nbsp;
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnHangUp" value="HangUp" onclick='sipHangUp();' />&nbsp;
-                            <input type="button" class="btn btn-primary btn-sm" id="btnKeyPad" value="KeyPad" onclick='openKeyPad();' />
-                            &nbsp;&nbsp;
+                            <button disabled class="btn btn-primary btn-sm" id="btnAudio" title="Audio" onclick="sipCall(&quot;call-audio&quot;);">
+                                <img src="images/sipml5_ng.action.phone.png" class="icon" />
+                            </button>
+                            <button disabled class="btn btn-primary btn-sm" id="btnVideo" title="Video" onclick="sipCall(&quot;call-audiovideo&quot;);">
+                                <img src="images/sipml5_ng.action.video.png" class="icon" />
+                            </button>
+                            <button disabled class="btn btn-primary btn-sm" id="btnScreenShare" title="Screen Share" onclick="sipCall(&quot;call-screenshare&quot;);">
+                                <img src="images/sipml5_ng.action.screenshare.png" class="icon" />
+                            </button>
+                            <button disabled class="btn btn-primary btn-sm" id="btnChat" title="Chat" onclick="chatDisplay( txtPhoneNumber.value );">
+                                <img src="images/sipml5_ng.action.chat.png" class="icon" />
+                            </button>
+                            <button disabled class="btn btn-primary btn-sm" id="btnHangUp" title="HangUp" onclick='sipHangUp();'>
+                                <img src="images/sipml5_ng.action.hangup.png" class="icon" />
+                            </button>
+                            <input type="button" class="btn btn-primary btn-sm" id="btnKeyPadShowHide" value="Show KeyPad" onclick='uiShowHideKeyPad( 1 );' />
                             <input type="button" disabled class="btn btn-primary btn-sm" id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
                             <input type="button" class="btn btn-primary btn-sm" id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
                             <input type="button" class="btn btn-primary btn-sm" id="btnHistoryShowHide" value="Hide History" onclick='uiShowHideHistory( 0 );' />
@@ -110,7 +119,39 @@
                             <div id="divVideoLocalWrapper"></div>
                         </div>
                     </div>
-                    <div id="divShortcuts" class="border-top-separator">
+                    <div id="divKeyPad" class="container border-top-separator" style="display: none;">
+                        <table style="width: 125px; height: 180px; margin: auto;">
+                            <tr>
+                                <td>
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="1" onclick="sipSendDTMF('1');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="2" onclick="sipSendDTMF('2');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="3" onclick="sipSendDTMF('3');" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="4" onclick="sipSendDTMF('4');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="5" onclick="sipSendDTMF('5');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="6" onclick="sipSendDTMF('6');" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="7" onclick="sipSendDTMF('7');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="8" onclick="sipSendDTMF('8');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="9" onclick="sipSendDTMF('9');" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="*" onclick="sipSendDTMF('*');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="0" onclick="sipSendDTMF('0');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="#" onclick="sipSendDTMF('#');" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="divShortcuts" class="container border-top-separator" style="display: none;">
                         <div id="divShortcutsHeader">
                             <a id="shortcutEditBtn" class="btn btn-primary btn-sm" href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
                             <p style="text-align: center; width: 100%;">Shortcuts</p>
@@ -118,13 +159,13 @@
                         <div id="divShortcutsButtons">
                         </div>
                     </div>
-                    <div id="divChat" class="container">
+                    <div id="divChat" class="container" style="display: none;">
                         <div class="row">
                             <div id="chatList" class="col-2 border-right-separator"></div>
                             <div id="chatConversation" class="col-10"></div>
                         </div>
                     </div>
-                    <div id="divHistory" class="border-top-separator">
+                    <div id="divHistory" class="container border-top-separator" style="display: none;">
                         <div id="divHistoryHeader">
                             <p style="text-align: center; width: 100%;">Call History</p>
                         </div>
