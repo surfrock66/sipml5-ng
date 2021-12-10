@@ -123,30 +123,30 @@
                         <table style="width: 125px; height: 180px; margin: auto;">
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="1" onclick="sipSendDTMF('1');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="2" onclick="sipSendDTMF('2');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="3" onclick="sipSendDTMF('3');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="1" onclick="keyPadButton('1');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="2" onclick="keyPadButton('2');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="3" onclick="keyPadButton('3');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="4" onclick="sipSendDTMF('4');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="5" onclick="sipSendDTMF('5');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="6" onclick="sipSendDTMF('6');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="4" onclick="keyPadButton('4');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="5" onclick="keyPadButton('5');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="6" onclick="keyPadButton('6');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="7" onclick="sipSendDTMF('7');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="8" onclick="sipSendDTMF('8');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="9" onclick="sipSendDTMF('9');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="7" onclick="keyPadButton('7');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="8" onclick="keyPadButton('8');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="9" onclick="keyPadButton('9');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="*" onclick="sipSendDTMF('*');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="0" onclick="sipSendDTMF('0');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="#" onclick="sipSendDTMF('#');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="*" onclick="keyPadButton('*');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="0" onclick="keyPadButton('0');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="#" onclick="keyPadButton('#');" />
                                 </td>
                             </tr>
                         </table>

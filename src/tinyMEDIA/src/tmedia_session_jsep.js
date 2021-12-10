@@ -792,7 +792,10 @@ tmedia_session_jsep01.prototype.__get_lo = function () {
         var o_RTCConfiguration = Object.assign({},
             {
                 iceServers: (o_iceServers && !o_iceServers.length) ? null : o_iceServers,
-                sdpSemantics: "plan-b",
+                //sdpSemantics: "plan-b",
+                // 2021.12.09 - The plan-b sdp formati is officially deprecated
+                //  in favor of the unified plan, so we must account for it.
+                sdpSemantics: "unified-plan",
                 //iceCandidatePoolSize: b_isChrome ? 2 : 0 // experiment
             },
 

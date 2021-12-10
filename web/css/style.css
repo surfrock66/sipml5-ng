@@ -369,12 +369,12 @@ input[type=submit].LogOut {
 }
 
 #divCallOptions {
-  padding-top: 15px;
+  /*padding-top: 15px;*/
 }
 
 .call-options {
   display: none;
-  margin: 0px 5px;
+  margin: 5px 0px;
   width: 100%;
   padding: 5px;
   background-color: #f0f0f0;

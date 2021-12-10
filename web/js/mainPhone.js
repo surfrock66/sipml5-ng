@@ -1418,7 +1418,7 @@ async function sipRegister() {
             else {
                 uiShowHideKeyPad( 1 );
             }
-
+            document.addEventListener( "keyup", globalKeyPadListener );
             btnRegister.disabled = false;
             return;
         }
@@ -1585,6 +1585,75 @@ function sipHangUp() {
         btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
         btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     }
+}
+
+function globalKeyPadListener( event ) {
+    key = event.keyCode;
+    dialerInput = document.getElementById( 'txtPhoneNumber' );
+    // Translated to keyPadKeys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, #, Enter, numpad0, numpad1, numpad2, numpad3, numpad4, numpad5, numpad6, numpad7, numpad8, numpad9, numpad*]);
+    const keyPadKeys = new Set([48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 170, 163, 13, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106]);
+    //if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.chatVisible' ) ) {
+    if ( "INPUT" != document.activeElement.tagName ) {
+        if ( keyPadKeys.has( key ) ) {
+            if ( key == "48" || key == "96" ) {
+                document.dialerInput.value = dialerInput.value + "0";
+                sipSendDTMF( "0" );
+            }
+            else if ( key == "49" || key == "97" ) {
+                dialerInput.value = dialerInput.value + "1";
+                sipSendDTMF( "1" );
+            }
+            else if ( key == "50" || key == "98" ) {
+                dialerInput.value = dialerInput.value + "2";
+                sipSendDTMF( "2" );
+            }
+            else if ( key == "51" || key == "99" ) {
+                dialerInput.value = dialerInput.value + "3";
+                sipSendDTMF( "3" );
+            }
+            else if ( key == "52" || key == "100" ) {
+                dialerInput.value = dialerInput.value + "4";
+                sipSendDTMF( "4" );
+            }
+            else if ( key == "53" || key == "101" ) {
+                dialerInput.value = dialerInput.value + "5";
+                sipSendDTMF( "5" );
+            }
+            else if ( key == "54" || key == "102" ) {
+                dialerInput.value = dialerInput.value + "6";
+                sipSendDTMF( "6" );
+            }
+            else if ( key == "55" || key == "103" ) {
+                dialerInput.value = dialerInput.value + "7";
+                sipSendDTMF( "7" );
+            }
+            else if ( key == "56" || key == "104" ) {
+                dialerInput.value = dialerInput.value + "8";
+                sipSendDTMF( "8" );
+            }
+            else if ( key == "57" || key == "105" ) {
+                dialerInput.value = dialerInput.value + "9";
+                sipSendDTMF( "9" );
+            }
+            else if ( key == "170" || key == "106" ) {
+                dialerInput.value = dialerInput.value + "*";
+                sipSendDTMF( "*" );
+            }
+            else if ( key == "163" ) {
+                dialerInput.value = dialerInput.value + "#";
+                sipSendDTMF( "#" );
+            }
+            else if ( key == "13" ) {
+                sipCall( "call-audio" );
+            }
+        }
+    }
+}
+
+function keyPadButton( c ) {
+    currentNumber = document.getElementById( 'txtPhoneNumber' ).value;
+    document.getElementById( 'txtPhoneNumber' ).value = currentNumber + c;
+    sipSendDTMF( c );
 }
 
 function sipSendDTMF(c) {
@@ -1789,10 +1858,10 @@ function uiCallTerminated(s_description) {
 
 // Callback function for SIP Stacks
 function onSipEventStack(e /*SIPml.Stack.Event*/) {
-console.log("DEBUG00 - onSipEventStack");
-console.log(e);
-console.log(oSipStack);
-console.log(oSipSessionCall);
+//console.log("DEBUG00 - onSipEventStack");
+//console.log(e);
+//console.log(oSipStack);
+//console.log(oSipSessionCall);
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
@@ -1979,10 +2048,10 @@ console.log(oSipSessionCall);
 
 // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
 function onSipEventSession(e /* SIPml.Session.Event */) {
-console.log("DEBUG00 - onSipEventSession");
-console.log(e);
-console.log(oSipStack);
-console.log(oSipSessionCall);
+//console.log("DEBUG00 - onSipEventSession");
+//console.log(e);
+//console.log(oSipStack);
+//console.log(oSipSessionCall);
     tsk_utils_log_info('==session event = ' + e.type);
 
     switch (e.type) {
