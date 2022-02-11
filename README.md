@@ -9,7 +9,9 @@ We have added sms chat and threaded conversations, chat persistence (if configur
 
 Stretch goals for our organization are to implement presence indication and group SMS support.
 
-At this time we cannot provide a public demo of our fork as it is protected behind ActiveDirectory logins through SAML, however the demo below from duobango still works for external SIP testing.
+At this time we cannot provide a public demo of our fork as it is protected behind ActiveDirectory logins through SAML, however the demo below from duobango still works for external SIP testing.  The video below is a demonstration of our implementation.
+
+[![Demonstration of the Sipml5-ng Phone Web App](https://github.com/L1kMakes/sipml5-ng/blob/master/Sipml5-ngPhoneWebAppDemo.Thumbnail.png?raw=true)](https://www.youtube.com/watch?v=O5mP5h32VPY)
 
 # Installation Requirements
 Our implementation requires the following:
