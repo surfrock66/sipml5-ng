@@ -178,7 +178,7 @@ tmedia_session_jsep.prototype.decorate_lo = function () {
         /* Session name for debugging - Requires by webrtc2sip to set RTCWeb type */
         var o_hdr_S;
         if ((o_hdr_S = this.o_sdp_lo.get_header(tsdp_header_type_e.S))) {
-            o_hdr_S.s_value = "Cloudonix WebRTC Client - " + tsk_utils_get_navigator_friendly_name();
+            o_hdr_S.s_value = "Doubango/Cloudonix/SEIULocal1000 WebRTC Client - " + tsk_utils_get_navigator_friendly_name();
         }
 
         // BUGFIX: [asterisk] remove first a=sendrecv
@@ -300,7 +300,6 @@ tmedia_session_jsep.prototype.decorate_ro = function (b_remove_bundle) {
         //!\ firefox nighly: DTLS-SRTP only, chrome: SDES-SRTP
         var b_fingerprint = !!this.o_sdp_ro.get_header_a("fingerprint"); // session-level fingerprint
         while ((o_hdr_M = this.o_sdp_ro.get_header_at(tsdp_header_type_e.M, i_index++))) {
-
             // https://support.mozilla.org/en-US/questions/1234227
             // https://www.fxsitecompat.com/en-CA/docs/2018/webrtc-sdp-offer-now-requires-mid-property/
             if ((! o_hdr_M.find_a("mid")) && (this.a_mid[i_index]) )  {
@@ -419,6 +418,7 @@ tmedia_session_jsep.prototype.__hold = function () {
     this.b_sdp_ro_pending = true;
 
     if (this.o_pc && this.o_local_stream) {
+
         this.o_pc.getSenders().forEach(function(sender){
             This.o_local_stream.getTracks().forEach(function(track){
                 if(track == sender.track){
@@ -428,7 +428,6 @@ tmedia_session_jsep.prototype.__hold = function () {
             })
         });
     }
-
     return 0;
 }
 
@@ -448,11 +447,17 @@ tmedia_session_jsep.prototype.__resume = function () {
     this.b_sdp_ro_pending = true;
 
     if (this.o_pc && this.o_local_stream) {
-        this.o_local_stream.getTracks().forEach(function(track){
-            return This.o_pc.addTrack(track, This.o_local_stream);
-        });
+	const sender = this.o_pc.getSenders()[0];
+	const track = This.o_local_stream.getTracks()[0];
+        sender.replaceTrack(track)
+            .then(() => {
+                tsk_utils_log_info('sender.replaceTrack(track)');
+            })
+            .catch( e => {
+                tsk_utils_log_error(e);
+            });
+	this.o_pc.getTransceivers()[0].direction = "sendrecv";
     }
-
     return 0;
 }
 

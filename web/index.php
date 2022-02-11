@@ -114,6 +114,9 @@
                             <input type="button" class="btn" style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
                             <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
                         </div>
+                        <div id='divCallList' class='call-options'>
+                            <p>Call List</p>
+                        </div>
                         <div id="divVideo" class="div-video">
                             <div id="divVideoRemoteWrapper"></div>
                             <div id="divVideoLocalWrapper"></div>

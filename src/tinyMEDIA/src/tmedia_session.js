@@ -497,7 +497,8 @@ tmedia_session_mgr.prototype.hold = function (e_type) {
     for (var i = 0; i < this.ao_sessions.length; ++i) {
         if (!e_type || (this.ao_sessions[i].e_type.i_id & e_type.i_id)) {
             this.b_state_changed = true;
-            if (i_ret = this.ao_sessions[i].hold()) {
+            i_ret = this.ao_sessions[i].hold();
+            if ( i_ret ) {
                 return i_ret;
             }
             this.ao_sessions[i].b_lo_held = true;
@@ -511,7 +512,8 @@ tmedia_session_mgr.prototype.resume = function (e_type) {
     for (var i = 0; i < this.ao_sessions.length; ++i) {
         if (!e_type || (this.ao_sessions[i].e_type.i_id & e_type.i_id)) {
             this.b_state_changed = true;
-            if (i_ret = this.ao_sessions[i].resume()) {
+            i_ret = this.ao_sessions[i].resume();
+            if ( i_ret ) {
                 return i_ret;
             }
             this.ao_sessions[i].b_lo_held = false;

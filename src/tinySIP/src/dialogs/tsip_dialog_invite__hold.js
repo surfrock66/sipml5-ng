@@ -140,7 +140,6 @@ function x0102_Connected_2_Resuming_X_oResume(ao_args){
 		tsk_utils_log_warn("Media Session manager is Null");
 		return 0;
 	}
-
 	/* Resume both */
 	i_ret = o_dialog.o_msession_mgr.resume(o_action.media.e_type, true);
 	i_ret = o_dialog.o_msession_mgr.resume(o_action.media.e_type, false);

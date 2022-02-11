@@ -21,9 +21,11 @@
 // Variables from the main phone functions
 var sTransferNumber;
 var oRingTone, oRingbackTone;
-var oSipStack, oSipSessionRegister, oSipSessionCall, oSipSessionTransferCall;
+var oSipStack, oSipSessionRegister, oSipSessionCall, oSipSessionHeldCall, oSipSessionTransferCall;
 var videoRemote, videoLocal, audioRemote;
 var bFullScreen = false;
+var bSwitchingCalls = false; // Holds state for the operation to switch calls, which has to be in sequence
+var bHeldCallPendingHangup = false; // Holds state for whether the held call is pending hangup
 var oNotifICall;
 var bDisableVideo = false;
 var viewVideoLocal, viewVideoRemote, viewLocalScreencast; // <video> (webrtc) or <div> (webrtc4all)
@@ -1437,6 +1439,7 @@ function sipUnRegister() {
 
 // makes a call (SIP INVITE)
 function sipCall(s_type) {
+    callListDiv = document.getElementById('divCallList');
     // If a video or screen share call is starting, draw the video UI
     if ( s_type == 'call-audiovideo' || s_type == 'call-screenshare' ) {
         // Video call, so show remote video, show local video, hide local screenshare
@@ -1471,6 +1474,15 @@ function sipCall(s_type) {
         btnScreenShare.disabled = true;
         btnHangUp.disabled = false;
         historyAppendLog( "Outgoing", s_type, Date.now(), txtPhoneNumber.value, "" );
+        
+        // Add call list entry
+        var callButton = document.createElement('input');
+        callButton.setAttribute( 'type', 'button' );
+        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        callButton.setAttribute( 'id', 'callButton' + txtPhoneNumber.value );
+        callButton.setAttribute( 'value', txtPhoneNumber.value );
+        callButton.setAttribute( 'onclick' , '' );
+        callListDiv.appendChild( callButton );
 
         // create call session
         oSipSessionCall = oSipStack.newSession(s_type, oConfigCall);
@@ -1478,13 +1490,23 @@ function sipCall(s_type) {
         var internalExtMaxLen = window.sessionStorage.getItem('org.doubango.internal_ext_max_length')
         internalExtMaxLen = ( "" == window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) ? "" : window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) );
         dialoutPrefix = ( "" == window.sessionStorage.getItem( 'org.doubango.dialout_prefix' ) ? "" : window.sessionStorage.getItem( 'org.doubango.dialout_prefix' ) );
+        var validChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#'];
+        var numberToDial = txtPhoneNumber.value.replace(new RegExp(`[^${validChars.join('')}]`, 'g'), '');
         if ( internalExtMaxLen == null || dialoutPrefix == null ) {
-            callResult = oSipSessionCall.call(txtPhoneNumber.value);
+            callResult = oSipSessionCall.call(numberToDial);
         } else {
-            if ( txtPhoneNumber.value.length > internalExtMaxLen ) {
-                callResult = oSipSessionCall.call(dialoutPrefix + txtPhoneNumber.value);
+            if ( numberToDial.length > internalExtMaxLen ) {
+                if ( numberToDial.length == 10 || numberToDial.length == 7 ) {
+                    callResult = oSipSessionCall.call(dialoutPrefix + numberToDial);
+                }
+                else if ( numberToDial.length == 11 && numberToDial.charAt(0) == "1" ) {
+                    callResult = oSipSessionCall.call(dialoutPrefix + numberToDial);
+                }
+                else {
+                    callResult = oSipSessionCall.call(numberToDial);
+                }
             } else {
-                callResult = oSipSessionCall.call(txtPhoneNumber.value);
+                callResult = oSipSessionCall.call(numberToDial);
             }
         }
         //if (oSipSessionCall.call(txtPhoneNumber.value) != 0) {
@@ -1515,9 +1537,157 @@ function sipCall(s_type) {
         btnAudio.disabled = false;
         btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
         btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+
+        // Add call list entry
+        var callButton = document.createElement('input');
+        callButton.setAttribute( 'type', 'button' );
+        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        callButton.setAttribute( 'id', 'callButton' + oSipSessionCall.o_session.o_uri_from.s_user_name );
+        callButton.setAttribute( 'value', oSipSessionCall.o_session.o_uri_from.s_user_name );
+        callButton.setAttribute( 'onclick' , '' );
+        callListDiv.appendChild( callButton );
+
         historyAppendLog( "Incoming", s_type, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
         oSipSessionCall.accept(oConfigCall);
     }
+}
+
+// Handles all Call Waiting and Multi-Line Functions
+//  None of the code in this app is natively asynchronous, 
+//   so as a result the idea of waiting is shoehorned in.
+//   to accommodate this, we are using some global variables 
+//   to attempt to track state.  This is kind of a hack but 
+//   should work; the main issue is some things complete or
+//   are set in a race condition with when they are consumed, 
+//   and as a result we must add some delay using setTimeout.
+function sipCallWaiting( s_type ) {
+console.log("DEBUG - CALLWAITING");
+console.log("bSwitchingCalls: " + bSwitchingCalls );
+console.log("bHeldCallPendingHangup: " + bHeldCallPendingHangup);
+    var myExt = window.sessionStorage.getItem( 'org.doubango.identity.impi' );
+    if ( oSipSessionCall ) {
+        var i_ret;
+        switch ( bSwitchingCalls ) {
+            case 'holdComplete':
+                {
+console.log("callWaiting - holdComplete");
+                    if ( bHeldCallPendingHangup != "hangUpHeldCall" ) {
+console.log("callWaiting - holdComplete - bHeldCallPendingHangup != hangUpHeldCall");
+                        if ( myExt == oSipSessionCall.o_session.o_uri_from.s_user_name ) {
+                            var callButton = document.getElementById( 'callButton' + oSipSessionCall.o_session.o_uri_to.s_user_name );
+                        }
+                        else {
+                            var callButton = document.getElementById( 'callButton' + oSipSessionCall.o_session.o_uri_from.s_user_name );
+                        }
+                        callButton.classList.add( 'btnBlink' );
+                        callButton.setAttribute( 'onclick', 'sipCallWaiting(' + "\"s_type\"" + ')' );
+console.log("old call oSipSessionCall.bheld: " + oSipSessionCall.bheld );
+                        var oSipSessionCallTemp = oSipSessionCall;
+                        oSipSessionCall = oSipSessionHeldCall;
+                        oSipSessionHeldCall = oSipSessionCallTemp;
+                        oSipSessionCallTemp = null;
+console.log("new call oSipSessionCall.bheld: " + oSipSessionCall.bheld );
+                        if ( myExt == oSipSessionCall.o_session.o_uri_from.s_user_name ) {
+                            var callButton = document.getElementById( 'callButton' + oSipSessionCall.o_session.o_uri_to.s_user_name );
+                        }
+                        else {
+                            var callButton = document.getElementById( 'callButton' + oSipSessionCall.o_session.o_uri_from.s_user_name );
+                        }
+                        if ( callButton.classList.contains( 'btnBlink' ) ) {
+                            callButton.classList.remove( 'btnBlink' );
+                        }
+                        callButton.setAttribute( 'onclick', '' );
+console.log("Call Waiting: oSipSessionCall.bHeld: " + oSipSessionCall.bHeld );
+                        if ( oSipSessionCall.bHeld ) {
+                            bSwitchingCalls = "waitingResume";
+                            setTimeout(function() {
+                                i_ret = oSipSessionCall.resume();
+                                if (i_ret != 0) {
+                                    txtCallStatus.innerHTML = '<i>Call switch failed; Second call did not resume!</i>';
+                                    return;
+                                }
+                            }, 350);
+                        }
+                        else {
+                            bSwitchingCalls = "waitingAccept";
+                            setTimeout(function() {
+                                i_ret = oSipSessionCall.accept(oConfigCall);
+                                if (i_ret != 0) {
+                                    txtCallStatus.innerHTML = '<i>Call switch failed; Second call did not answer!</i>';
+                                   return;
+                                }
+                            }, 350);
+                            historyAppendLog( "Incoming", s_type, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
+                        }
+                    }
+                    break;
+                }
+            case 'acceptComplete' : case 'resumeComplete' : 
+                {
+console.log("callWaiting - accept/resumeComplete");
+//if ( bHeldCallPendingHangup != "holdActiveCall") {
+                    bSwitchingCalls = "waitingFixHold";
+                    setTimeout(function() {
+                        i_ret = oSipSessionCall.hold();
+                        if (i_ret != 0) {
+                            txtCallStatus.innerHTML = '<i>Call switch failed; main call did not hold!</i>';
+                            return;
+                        }
+                    }, 350);
+//} else if ( bHeldCallPendingHangup == "holdActiveCall" ) {
+//    bSwitchingCalls = false;
+//    bHeldCallPendingHangup = "hangUpHeldCall";
+//    sipCallWaiting( s_type );
+//}
+                    break;
+                }
+            case 'fixHoldComplete' :
+                {
+console.log("callWaiting - fixHoldComplete");
+                    bSwitchingCalls = "waitingFixResume";
+                    setTimeout(function() {
+                        i_ret = oSipSessionCall.resume();
+                        if (i_ret != 0) {
+                            txtCallStatus.innerHTML = '<i>Call switch failed; Second call did not resume!</i>';
+                            return;
+                        }
+                    }, 350);
+                    break;
+                }
+            case 'fixResumeComplete' :
+                {
+console.log("callWaiting - fixResumeComplete");
+                    bSwitchingCalls = false;
+                    if ( bHeldCallPendingHangup == "holdActiveCall" ) {
+                        bHeldCallPendingHangup = "hangUpHeldCall";
+                        sipCallWaiting( s_type );
+                    } else {
+                        txtCallStatus.innerHTML = '<i>Active call switched!</i>';
+                    }
+                    break;
+                }
+            default :
+                {
+console.log("callWaiting - default");
+                    if ( bHeldCallPendingHangup == "hangUpHeldCall" ) {
+                        oSipSessionHeldCall.hangup();
+                        txtCallStatus.innerHTML = '<i>Call successfully hung up, second call is active!</i>';
+                    } else if ( bHeldCallPendingHangup != "hangUpHeldCall" ) {
+console.log("callWaiting - default - bHeldCallPendingHangup != hangUpHeldCall");
+                        txtCallStatus.innerHTML = '<i>Switching calls...</i>';
+                        if ( ! oSipSessionCall.bHeld ) {
+                            bSwitchingCalls = "waitingHold";
+                            i_ret = oSipSessionCall.hold();
+                            if (i_ret != 0) {
+                                txtCallStatus.innerHTML = '<i>Call switch failed; First call did not hold!</i>';
+                                return;
+                            }
+                        }
+                    }
+                }
+        }
+    }
+console.log("bSwitchingCalls End of CallWaiting: " + bSwitchingCalls );
 }
 
 // transfers the call
@@ -1538,11 +1708,17 @@ function sipTransfer() {
 
 // holds or resumes the call
 function sipToggleHoldResume() {
-    if (oSipSessionCall) {
+    if ( oSipSessionCall ) {
         var i_ret;
         btnHoldResume.disabled = true;
-        txtCallStatus.innerHTML = oSipSessionCall.bHeld ? '<i>Resuming the call...</i>' : '<i>Holding the call...</i>';
-        i_ret = oSipSessionCall.bHeld ? oSipSessionCall.resume() : oSipSessionCall.hold();
+        if ( oSipSessionCall.bHeld ) {
+            txtCallStatus.innerHTML = '<i>Resuming the call...</i>';
+            i_ret = oSipSessionCall.resume();
+        }
+        else {
+            txtCallStatus.innerHTML = '<i>Holding the call...</i>';
+            i_ret = oSipSessionCall.hold();
+        }
         if (i_ret != 0) {
             txtCallStatus.innerHTML = '<i>Hold / Resume failed</i>';
             btnHoldResume.disabled = false;
@@ -1569,34 +1745,52 @@ function sipToggleMute() {
 
 // terminates the call (SIP BYE or CANCEL)
 function sipHangUp() {
+console.log("sipHangUp - bHeldCallPendingHangup: " + bHeldCallPendingHangup);
+console.log(oSipSessionCall);
+console.log(oSipSessionHeldCall);
     if (oSipSessionCall) {
         txtCallStatus.innerHTML = '<i>Terminating the call...</i>';
-        oSipSessionCall.hangup({ events_listener: { events: '*', listener: onSipEventSession } });
-        if ( btnAudio.classList.contains( 'btnBlink' ) ) {
-            btnAudio.classList.remove( 'btnBlink' );
+        if ( oSipSessionHeldCall ) {
+            // This is a handoff as the call waiting function handles all the switch and hangup work
+console.log("Debug: hanging up main call");
+            bHeldCallPendingHangup = "holdActiveCall";
+            sipCallWaiting(); 
+        } else {
+            var callButtonIncoming = document.getElementById('callButton' + oSipSessionCall.o_session.o_uri_from.s_user_name );
+            var callButtonOutgoing = document.getElementById('callButton' + txtPhoneNumber.value );
+            if ( callButtonIncoming ) {
+                divCallList.removeChild( callButtonIncoming );
+            }
+            else if ( callButtonOutgoing ) {
+                divCallList.removeChild( callButtonOutgoing );
+            }
+            oSipSessionCall.hangup({ events_listener: { events: '*', listener: onSipEventSession } });
+            if ( btnAudio.classList.contains( 'btnBlink' ) ) {
+                btnAudio.classList.remove( 'btnBlink' );
+            }
+            if ( btnVideo.classList.contains( 'btnBlink' ) ) {
+                btnVideo.classList.remove( 'btnBlink' );
+            }
+            if ( btnHangUp.classList.contains( 'btnBlink' ) ) {
+                btnHangUp.classList.remove( 'btnBlink' );
+            }
+            btnAudio.disabled = false;
+            btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+            btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
         }
-        if ( btnVideo.classList.contains( 'btnBlink' ) ) {
-            btnVideo.classList.remove( 'btnBlink' );
-        }
-        if ( btnHangUp.classList.contains( 'btnBlink' ) ) {
-            btnHangUp.classList.remove( 'btnBlink' );
-        }
-        btnAudio.disabled = false;
-        btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-        btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
     }
 }
 
 function globalKeyPadListener( event ) {
     key = event.keyCode;
     dialerInput = document.getElementById( 'txtPhoneNumber' );
-    // Translated to keyPadKeys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, #, Enter, numpad0, numpad1, numpad2, numpad3, numpad4, numpad5, numpad6, numpad7, numpad8, numpad9, numpad*]);
-    const keyPadKeys = new Set([48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 170, 163, 13, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106]);
+    // Translated to keyPadKeys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, *, #, Enter, numpad0, numpad1, numpad2, numpad3, numpad4, numpad5, numpad6, numpad7, numpad8, numpad9, numpad*, backspace, delete]);
+    const keyPadKeys = new Set([48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 170, 163, 13, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 8, 46]);
     //if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.chatVisible' ) ) {
-    if ( "INPUT" != document.activeElement.tagName ) {
+    if ( ! ( "INPUT" == document.activeElement.tagName && "text" == document.activeElement.type ) ) {
         if ( keyPadKeys.has( key ) ) {
             if ( key == "48" || key == "96" ) {
-                document.dialerInput.value = dialerInput.value + "0";
+                dialerInput.value = dialerInput.value + "0";
                 sipSendDTMF( "0" );
             }
             else if ( key == "49" || key == "97" ) {
@@ -1645,6 +1839,9 @@ function globalKeyPadListener( event ) {
             }
             else if ( key == "13" ) {
                 sipCall( "call-audio" );
+            }
+            else if ( key == "8" || key == "46" ) {
+                dialerInput.value = dialerInput.value.slice(0, -1);
             }
         }
     }
@@ -1848,6 +2045,7 @@ function uiCallTerminated(s_description) {
     uiVideoElementDraw( 0, 0 );
     divCallWrapper.classList.remove( 'border-top-separator' );
     divCallOptions.style.display = 'none';
+    divCallList.style.display = 'none';
 
     if (oNotifICall) {
         oNotifICall.cancel();
@@ -1858,10 +2056,14 @@ function uiCallTerminated(s_description) {
 
 // Callback function for SIP Stacks
 function onSipEventStack(e /*SIPml.Stack.Event*/) {
-//console.log("DEBUG00 - onSipEventStack");
-//console.log(e);
-//console.log(oSipStack);
-//console.log(oSipSessionCall);
+console.log("DEBUG00 - onSipEventStack");
+console.log(e);
+console.log(oSipStack);
+console.log("oSipSessionCall");
+console.log(oSipSessionCall);
+console.log("oSipSessionHeldCall");
+console.log(oSipSessionHeldCall);
+console.log("bSwitchingCalls: " + bSwitchingCalls );
     tsk_utils_log_info('==stack event = ' + e.type);
     switch (e.type) {
         case 'started':
@@ -1902,6 +2104,7 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
                 uiVideoElementDraw( 0, 0 );
                 divCallWrapper.classList.remove( 'border-top-separator' );
                 divCallOptions.style.display = 'none';
+                divCallList.style.display = 'none';
 
                 txtCallStatus.innerHTML = '';
                 txtRegStatus.innerHTML = bFailure ? '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected: <b>' + e.description + '</b></i>' : '<img src="images/reg-status-disconnected.png" height="24" /><i>Disconnected</i>';
@@ -1912,6 +2115,25 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
             {
                 if (oSipSessionCall) {
                     if ( "true" == window.sessionStorage.getItem( 'org.doubango.expert.enable_multi_line' ) ) {
+                        // Add Call List Entry
+                        var callButton = document.createElement('input');
+                        callButton.setAttribute( 'type', 'button' );
+                        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm btnBlink' );
+                        callButton.setAttribute( 'id', 'callButton' + e.newSession.o_session.o_uri_from.s_user_name );
+                        callButton.setAttribute( 'value', e.newSession.o_session.o_uri_from.s_user_name );
+                        incomingCallType = e.o_event.o_session.media.e_type.s_name;
+                        if ( incomingCallType == "audio" ) {
+                            callButton.setAttribute( 'onclick' , 'sipCallWaiting("call-audio");' );
+                            sipNotify( "Incoming Audio Call!", "Incoming audio call from " + sRemoteNumber, 20, "Audio", sRemoteNumber );
+                            txtCallStatus.innerHTML = "<i>Incoming audio call from [<b>" + sRemoteNumber + "</b>]</i>";
+                        } else if ( incomingCallType == "audio/video" ) {
+                            callButton.setAttribute( 'onclick' , 'sipCallWaiting("call-audiovideo");' );
+                            sipNotify( "Incoming Video Call!", "Incoming video call from " + sRemoteNumber, 20, "Video", sRemoteNumber );
+                            txtCallStatus.innerHTML = "<i>Incoming video call from [<b>" + sRemoteNumber + "</b>]</i>";
+                        }
+                        callListDiv.appendChild( callButton );
+                        oSipSessionHeldCall = e.newSession;
+                        startRingTone();
                     }
                     else {
                         // do not accept the incoming call if we're already 'in call'
@@ -2048,10 +2270,15 @@ function onSipEventStack(e /*SIPml.Stack.Event*/) {
 
 // Callback function for SIP sessions (INVITE, REGISTER, MESSAGE...)
 function onSipEventSession(e /* SIPml.Session.Event */) {
-//console.log("DEBUG00 - onSipEventSession");
-//console.log(e);
-//console.log(oSipStack);
-//console.log(oSipSessionCall);
+console.log("DEBUG00 - onSipEventSession");
+console.log(e);
+console.log(oSipStack);
+console.log("oSipSessionCall");
+console.log(oSipSessionCall);
+console.log("oSipSessionHeldCall");
+console.log(oSipSessionHeldCall);
+console.log("bSwitchingCalls: " + bSwitchingCalls );
+console.log("bHeldCallPendingHangup: " + bHeldCallPendingHangup);
     tsk_utils_log_info('==session event = ' + e.type);
 
     switch (e.type) {
@@ -2089,15 +2316,28 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                         divCallWrapper.classList.remove( 'border-top-separator' );
                     }
                     divCallOptions.style.display = bConnected ? 'block' : 'none';
+                    divCallList.style.display = bConnected ? 'block' : 'none';
 
                     if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback
                         // Show remote video, show local camera, hide local screencast
                         uiVideoElementDraw( 1, 1 );
                     }
+                    if ( bSwitchingCalls == "waitingAccept" ) {
+                        bSwitchingCalls = "acceptComplete";
+                        if ( oSipSessionCall.o_session.media.e_type.s_name == "audio" ) {
+                            sipCallWaiting("call-audio");
+                        } else if ( oSipSessionCall.o_session.media.e_type.s_name == "audio/video" ) {
+                            sipCallWaiting("call-audiovideo");
+                        }
+                    } 
                 }
                 break;
             } // 'connecting' | 'connected'
-        case 'terminating': case 'terminated':
+        case 'terminating':
+            {
+                break;
+            } // 'connecting' | 'connected'
+        case 'terminated':
             {
                 if ( e.description == "Request Cancelled" ) {
                     // Detect if a call is missed, then log a missed call
@@ -2107,17 +2347,33 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                     // Detect a "Declined" Call, then log it
                     historyAppendLog( "Declined", oSipSessionCall.o_session.media.e_type.s_name, Date.now(), oSipSessionCall.o_session.o_uri_from.s_user_name, oSipSessionCall.o_session.o_uri_from.s_display_name );
                 }
-                if (e.session == oSipSessionRegister) {
-                    uiOnConnectionEvent(false, false);
-
-                    oSipSessionCall = null;
-                    oSipSessionRegister = null;
-
-                    txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><i>' + e.description + '</i>';
+//                bHeldCallPendingHangup = false;
+                // Cleanup call list
+                var heldCallButton = document.getElementById('callButton' + e.session.o_session.o_uri_from.s_user_name );
+                if ( heldCallButton ) {
+                    divCallList.removeChild( heldCallButton );
+                } else if ( e.session.o_session.o_uri_to ) {
+                    if ( e.session.o_session.o_uri_to.s_user_name == txtPhoneNumber.value ) {
+                        var heldCallButton = document.getElementById( 'callButton' + txtPhoneNumber.value );
+                        if ( heldCallButton ) {
+                            divCallList.removeChild( heldCallButton );
+                        }
+                    }
+                } else {
+                    var heldCallButton = document.getElementById( 'callButton' + txtPhoneNumber.value );
+                    if ( heldCallButton ) {
+                        divCallList.removeChild( heldCallButton );
+                    }
                 }
-                else if (e.session == oSipSessionCall) {
-                    uiCallTerminated(e.description);
-                }
+//                var callButtonIncoming = document.getElementById('callButton' + e.session.o_session.o_uri_from.s_user_name );
+//                var callButtonOutgoing = document.getElementById('callButton' + txtPhoneNumber.value );
+//                if ( callButtonIncoming ) {
+//                    divCallList.removeChild( callButtonIncoming );
+//                }
+//                else if ( callButtonOutgoing ) {
+//                    divCallList.removeChild( callButtonOutgoing );
+//                }
+
                 if ( btnAudio.classList.contains( 'btnBlink' ) ) {
                     btnAudio.classList.remove( 'btnBlink' );
                 }
@@ -2127,9 +2383,26 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
                 if ( btnHangUp.classList.contains( 'btnBlink' ) ) {
                     btnHangUp.classList.remove( 'btnBlink' );
                 }
-                btnAudio.disabled = false;
-                btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
-                btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+
+                if ( bHeldCallPendingHangup ) {
+                    oSipSessionHeldCall = null;
+                    bHeldCallPendingHangup = false;
+                } else {
+                    if (e.session == oSipSessionRegister) {
+                        uiOnConnectionEvent(false, false);
+
+                        oSipSessionCall = null;
+                        oSipSessionRegister = null;
+
+                        txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><i>' + e.description + '</i>';
+                    }
+                    else if (e.session == oSipSessionCall) {
+                        uiCallTerminated(e.description);
+                    }
+                    btnAudio.disabled = false;
+                    btnVideo.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                    btnScreenShare.disabled = ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false );
+                }
                 break;
             } // 'terminating' | 'terminated'
 
@@ -2205,14 +2478,34 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'm_local_hold_ok':
             {
                 if (e.session == oSipSessionCall) {
-                    if (oSipSessionCall.bTransfering) {
-                        oSipSessionCall.bTransfering = false;
-                        // this.AVSession.TransferCall(this.transferUri);
-                    }
-                    btnHoldResume.value = 'Resume';
-                    btnHoldResume.disabled = false;
-                    txtCallStatus.innerHTML = '<i>Call placed on hold</i>';
                     oSipSessionCall.bHeld = true;
+                    if ( bSwitchingCalls == "waitingHold" ) {
+                        bSwitchingCalls = "holdComplete";
+//                         setTimeout( function() {
+                        if ( oSipSessionCall.o_session.media.e_type.s_name == "audio" ) {
+                            sipCallWaiting("call-audio");
+                        } else if ( oSipSessionCall.o_session.media.e_type.s_name == "audio/video" ) {
+                            sipCallWaiting("call-audiovideo");
+                        }
+//                         },250);
+                    } else if ( bSwitchingCalls == "waitingFixHold" ) {
+                        bSwitchingCalls = "fixHoldComplete";
+//                        setTimeout( function() {
+                        if ( oSipSessionCall.o_session.media.e_type.s_name == "audio" ) {
+                            sipCallWaiting("call-audio");
+                        } else if ( oSipSessionCall.o_session.media.e_type.s_name == "audio/video" ) {
+                            sipCallWaiting("call-audiovideo");
+                        }
+//                        },250);
+                    } else {
+                        if (oSipSessionCall.bTransfering) {
+                            oSipSessionCall.bTransfering = false;
+                            // this.AVSession.TransferCall(this.transferUri);
+                        }
+                        btnHoldResume.value = 'Resume';
+                        btnHoldResume.disabled = false;
+                        txtCallStatus.innerHTML = '<i>Call placed on hold</i>';
+                    }
                 }
                 break;
             }
@@ -2229,15 +2522,35 @@ function onSipEventSession(e /* SIPml.Session.Event */) {
         case 'm_local_resume_ok':
             {
                 if (e.session == oSipSessionCall) {
-                    oSipSessionCall.bTransfering = false;
-                    btnHoldResume.value = 'Hold';
-                    btnHoldResume.disabled = false;
-                    txtCallStatus.innerHTML = '<i>Call taken off hold</i>';
                     oSipSessionCall.bHeld = false;
+                    if ( bSwitchingCalls == "waitingResume" ) {
+                        bSwitchingCalls = "resumeComplete";
+//                         setTimeout( function() {
+                        if ( oSipSessionCall.o_session.media.e_type.s_name == "audio" ) {
+                            sipCallWaiting("call-audio");
+                        } else if ( oSipSessionCall.o_session.media.e_type.s_name == "audio/video" ) {
+                            sipCallWaiting("call-audiovideo");
+                        }
+//                         },250);
+                    } else if ( bSwitchingCalls == "waitingFixResume" ) {
+                        bSwitchingCalls = "fixResumeComplete";
+//                         setTimeout( function() {
+                        if ( oSipSessionCall.o_session.media.e_type.s_name == "audio" ) {
+                            sipCallWaiting("call-audio");
+                        } else if ( oSipSessionCall.o_session.media.e_type.s_name == "audio/video" ) {
+                            sipCallWaiting("call-audiovideo");
+                        }
+//                         },250);
+                    } else {
+                        oSipSessionCall.bTransfering = false;
+                        btnHoldResume.value = 'Hold';
+                        btnHoldResume.disabled = false;
+                        txtCallStatus.innerHTML = '<i>Call taken off hold</i>';
 
-                    if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback yet
-                        uiVideoDisplayEvent(false, true);
-                        uiVideoDisplayEvent(true, true);
+                        if (SIPml.isWebRtc4AllSupported()) { // IE don't provide stream callback yet
+                            uiVideoDisplayEvent(false, true);
+                            uiVideoDisplayEvent(true, true);
+                        }
                     }
                 }
                 break;

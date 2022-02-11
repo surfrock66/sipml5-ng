@@ -3739,7 +3739,8 @@ function tsk_fsm_entry_compare(o_entry1, o_entry2) {
     }
    
     return 0
-}/*
+}
+/*
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
 * This file is part of Open Source sipML5 solution <http://www.sipml5.org>
@@ -5471,7 +5472,8 @@ tmedia_session_mgr.prototype.hold = function (e_type) {
     for (var i = 0; i < this.ao_sessions.length; ++i) {
         if (!e_type || (this.ao_sessions[i].e_type.i_id & e_type.i_id)) {
             this.b_state_changed = true;
-            if (i_ret = this.ao_sessions[i].hold()) {
+            i_ret = this.ao_sessions[i].hold();
+            if ( i_ret ) {
                 return i_ret;
             }
             this.ao_sessions[i].b_lo_held = true;
@@ -5485,7 +5487,8 @@ tmedia_session_mgr.prototype.resume = function (e_type) {
     for (var i = 0; i < this.ao_sessions.length; ++i) {
         if (!e_type || (this.ao_sessions[i].e_type.i_id & e_type.i_id)) {
             this.b_state_changed = true;
-            if (i_ret = this.ao_sessions[i].resume()) {
+            i_ret = this.ao_sessions[i].resume();
+            if ( i_ret ) {
                 return i_ret;
             }
             this.ao_sessions[i].b_lo_held = false;
@@ -5810,7 +5813,7 @@ tmedia_session_jsep.prototype.decorate_lo = function () {
         /* Session name for debugging - Requires by webrtc2sip to set RTCWeb type */
         var o_hdr_S;
         if ((o_hdr_S = this.o_sdp_lo.get_header(tsdp_header_type_e.S))) {
-            o_hdr_S.s_value = "Cloudonix WebRTC Client - " + tsk_utils_get_navigator_friendly_name();
+            o_hdr_S.s_value = "Doubango/Cloudonix/SEIULocal1000 WebRTC Client - " + tsk_utils_get_navigator_friendly_name();
         }
 
         // BUGFIX: [asterisk] remove first a=sendrecv
@@ -5932,7 +5935,6 @@ tmedia_session_jsep.prototype.decorate_ro = function (b_remove_bundle) {
         //!\ firefox nighly: DTLS-SRTP only, chrome: SDES-SRTP
         var b_fingerprint = !!this.o_sdp_ro.get_header_a("fingerprint"); // session-level fingerprint
         while ((o_hdr_M = this.o_sdp_ro.get_header_at(tsdp_header_type_e.M, i_index++))) {
-
             // https://support.mozilla.org/en-US/questions/1234227
             // https://www.fxsitecompat.com/en-CA/docs/2018/webrtc-sdp-offer-now-requires-mid-property/
             if ((! o_hdr_M.find_a("mid")) && (this.a_mid[i_index]) )  {
@@ -6051,6 +6053,7 @@ tmedia_session_jsep.prototype.__hold = function () {
     this.b_sdp_ro_pending = true;
 
     if (this.o_pc && this.o_local_stream) {
+
         this.o_pc.getSenders().forEach(function(sender){
             This.o_local_stream.getTracks().forEach(function(track){
                 if(track == sender.track){
@@ -6060,7 +6063,6 @@ tmedia_session_jsep.prototype.__hold = function () {
             })
         });
     }
-
     return 0;
 }
 
@@ -6080,11 +6082,17 @@ tmedia_session_jsep.prototype.__resume = function () {
     this.b_sdp_ro_pending = true;
 
     if (this.o_pc && this.o_local_stream) {
-        this.o_local_stream.getTracks().forEach(function(track){
-            return This.o_pc.addTrack(track, This.o_local_stream);
-        });
+	const sender = this.o_pc.getSenders()[0];
+	const track = This.o_local_stream.getTracks()[0];
+        sender.replaceTrack(track)
+            .then(() => {
+                tsk_utils_log_info('sender.replaceTrack(track)');
+            })
+            .catch( e => {
+                tsk_utils_log_error(e);
+            });
+	this.o_pc.getTransceivers()[0].direction = "sendrecv";
     }
-
     return 0;
 }
 
@@ -11937,7 +11945,8 @@ tsip_session_invite.prototype.set_mute = function (s_media, b_mute) {
         return this.__action_handle(o_action);
     }
     return -3;
-}﻿/*
+}
+﻿/*
 * Copyright (C) 2012-2016 Doubango Telecom <http://www.doubango.org>
 * License: BSD
 * This file is part of Open Source sipML5 solution <http://www.sipml5.org>
@@ -18477,7 +18486,6 @@ function x0102_Connected_2_Resuming_X_oResume(ao_args){
 		tsk_utils_log_warn("Media Session manager is Null");
 		return 0;
 	}
-
 	/* Resume both */
 	i_ret = o_dialog.o_msession_mgr.resume(o_action.media.e_type, true);
 	i_ret = o_dialog.o_msession_mgr.resume(o_action.media.e_type, false);

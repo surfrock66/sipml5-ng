@@ -307,31 +307,33 @@
                 <h3 class="mb-0">Registration</h3>
             </header>
             <div class="p-3">
-                <label style="height: 100%">
-                    Display Name:
-                </label>
-                <input type="text" style="width: 100%; height: 100%" id="txtDisplayName" value="<?php echo $fullName; ?>" placeholder="<?php echo $fullName; ?>" />
-                <br />
-                <label style="height: 100%">
-                    Private Identity<sup>*</sup>:
-                </label>
-                <input type="text" style="width: 100%; height: 100%" id="txtPrivateIdentity" value="<?php echo $privIdValue; ?>" placeholder="<?php echo $privIdPlaceholder; ?>" />
-                <br />
-                <label style="height: 100%">
-                    Public Identity<sup>*</sup>:
-                </label>
-                <input type="text" style="width: 100%; height: 100%" id="txtPublicIdentity" value="<?php echo $pubIdValue; ?>" placeholder="<?php echo $pubIdPlaceholder; ?>" />
-                <br />
-                <label style="height: 100%">Password:</label>
-                <input type="password" style="width: 100%; height: 100%" id="txtPassword" value="" name="sipPassword" autocomplete="off" />
-                <br />
-                <label style="height: 100%">Realm<sup>*</sup>:</label>
-                <input type="text" style="width: 100%; height: 100%" id="txtRealm" value="<?php echo $realm; ?>" placeholder="<?php echo $realm;?>" />
-                <br /><br />
-                <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled onclick='sipRegister();' />
-                &nbsp;
-                <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled onclick='sipUnRegister();' />
-                <p class="small"><sup>*</sup> <i>Mandatory Field</i></p>
+		<form>
+		    <label style="height: 100%">
+	                Display Name:
+	            </label>
+                    <input type="text" style="width: 100%; height: 100%" id="txtDisplayName" value="<?php echo $fullName; ?>" placeholder="<?php echo $fullName; ?>" />
+                    <br />
+                    <label style="height: 100%">
+                        Private Identity<sup>*</sup>:
+                    </label>
+                    <input type="text" style="width: 100%; height: 100%" id="txtPrivateIdentity" value="<?php echo $privIdValue; ?>" placeholder="<?php echo $privIdPlaceholder; ?>" />
+                    <br />
+                    <label style="height: 100%">
+                        Public Identity<sup>*</sup>:
+                    </label>
+                    <input type="text" style="width: 100%; height: 100%" id="txtPublicIdentity" value="<?php echo $pubIdValue; ?>" placeholder="<?php echo $pubIdPlaceholder; ?>" />
+                    <br />
+                    <label style="height: 100%">Password:</label>
+                    <input type="password" style="width: 100%; height: 100%" id="txtPassword" value="" name="sipPassword" autocomplete="off" />
+                    <br />
+                    <label style="height: 100%">Realm<sup>*</sup>:</label>
+                    <input type="text" style="width: 100%; height: 100%" id="txtRealm" value="<?php echo $realm; ?>" placeholder="<?php echo $realm;?>" />
+                    <br /><br />
+                    <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled onclick='sipRegister();' />
+                    &nbsp;
+                    <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled onclick='sipUnRegister();' />
+                    <p class="small"><sup>*</sup> <i>Mandatory Field</i></p>
+		</form>
                 <br />
                 <h2> Expert settings</h2>
                 <label style="height: 100%">Disable Video:</label>
