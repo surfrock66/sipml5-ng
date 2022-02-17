@@ -35,9 +35,27 @@
             $_SESSION['as'] = new SimpleSAML_Auth_Simple( SAMLSPNAME );
             $_SESSION['as']->requireAuth();
             $attributes = $_SESSION['as']->getAttributes();
-            $_SESSION['givenname'] = $attributes['givenname'][0];
-            $_SESSION['surname'] = $attributes['surname'][0];
-            $_SESSION['extension'] = $attributes['extension'][0];
+            $attrGivenName = "givenname";
+            if ( defined ( 'SAMLATTRGIVENNAME' ) ) {
+                if ( !empty ( SAMLATTRGIVENNAME ) ) {
+                    $attrGivenName = SAMLATTRGIVENNAME;
+                }
+            }
+            $_SESSION['givenname'] = $attributes[$attrGivenName][0];
+            $attrSurname = "surname";
+            if ( defined ( 'SAMLATTRSURNAME' ) ) {
+                if ( !empty ( SAMLATTRSURNAME ) ) {
+                    $attrSurname = SAMLATTRSURNAME;
+                }
+            }
+            $_SESSION['surname'] = $attributes[$attrSurname][0];
+            $attrExtension = "extension";
+            if ( defined ( 'SAMLATTREXT' ) ) {
+                if ( !empty ( SAMLATTREXT ) ) {
+                    $attrExtension = SAMLATTREXT;
+                }
+            }
+            $_SESSION['extension'] = $attributes[$attrExtension][0];
             // 2020.12.16 - Edit by jgullo - Populate variables from saml to input later
             if ( !empty ( $_SESSION['givenname'] ) || !empty ( $_SESSION['surname'] ) ) {
                 $fullName = $_SESSION['givenname']." ".$_SESSION['surname'];

@@ -3,6 +3,9 @@
 // Page Title
 //define("TITLE","Sample Web Phone");
 
+// Page Footer Text
+//define("Footer","&copy; Sample Footer Line");
+
 
 // SIP Realm
 //define("REALM","sample realm");
@@ -89,8 +92,19 @@
 // SimpleSAMLPhp Logout Return URL
 //define("SAMLRETURNURL","https://domain.tld");
 
+// SimpleSAMLPhp Attribute Map - givenName
+//define("SAMLATTRGIVENNAME","givenName");
+
+// SimpleSAMLPhp Attribute Map - surame
+//define("SAMLATTRSURNAME","sn");
+
+// SimpleSAMLPhp Attribute Map - extension
+//define("SAMLATTREXT","extension");
+
 
 // LDAP Credentials
+// For LDAP lookup to work, you must copy includes/getContacts.php.sample to includes/getContacts.php
+//  Any further LDAP filtering or configuration will happen there
 
 // LDAP/AD URI
 //define("LDAPURI","ldaps://sampleserver.sampledomain.tld:636");
@@ -103,6 +117,9 @@
 
 // LDAP Base DN
 //define("LDAPBASEDN","dc=SAMPLEDOMAIN,dc=TLD");
+
+// LDAP Search Filter
+//define("LDAPSEARCHFILTER","(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))");
 
 
 // MySQL Credentials
