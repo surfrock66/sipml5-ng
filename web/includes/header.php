@@ -20,7 +20,15 @@
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         
         <!-- About -->
-        <title>SEIU Local 1000 - Webphone</title>
+<?php
+    $pageTitle = "SIPml5-ng Web Phone";
+    if ( defined ( 'TITLE' ) ) {
+        if ( !empty ( TITLE ) ) {
+            $pageTitle = TITLE;
+        }
+    }
+        echo "<title>$pageTitle</title>";
+?>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="Keywords" content="doubango, sipML5, VoIP, HTML5, WebRTC, RTCWeb, SIP, IMS, Video chat, VP8" />
         <meta name="Description" content="HTML5 SIP client using WebRTC framework" />

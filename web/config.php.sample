@@ -1,5 +1,9 @@
 <?php
 
+// Page Title
+//define("TITLE","Sample Web Phone");
+
+
 // SIP Realm
 //define("REALM","sample realm");
 
@@ -16,10 +20,10 @@
 //define("SIPOUTBOUNDPROXYURL","udp://sipml5.org:5060");
 
 // SIP ICE Servers
-//define("ICESERVERS","udp://sipml5.org:5060");
+//define("ICESERVERS","[{ urls: [\"turns:turnserver.domain.tld:5349\"], username: \"turnuser\", credential: \"turnpass\" }, { urls: \"stun:turnserver.domain.tld:5349\" }]");
 
 // SIP Max Bandwidth (kbps)
-//define("BANDWIDTH","{maxWidth: 640, maxHeight:480 }");
+//define("BANDWIDTH","{ audio:64, video:512 }");
 
 // SIP Video Size
 //define("VIDEOSIZE","{minWidth: 640, minHeight:480, maxWidth: 640, maxHeight:480 }");
@@ -81,6 +85,10 @@
 
 // SimpleSAMLPhp Provider Name
 //define("SAMLSPNAME","saml-sp-name");
+
+// SimpleSAMLPhp Logout Return URL
+//define("SAMLRETURNURL","https://domain.tld");
+
 
 // LDAP Credentials
 
