@@ -187,7 +187,13 @@
     if ( defined ( 'SAMLSPNAME' ) ) {
         if ( !empty ( SAMLSPNAME ) ) {
             if(isset($_GET['logout'])){
-                $_SESSION['as']->logout('https://seiu1000.org');
+                $samlReturnURL = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]index.php";
+                if ( defined ( 'SAMLRETURNURL' ) ) {
+                    if ( !empty ( SAMLRETURNURL ) ) {
+                        $samlReturnURL = SAMLRETURNURL;
+                    }
+                }
+                $_SESSION['as']->logout($samlReturnURL);
                 session_destroy();
             }
         }
