@@ -17,7 +17,6 @@
             $ldapbindpass = LDAPBINDPASS;
             $ldapbasedn = LDAPBASEDN;
             $ldap_connection = ldap_connect( $ldapuri );
-
             if (FALSE === $ldap_connection) {
                 // Uh-oh, something is wrong...
                 echo 'Unable to connect to the ldap server';
@@ -30,26 +29,31 @@
             if ( TRUE === ldap_bind ( $ldap_connection, $ldapbinduser, $ldapbindpass ) ) {
                 //Get standard users and contacts
                 $search_filter = '(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
+                if ( defined ( 'LDAPSEARCHFILTER' ) ) {
+                    if ( !empty ( LDAPSEARCHFILTER ) ) {
+                        $search_filter = LDAPSEARCHFILTER;
+                    }
+                }
 
-                $attr = array("dn","samaccountname","givenname","sn","title","department","telephonenumber","mobile");
+                //
+                // If the attribute list for directory information is different than what is pulled here, modify it
+                //
+                $attr = array("dn","samaccountname","cn","givenname","sn","title","department","telephonenumber","homePhone","mobile");
  
                 //Connect to LDAP
                 $result = ldap_search($ldap_connection, $ldapbasedn, $search_filter, $attr);
-
                 if (FALSE !== $result) {
                     $entries = ldap_get_entries($ldap_connection, $result);
- 
                     // Uncomment the below if you want to write all entries to debug somethingthing 
                     //echo "<pre>";
                     //var_dump($entries);
                     //echo "</pre>";
-
-                    $ADUsers = array();
+                    $DirUsers = array();
 
                     //For each account returned by the search
                     for ($x = 0; $x < $entries['count']; $x++) {
                         //
-                        //Retrieve values from Active Directory
+                        //Retrieve values from Active Directory or LDAP
                         //
          
                         //Distinguished Name
@@ -61,7 +65,10 @@
                             }
                         }
 
-                        if ( ( strpos ( $LDAP_dn, 'Users' ) !== false ) && ( strpos ( $LDAP_dn, 'Inactive'  ) == false ) ) {
+                        //
+                        // Uncomment this and the corresponding closing bracket if you need to do further AD filtering based on the structure of your org
+                        //
+                        //if ( ( strpos ( $LDAP_dn, 'Users' ) !== false ) && ( strpos ( $LDAP_dn, 'Inactive'  ) == false ) ) {
 
                             // Phone Number 
                             $LDAP_PhoneNumber = "";
@@ -81,25 +88,57 @@
                                 }
                             }
 
-                            if ( ( $LDAP_PhoneNumber !== "" ) || ( $LDAP_MobilePhone !== "" ) ) {
+                            //
+                            // In this example, "homePhone" is an attribute which can have multiple values, hence it comes in as an array and must be handled differently
+                            //
+                            //Home phone
+                            $LDAP_HomePhone = "";
+                            if (!empty($entries[$x]['homephone'][0])) {
+                                if ( is_array( $entries[$x]['homephone'][0] ) ) {
+                                    $LDAP_HomePhone = $entries[$x]['homephone'][0][1];
+                                } else {
+                                    $LDAP_HomePhone = $entries[$x]['homephone'][0];
+                                }
+                                if ($LDAP_HomePhone == "NULL") {
+                                    $LDAP_HomePhone = "";
+                                }
+                            }
+                       
 
-                                //Windows Usernaame
-                                $LDAP_samaccountname = "";
+                            if ( ( $LDAP_PhoneNumber !== "" ) || ( $LDAP_MobilePhone !== "" ) || ( $LDAP_HomePhone !== "" ) ) {
+
+                                //
+                                // The following code blocks will construct the strings available in the directory search dropdown.
+                                // While this should be a sane starting point, you can modify or adapt this as needed for your organization.
+                                //
+
+                                //Usernaame
+                                $LDAP_accountname = "";
                                 if (!empty($entries[$x]['samaccountname'][0])) {
-                                    $LDAP_samaccountname = $entries[$x]['samaccountname'][0];
-                                    if ($LDAP_samaccountname == "NULL") {
-                                        $LDAP_samaccountname = "";
+                                    $LDAP_accountname = $entries[$x]['samaccountname'][0];
+                                    if ($LDAP_accountname == "NULL") {
+                                        $LDAP_accountname = "";
+                                    }
+                                } elseif (!empty($entries[$x]['cn'][0])) {
+                                    $LDAP_accountname = $entries[$x]['cn'][0];
+                                    if ($LDAP_accountname == "NULL") {
+                                        $LDAP_accountname = "";
                                     }
                                 } else {
-                                    //#There is no samaccountname s0 assume this is an AD contact record so generate a unique username
+                                    //#There is no samaccountname or cn so assume this is an AD contact record so generate a unique username
                                     $LDAP_uSNCreated = $entries[$x]['usncreated'][0];
-                                    $LDAP_samaccountname = "CONTACT_" . $LDAP_uSNCreated;
+                                    $LDAP_accountname = "CONTACT_" . $LDAP_uSNCreated;
                                 }
  
                                 //Last Name
                                 $LDAP_LastName = "";
                                 if (!empty($entries[$x]['sn'][0])) {
                                     $LDAP_LastName = $entries[$x]['sn'][0];
+                                    if ($LDAP_LastName == "NULL") {
+                                        $LDAP_LastName = "";
+                                    }
+                                } elseif (!empty($entries[$x]['surname'][0])) {
+                                    $LDAP_LastName = $entries[$x]['surname'][0];
                                     if ($LDAP_LastName == "NULL") {
                                         $LDAP_LastName = "";
                                     }
@@ -117,7 +156,7 @@
                                 //Department
                                 $LDAP_Department = "";
                                 if (!empty($entries[$x]['department'][0])) {
-                                    $LDAP_Department = $entries[$x]['department'][0];
+                                    $LDAP_Department = ", ".$entries[$x]['department'][0];
                                     if ($LDAP_Department == "NULL") {
                                         $LDAP_Department = "";
                                     }
@@ -126,35 +165,39 @@
                                 //Job Title
                                 $LDAP_JobTitle = "";
                                 if (!empty($entries[$x]['title'][0])) {
-                                    $LDAP_JobTitle = $entries[$x]['title'][0];
+                                    $LDAP_JobTitle = " - ".$entries[$x]['title'][0];
                                     if ($LDAP_JobTitle == "NULL") {
                                         $LDAP_JobTitle = "";
                                     }
                                 }
                                 if ( $LDAP_PhoneNumber !== "" ) {
-                                    $userData = array($LDAP_LastName, $LDAP_FirstName, $LDAP_JobTitle, $LDAP_Department, $LDAP_PhoneNumber, "Phone #");
-                                    array_push ( $ADUsers, $userData );
+                                    $userData = array($LDAP_LastName, $LDAP_FirstName, $LDAP_JobTitle, $LDAP_Department, $LDAP_PhoneNumber, " - Phone #");
+                                    array_push ( $DirUsers, $userData );
                                 }
                                 if ( $LDAP_MobilePhone !== "" ) {
-                                    $userData = array($LDAP_LastName, $LDAP_FirstName, $LDAP_JobTitle, $LDAP_Department, $LDAP_MobilePhone, "Mobile #");
-                                    array_push ( $ADUsers, $userData );
+                                    $userData = array($LDAP_LastName, $LDAP_FirstName, $LDAP_JobTitle, $LDAP_Department, $LDAP_MobilePhone, " - Mobile #");
+                                    array_push ( $DirUsers, $userData );
                                 }
-                            }
+                                if ( $LDAP_HomePhone !== "" ) {
+                                    $userData = array($LDAP_LastName, $LDAP_FirstName, $LDAP_JobTitle, $LDAP_Department, $LDAP_HomePhone, " - Home #");
+                                    array_push ( $DirUsers, $userData );
+                                }
+                            //}
                         }
                     }
 
                     // Sort the results by last name, first name, and number type
-                    $column_lastname = array_column ( $ADUsers, 1 );
-                    $column_firstname = array_column ( $ADUsers, 0 );
-                    $column_type = array_column ( $ADUsers, 5 );
-                    array_multisort ( $column_lastname, SORT_ASC, $column_firstname, SORT_ASC, $column_type, SORT_DESC, $ADUsers  );
+                    $column_lastname = array_column ( $DirUsers, 1 );
+                    $column_firstname = array_column ( $DirUsers, 0 );
+                    $column_type = array_column ( $DirUsers, 5 );
+                    array_multisort ( $column_lastname, SORT_ASC, $column_firstname, SORT_ASC, $column_type, SORT_DESC, $DirUsers  );
 
                     $contactLookup = array();
 
-                    foreach( $ADUsers as $user ) {
+                    foreach( $DirUsers as $user ) {
                         $userData = array (
                             "lookupName" => $user[1] . " " . $user[0],
-                            "displayText" => $user[0] . ", " . $user[1] . " - " . $user[2] . ", " . $user[3] . " - " . $user[5] . ": " . $user[4],
+                            "displayText" => $user[0] . ", " . $user[1] . $user[2] . $user[3] . $user[5] . ": " . $user[4],
                             "number" => $user[4]
                         );
                         

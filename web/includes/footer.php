@@ -1,7 +1,15 @@
 
         <footer class="footer fixed-bottom">
             <div class="container">
-                <p class="text-muted text-center"><small>&copy; SEIU Local 1000 - <?php echo date("Y"); ?>. All Rights Reserved.</small></p>
+<?php
+$footerText = "";
+if ( defined ( 'FOOTER' ) ) {
+    if ( !empty ( FOOTER ) ) {
+        $footerText = FOOTER . " - ";
+    }
+}
+?>
+                <p class="text-muted text-center"><small><?php echo $footerText.date("Y"); ?>. All Rights Reserved.</small></p>
             </div>
             <!-- Creates all ATL/COM objects right now
                 Will open confirmation dialogs if not already done

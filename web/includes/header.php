@@ -27,7 +27,7 @@
             $pageTitle = TITLE;
         }
     }
-        echo "<title>$pageTitle</title>";
+        echo "\n        <title>$pageTitle</title>\n";
 ?>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="Keywords" content="doubango, sipML5, VoIP, HTML5, WebRTC, RTCWeb, SIP, IMS, Video chat, VP8" />
@@ -404,7 +404,7 @@
                                 </div>
                                 <div class="col-10 branding mt-1">
                                     <div class="logo">
-                                        <img src="/images/logo.svg" alt="SEIU Local 1000" />
+                                        <img src="./images/logo.svg" alt="Logo Image" />
                                     </div>
                                 </div>
                             </div>
