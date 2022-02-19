@@ -189,10 +189,10 @@
                                     if ( !empty ( DEFAULTSHORTCUTS ) ) {
                                         echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '".json_encode( DEFAULTSHORTCUTS )."');\r\n";
                                     } else {
-                                        echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                        echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '[]');\r\n";
                                     }
                                 } else {
-                                    echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '');\r\n";
+                                    echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '[]');\r\n";
                                 }
                             } else {
                                 echo "            window.sessionStorage.setItem('org.doubango.shortcuts', '".addcslashes( $row[2], "'\"" )."');\r\n";

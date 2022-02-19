@@ -477,7 +477,7 @@ function shortcutEnum() {
     var divShortcutsButtons = document.getElementById("divShortcutsButtons");
     var btnShortcutsShowHide = document.getElementById( 'btnShortcutsShowHide' );
     if ( shortcutsObj.length == 0 ) {
-        btnShortcutsShowHide.disabled = true;
+        //btnShortcutsShowHide.disabled = true;
     } else {
         btnShortcutsShowHide.disabled = false;
         divShortcutsButtons.innerHTML = "";
