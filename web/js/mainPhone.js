@@ -234,12 +234,14 @@ function uiShowHideKeyPad( show ) {
         window.localStorage.setItem('org.doubango.uiPref.keypadVisible', "1");
         divKeyPad.style.display = 'block';
         divKeyPad.classList.add( 'border-top-separator' );
+        divKeyPad.classList.add( 'theme-accent-color-border' );
         btnKeyPadShowHide.value = 'Hide KeyPad';
         btnKeyPadShowHide.setAttribute( 'onclick', 'uiShowHideKeyPad( 0 )' );
     } else {
         window.localStorage.setItem('org.doubango.uiPref.keypadVisible', "0");
         divKeyPad.style.display = 'none';
         divKeyPad.classList.remove( 'border-top-separator' );
+        divKeyPad.classList.remove( 'theme-accent-color-border' );
         btnKeyPadShowHide.value = 'Show KeyPad';
         btnKeyPadShowHide.setAttribute( 'onclick', 'uiShowHideKeyPad( 1 )' );
     }
@@ -253,12 +255,14 @@ function uiShowHideShortcuts( show ) {
         window.localStorage.setItem('org.doubango.uiPref.shortcutsVisible', "1");
         divShortcuts.style.display = 'block';
         divShortcuts.classList.add( 'border-top-separator' );
+        divShortcuts.classList.add( 'theme-accent-color-border' );
         btnShortcutsShowHide.value = 'Hide Shortcuts';
         btnShortcutsShowHide.setAttribute( 'onclick', 'uiShowHideShortcuts( 0 )' );
     } else {
         window.localStorage.setItem('org.doubango.uiPref.shortcutsVisible', "0");
         divShortcuts.style.display = 'none';
         divShortcuts.classList.remove( 'border-top-separator' );
+        divShortcuts.classList.remove( 'theme-accent-color-border' );
         btnShortcutsShowHide.value = 'Show Shortcuts';
         btnShortcutsShowHide.setAttribute( 'onclick', 'uiShowHideShortcuts( 1 )' );
     }
@@ -272,12 +276,14 @@ function uiShowHideHistory( show ) {
         window.localStorage.setItem('org.doubango.uiPref.historyVisible', "1");
         divHistory.style.display = 'block';
         divHistory.classList.add( 'border-top-separator' );
+        divHistory.classList.add( 'theme-accent-color-border' );
         btnHistoryShowHide.value = 'Hide History';
         btnHistoryShowHide.setAttribute( 'onclick', 'uiShowHideHistory( 0 )' );
     } else {
         window.localStorage.setItem('org.doubango.uiPref.historyVisible', "0");
         divHistory.style.display = 'none';
         divHistory.classList.remove( 'border-top-separator' );
+        divHistory.classList.remove( 'theme-accent-color-border' );
         btnHistoryShowHide.value = 'Show History';
         btnHistoryShowHide.setAttribute( 'onclick', 'uiShowHideHistory( 1 )' );
     }
@@ -315,6 +321,7 @@ function historyEnum() {
             var historyListTable = document.createElement( 'table' );
             historyListTable.setAttribute( 'border' , '1' );
             historyListTable.setAttribute( 'id' , 'historyListTable' );
+            historyListTable.classList.add( 'theme-accent-color-border' );
             var historyListTableRow = document.createElement( 'tr' );
             historyListTable.appendChild( historyListTableRow );
             var historyListTableCol1 = document.createElement( 'th' );
@@ -357,7 +364,7 @@ function historyEnum() {
                     historyListTableRow.appendChild( historyListTableCol6 );
                     // Audio Call Button
                     var hisAudBtn = document.createElement('button');
-                    hisAudBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisAudBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
                     hisAudBtn.setAttribute( 'title' , 'Audio' );
                     hisAudBtn.setAttribute( 'id' , 'historyAudio' + historyEntry.callTarget );
                     hisAudBtn.setAttribute( 'onclick' , 'historyRun("Audio", "' + historyEntry.callTarget + '");' );
@@ -368,7 +375,7 @@ function historyEnum() {
                     hisAudBtn.appendChild( hisAudBtnImg );
                     // Video Call Button
                     var hisVidBtn = document.createElement('button');
-                    hisVidBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisVidBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
                     hisVidBtn.setAttribute( 'title' , 'Video' );
                     hisVidBtn.setAttribute( 'id' , 'historyVideo' + historyEntry.callTarget );
                     hisVidBtn.setAttribute( 'onclick' , 'historyRun("Video", "' + historyEntry.callTarget + '");' );
@@ -382,7 +389,7 @@ function historyEnum() {
                     hisVidBtn.appendChild( hisVidBtnImg );
                     // Screenshare Call Button
                     var hisScrBtn = document.createElement('button');
-                    hisScrBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                    hisScrBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
                     hisScrBtn.setAttribute( 'title' , 'Screenshare' );
                     hisScrBtn.setAttribute( 'id' , 'historyScreenshare' + historyEntry.callTarget );
                     hisScrBtn.setAttribute( 'onclick' , 'historyRun("Screenshare", "' + historyEntry.callTarget + '");' );
@@ -484,7 +491,7 @@ function shortcutEnum() {
         shortcutsObj.forEach( shortcut => {
                 var shortcutBtn = document.createElement('input');
                 shortcutBtn.setAttribute( 'type' , 'button' );
-                shortcutBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                shortcutBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
                 shortcutBtn.setAttribute( 'id' , 'shortcut' + shortcut.order );
                 shortcutBtn.setAttribute( 'onclick' , 'shortcutRun("' + shortcut.order + '");' );
                 shortcutBtn.setAttribute( 'value' , shortcut.displayName );
@@ -533,7 +540,7 @@ function shortcutsEditDraw() {
             divShortcutsEditor.appendChild( divShortcutEditBlock );
             var shortcutEditBtn = document.createElement('input');
             shortcutEditBtn.setAttribute( 'type' , 'button' );
-            shortcutEditBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            shortcutEditBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
             shortcutEditBtn.setAttribute( 'id' , 'shortcutEdit' + shortcut.order );
             shortcutEditBtn.setAttribute( 'href' , '#' );
             shortcutEditBtn.setAttribute( 'onclick' , 'shortcutEdit("' + shortcut.order + '");' );
@@ -544,7 +551,7 @@ function shortcutsEditDraw() {
             divShortcutEditBlock.appendChild( shortcutEditBtn );
             var shortcutDeleteBtn = document.createElement('input');
             shortcutDeleteBtn.setAttribute( 'type' , 'button' );
-            shortcutDeleteBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            shortcutDeleteBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
             shortcutDeleteBtn.setAttribute( 'id' , 'shortcutDelete' + shortcut.order );
             shortcutDeleteBtn.setAttribute( 'href' , '#' );
             shortcutDeleteBtn.setAttribute( 'onclick' , 'shortcutDelete("' + shortcut.order + '");' );
@@ -557,7 +564,7 @@ function shortcutsEditDraw() {
     );
     var shortcutAddBtn = document.createElement('input');
     shortcutAddBtn.setAttribute( 'type' , 'button' );
-    shortcutAddBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutAddBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
     shortcutAddBtn.setAttribute( 'id' , 'shortcutAddBtn' );
     shortcutAddBtn.setAttribute( 'href' , '#' );
     shortcutAddBtn.setAttribute( 'onclick' , 'shortcutAdd();' );
@@ -565,7 +572,7 @@ function shortcutsEditDraw() {
     divShortcutsEditor.appendChild( shortcutAddBtn );
     var shortcutReorderBtn = document.createElement('input');
     shortcutReorderBtn.setAttribute( 'type' , 'button' );
-    shortcutReorderBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutReorderBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
     shortcutReorderBtn.setAttribute( 'id' , 'shortcutReorderBtn' );
     shortcutReorderBtn.setAttribute( 'href' , '#' );
     shortcutReorderBtn.setAttribute( 'onclick' , 'shortcutsOrderDraw();' );
@@ -641,7 +648,7 @@ function shortcutEdit( shortcutSelect ) {
         divShortcutEditBlock.appendChild( inputShortcutOrder );
                     
         var shortcutEditSaveBtn = document.createElement('a');
-        shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
         shortcutEditSaveBtn.setAttribute( 'id' , 'shortcutEditSave' + shortcutSelect );
         shortcutEditSaveBtn.setAttribute( 'href' , '#' );
         shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutSelect + '");' );
@@ -706,7 +713,7 @@ function shortcutsOrderDraw() {
     );
     var shortcutOrderSaveBtn = document.createElement('input');
     shortcutOrderSaveBtn.setAttribute( 'type' , 'button' );
-    shortcutOrderSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutOrderSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
     shortcutOrderSaveBtn.setAttribute( 'id' , 'shortcutOrderSaveBtn' );
     shortcutOrderSaveBtn.setAttribute( 'href' , '#' );
     shortcutOrderSaveBtn.setAttribute( 'onclick' , 'shortcutOrderSave();' );
@@ -893,7 +900,7 @@ function shortcutAdd() {
     divShortcutEditBlock.appendChild( inputShortcutOrder );
                     
     var shortcutEditSaveBtn = document.createElement('a');
-    shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+    shortcutEditSaveBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
     shortcutEditSaveBtn.setAttribute( 'id' , 'shortcutEditSave' + shortcutNextOrder );
     shortcutEditSaveBtn.setAttribute( 'href' , '#' );
     shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutNextOrder + '");' );
@@ -936,6 +943,7 @@ function uiShowHideChat( show ) {
         window.localStorage.setItem('org.doubango.uiPref.chatVisible', "1");
         msgDiv.style.display = 'block';
         msgDiv.classList.add( 'border-top-separator' );
+        msgDiv.classList.add( 'theme-accent-color-border' );
         btnChatShowHide.value = 'Hide Chat';
         btnChatShowHide.setAttribute( 'onclick', 'uiShowHideChat( 0 )' );
         if ( btnChatShowHide.classList.contains( 'btnBlink' ) ) {
@@ -945,6 +953,7 @@ function uiShowHideChat( show ) {
         window.localStorage.setItem('org.doubango.uiPref.chatVisible', "0");
         msgDiv.style.display = 'none';
         msgDiv.classList.remove( 'border-top-separator' );
+        msgDiv.classList.remove( 'theme-accent-color-border' );
         window.sessionStorage.setItem( 'org.doubango.chat.activeConv', '' );
         btnChatShowHide.value = 'Show Chat';
         btnChatShowHide.setAttribute( 'onclick', 'uiShowHideChat( 1 )' );
@@ -967,16 +976,16 @@ function chatEnum() {
         msgConvoListDiv.appendChild( msgConvoHead );
         msgSession.forEach( msgConversation => {
                 var msgConvoEntry = document.createElement('div');
-                msgConvoEntry.setAttribute( 'class', 'chatListEntry' );
+                msgConvoEntry.setAttribute( 'class', 'chatListEntry d-flex justify-content-between flex-wrap align-items-center' );
                 var msgConvoSel = document.createElement('a');
-                msgConvoSel.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+                msgConvoSel.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color btn-chatName' );
                 msgConvoSel.setAttribute( 'id' , 'convo' + msgConversation.contact );
                 msgConvoSel.setAttribute( 'href' , '#' );
                 msgConvoSel.setAttribute( 'onclick' , 'chatDisplay("' + msgConversation.contact + '");' );
                 activeChat = window.sessionStorage.getItem('org.doubango.chat.activeConv');
                 msgConvoSel.innerText = msgConversation.displayName;
                 var msgConvoSelClose = document.createElement('a');
-                msgConvoSelClose.setAttribute( 'class' , 'btn btn-primary btn-sm btn-chatClose' );
+                msgConvoSelClose.setAttribute( 'class' , 'btn btn-primary btn-sm btn-chatClose theme-accent-color ' );
                 msgConvoSelClose.setAttribute( 'id' , 'convo' + msgConversation.contact );
                 msgConvoSelClose.setAttribute( 'href' , '#' );
                 msgConvoSelClose.setAttribute( 'onclick' , 'chatCloseConvo("' + msgConversation.contact + '");' );
@@ -1107,7 +1116,7 @@ function chatDisplay( msgFrom ) {
             chatSendBtn.setAttribute( 'href' , '#' );
             chatSendBtn.setAttribute( 'type' , 'button' );
             chatSendBtn.setAttribute( 'id' , 'chatSendBtn' );
-            chatSendBtn.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+            chatSendBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
             chatSendBtn.setAttribute( 'value' , 'Send' );
             chatConvSend.appendChild( chatSendBtn );
         }
@@ -1478,7 +1487,7 @@ function sipCall(s_type) {
         // Add call list entry
         var callButton = document.createElement('input');
         callButton.setAttribute( 'type', 'button' );
-        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
         callButton.setAttribute( 'id', 'callButton' + txtPhoneNumber.value );
         callButton.setAttribute( 'value', txtPhoneNumber.value );
         callButton.setAttribute( 'onclick' , '' );
@@ -1541,7 +1550,7 @@ function sipCall(s_type) {
         // Add call list entry
         var callButton = document.createElement('input');
         callButton.setAttribute( 'type', 'button' );
-        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm' );
+        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
         callButton.setAttribute( 'id', 'callButton' + oSipSessionCall.o_session.o_uri_from.s_user_name );
         callButton.setAttribute( 'value', oSipSessionCall.o_session.o_uri_from.s_user_name );
         callButton.setAttribute( 'onclick' , '' );
@@ -1962,12 +1971,14 @@ function uiVideoElementDraw( rv_show, lv_show ) {
     if ( rv_show == 0 && lv_show == 0 ) {
         // If we're hiding everything, clear the 3 divs and set the parent div to 0 height
         divCallWrapper.classList.remove( 'border-top-separator' );
+        divCallWrapper.classList.remove( 'theme-accent-color-border' );
         divVideoRemoteWrapper.innerHTML = '';
         divVideoLocalWrapper.innerHTML = '';
         divVideo.style.height = '0px';
         btnFullScreen.disabled = true;
     } else {
         divCallWrapper.classList.add( 'border-top-separator' );
+        divCallWrapper.classList.add( 'theme-accent-color-border' );
         divVideo.style.height = null;
         divVideo.style.minheight = '340px';
         if ( rv_show == 1 ) {
@@ -2044,6 +2055,7 @@ function uiCallTerminated(s_description) {
     // Hide the video element
     uiVideoElementDraw( 0, 0 );
     divCallWrapper.classList.remove( 'border-top-separator' );
+    divCallWrapper.classList.remove( 'theme-accent-color-border' );
     divCallOptions.style.display = 'none';
     divCallList.style.display = 'none';
 
@@ -2103,6 +2115,7 @@ console.log("bSwitchingCalls: " + bSwitchingCalls );
 
                 uiVideoElementDraw( 0, 0 );
                 divCallWrapper.classList.remove( 'border-top-separator' );
+                divCallWrapper.classList.remove( 'theme-accent-color-border' );
                 divCallOptions.style.display = 'none';
                 divCallList.style.display = 'none';
 
@@ -2118,7 +2131,7 @@ console.log("bSwitchingCalls: " + bSwitchingCalls );
                         // Add Call List Entry
                         var callButton = document.createElement('input');
                         callButton.setAttribute( 'type', 'button' );
-                        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm btnBlink' );
+                        callButton.setAttribute( 'class' , 'btn btn-primary btn-sm btnBlink theme-accent-color ' );
                         callButton.setAttribute( 'id', 'callButton' + e.newSession.o_session.o_uri_from.s_user_name );
                         callButton.setAttribute( 'value', e.newSession.o_session.o_uri_from.s_user_name );
                         incomingCallType = e.o_event.o_session.media.e_type.s_name;
@@ -2312,8 +2325,10 @@ console.log("bHeldCallPendingHangup: " + bHeldCallPendingHangup);
                     // 2021.01.13 Edit by jgullo - Rather than doing this with opacity, hide it
                     if ( bConnected ) {
                         divCallWrapper.classList.add( 'border-top-separator' );
+                        divCallWrapper.classList.add( 'theme-accent-color-border' );
                     } else {
                         divCallWrapper.classList.remove( 'border-top-separator' );
+                        divCallWrapper.classList.remove( 'theme-accent-color-border' );
                     }
                     divCallOptions.style.display = bConnected ? 'block' : 'none';
                     divCallList.style.display = bConnected ? 'block' : 'none';

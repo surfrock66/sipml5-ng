@@ -1,0 +1,19 @@
+{
+    "name": "SEIU Local 1000 Webphone",
+    "short_name": "SEIU Local 1000 Webphone",
+    "icons": [
+        {
+            "src": "./themes/seiu1000/icons/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "./themes/seiu1000/icons/android-chrome-256x256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#8165a6",
+    "background_color": "#8165a6",
+    "display": "standalone"
+}

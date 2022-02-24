@@ -10,7 +10,6 @@ body {
   display: flex;
   /*-ms-flex-align: center;
   align-items: center;*/
-  background-color: #f5f5f5;
   font-family: 'Montserrat', sans-serif;  
 }
 
@@ -20,10 +19,6 @@ body {
 
 .container {
   max-width: 1360px;
-}
-
-h1, h2, h3, h4 {
-  color: #362886;
 }
 
 h1 {
@@ -103,24 +98,8 @@ button, input, optgroup, select, textarea {
 
 .btn-primary,
 .btn {
-  background-color: #362886;
-  color: #fff;
   font-size: larger;
   vertical-align: top;
-}
-
-.btn-primary:hover,
-.btn:hover,
-.btn-indicate {
-  background-color: #fce36c;
-  color: #362886;
-  border-color: #362886;
-}
-
-.btn-primary:disabled,
-.btn:disabled {
-  background-color: #362886;
-  color: #6c757d;
 }
 
 .btn-sm {
@@ -137,63 +116,14 @@ button, input, optgroup, select, textarea {
   animation:blinkingButton 2s infinite;
 }
 
-@keyframes blinkingButton{
-  0%{
-    background-color: #fce36c;
-    color: #000000;
-  }
-  6%{
-    background-color: #cbb473;
-    color: #404040;
-  }
-  12%{
-    background-color: #998679;
-    color: #808080;
-  }
-  18%{
-    background-color: #685780;
-    color: #bfbfbf;
-  }
-  25%{
-    background-color: #362886;
-    color: #ffffff;
-  }
-  50%{
-    background-color: #362886;
-    color: #ffffff;
-  }
-  56%{
-    background-color: #685780;
-    color: #bfbfbf;
-  }
-  62%{
-    background-color: #998679;
-    color: #808080;
-  }
-  68%{
-    background-color: #cbb473;
-    color: #404040;
-  }
-  75%{
-    background-color: #fce36c;
-    color: #000000;
-  }
-  100%{
-    background-color: #fce36c;
-    color: #000000;
-  }
-}
-
-.navbar-seiu {
-  background-color: #4c3f99;
+.navbar-main {
   height: 65px;
   left: 0;
   right: 0;
   z-index: 2;
 }
 
-.navbar-seiu-yellow {
-  background-color: #fce36c;
+.navbar-panel {
   height: 65px;
   left: 0;
   right: 0;
@@ -204,16 +134,23 @@ a.white {
  color: white!important;
 }
 
+.brandingRow {
+  flex-wrap: nowrap;
+}
+
 .branding .menuBtn img {
   width: 100%;
+  max-height: 40px;
+  max-width: 40px;
+}
+
+.branding .logo {
   max-height: 36px;
-  max-width: 36px;
+  max-width: 270px;
 }
 
 .branding .logo img {
-  width: 100%;
-  max-height: 21px;
-  max-width: 234px;
+  max-width: 100%;
 }
 
 img, svg {
@@ -262,7 +199,6 @@ label.error {
   /* Set the fixed height of the footer here */
   height: 40px;
   line-height: 40px; /* Vertically center the text there */
-  background: #f5f5f5;
 }
 
 form.navbar-form {
@@ -274,8 +210,11 @@ form.navbar-form {
 }
 
 input[type=submit].LogOut {
-  color: #000;
-  background-color: #fce36c;
+  font-weight: bold;
+}
+
+input[type=submit].LogOut:hover {
+  text-decoration: underline;
 }
 
 .HighlightLine {
@@ -315,11 +254,11 @@ input[type=submit].LogOut {
 }
 
 .border-top-separator {
-  border-top: thick solid #362886;
+  border-top: thick solid;
 }
 
 .border-right-separator {
-  border-right: thin solid #362886;
+  border-right: thin solid;
 }
 
 
@@ -377,9 +316,7 @@ input[type=submit].LogOut {
   margin: 5px 0px;
   width: 100%;
   padding: 5px;
-  background-color: #f0f0f0;
-  border: 1px solid #eee;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -461,7 +398,7 @@ input[type=submit].LogOut {
 #historyListTable {
   margin: auto;
   padding: 10px 2px;
-  border: 2px solid #362886;
+  border: 2px solid;
   border-radius: 8px;
   -moz-border-radius: 8px;
   border-collapse: separate;
@@ -551,6 +488,13 @@ input[type=submit].LogOut {
 #chatList {
   text-align: center;
   margin-bottom: 5px;
+  margin-right:  10px;
+  padding-right: 10px;
+  min-width: 150px;
+}
+
+#chatConversation {
+  width:  calc(100% - 170px);
 }
 
 .chatListEntry {
@@ -558,8 +502,14 @@ input[type=submit].LogOut {
   /*float: left;*/
 }
 
+.btn-chatName {
+  max-width: 75px;
+  margin: 0px auto;
+  white-space: normal;
+}
+
 .btn-chatClose {
-  margin-bottom: 5px;
+  margin: 0px 5px;
   float: right;
 }
 
@@ -568,12 +518,16 @@ input[type=submit].LogOut {
   max-height: 250px;
 }
 
-.chatInput {
-  width: 75%;
+#chatConvSend {
+  padding-top: 10px;
+}
+
+#chatInput {
+  width: calc(100% - 65px);
   float: left;
 }
 
-.chatSendBtn {
+#chatSendBtn {
   float:right;
 }
 
@@ -642,7 +596,6 @@ input[type=submit].LogOut {
   left: 0;
   height: 100%;
   z-index: 1200;
-  background-color: #fff;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -669,7 +622,6 @@ input[type=submit].LogOut {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
-  background-color: #362886;
   color: #fff;
   text-align: center;
   padding: 5px 0;

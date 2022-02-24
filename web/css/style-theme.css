@@ -1,0 +1,128 @@
+/* Background Color */
+.theme-bg-color {
+  background-color: #ffffff;
+}
+
+/* Panel Background Color */
+.theme-panel-bg-color {
+  background-color: #f5f5f5;
+}
+
+/* Input Field Background Color */
+input[type=text] {
+  background-color: #e6e6e6;
+  color: #212529;
+}
+
+/* Normal Text Color */
+.theme-text-color {
+  color: #212529;
+}
+
+/* Button Box Colors */
+.theme-button-box-color {
+  background-color: #f1f5f0;
+  border-color: #a7c2ae;
+}
+
+/* Primary Accent Color (Buttons and Panels) */
+.theme-accent-color {
+  background-color: #69707a;
+  color:  #ededed;
+  border-color: #3d424a;  
+}
+
+/* Primary Accent Color Hover (Buttons and Panels) */
+button.theme-accent-color:hover:enabled,
+input[type=button].theme-accent-color:hover:enabled,
+input[type=submit].theme-accent-color:hover:enabled,
+a.theme-accent-color:hover {
+  background-color: #949ba6;
+  color: #ededed;
+  border-color: #3d424a;  
+}
+
+/* Primary Accent Color (Disabled Buttons) */
+.theme-accent-color:disabled {
+  background-color: #1c1e22;
+  color: #6c757d;
+  border-color: #30363d;  
+}
+
+/* Primary Accent Color Border */
+.theme-accent-color-border {
+  border-color: #21262d;
+}
+
+/* Secondary Accent Color (Buttons and Panels)*/
+.theme-2nd-accent-color {
+  background-color: #c2c0c0;
+  color:  #212529;
+  border-color: #3d424a;  
+}
+
+/* Secondary Accent Color Hover (Buttons and Panels)*/
+input[type=submit].theme-2nd-accent-color:hover:enabled {
+  background-color: #e0e0e0;
+  color:  #212529;
+  border-color: #3d424a;  
+}
+
+/* For making a blinking light, use a 5-step fade between colors */
+@keyframes blinkingButton{
+  /* Button Base Color, Step 1 */
+  0%{
+    background-color: #69707a;
+    color: #ededed;
+  }
+  /* Blink Color, Step 2 */
+  6%{
+    background-color: #66778c;
+    color: #ededed;
+  }
+  /* Blink Color, Step 3 */
+  12%{
+    background-color: #617e9e;
+    color: #ededed;
+  }
+  /* Blink Color, Step 4 */
+  18%{
+    background-color: #5985b1;
+    color: #ededed;
+  }
+  /* Final Blink Color, Step 5 */
+  25%{
+    background-color: #4d8cc4;
+    color: #ededed;
+  }
+  /* Final Blink Color, Step 5 */
+  50%{
+    background-color: #4d8cc4;
+    color: #ededed;
+  }
+  /* Blink Color, Step 4 */
+  56%{
+    background-color: #5985b1;
+    color: #ededed;
+  }
+  /* Blink Color, Step 3 */
+  62%{
+    background-color: #617e9e;
+    color: #ededed;
+  }
+  /* Blink Color, Step 2 */
+  68%{
+    background-color: #66778c;
+    color: #ededed;
+  }
+  /* Button Base Color, Step 1 */
+  75%{
+    background-color: #69707a;
+    color: #ededed;
+  }
+  /* Button Base Color, Step 1 */
+  100%{
+    background-color: #69707a;
+    color: #ededed;
+  }
+}

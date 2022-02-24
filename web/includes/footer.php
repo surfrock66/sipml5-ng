@@ -1,5 +1,5 @@
 
-        <footer class="footer fixed-bottom">
+        <footer class="footer fixed-bottom theme-bg-color">
             <div class="container">
 <?php
 $footerText = "";
@@ -9,7 +9,7 @@ if ( defined ( 'FOOTER' ) ) {
     }
 }
 ?>
-                <p class="text-muted text-center"><small><?php echo $footerText.date("Y"); ?>. All Rights Reserved.</small></p>
+                <p class="text-muted text-center"><small><?php echo $footerText.date("Y"); ?> | All Rights Reserved. | <a href="https://github.com/surfrock66/sipml5-ng">View This on GitHub</a></small></p>
             </div>
             <!-- Creates all ATL/COM objects right now
                 Will open confirmation dialogs if not already done
@@ -30,10 +30,9 @@ if ( defined ( 'FOOTER' ) ) {
         <div id='divGlassPanel' class='glass-panel' style='visibility:hidden'></div>
         <!-- Audios -->
         <audio id="audio_remote" autoplay="autoplay"> </audio>
-        <audio id="ringtone" loop src="./sounds/ringtone.wav"> </audio>
-        <audio id="ringbacktone" loop src="./sounds/ringbacktone.wav"> </audio>
-        <audio id="dtmfTone" src="./sounds/dtmf.wav"> </audio>
-
+        <audio id="ringtone" loop src=<?php if ( file_exists("./themes/".$themeName."/sounds/ringtone.wav") ) { echo "\"./themes/".$themeName."/sounds/ringtone.wav\""; } else { echo "\"./sounds/ringtone.wav\""; } ?>> </audio>
+        <audio id="ringbacktone" loop src=<?php if ( file_exists("./themes/".$themeName."/sounds/ringbacktone.wav") ) { echo "\"./themes/".$themeName."/sounds/ringbacktone.wav\""; } else { echo "\"./sounds/ringbacktone.wav\""; } ?>> </audio>
+        <audio id="dtmfTone" src=<?php if ( file_exists("./themes/".$themeName."/sounds/dtmf.wav") ) { echo "\"./themes/".$themeName."/sounds/dtmf.wav\""; } else { echo "\"./sounds/dtmf.wav\""; } ?>> </audio>
     </body>
 </html>
 

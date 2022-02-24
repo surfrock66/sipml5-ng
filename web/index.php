@@ -84,7 +84,7 @@
                         </div>
                     </div>
                     <div class="div-dialer">
-                        <h2>Call control</h2>
+                        <h2 class="theme-text-color">Call control</h2>
 <?php
     // Remove the onchange function if ldap paramaters are not defined as AD contact lookup will be disabled
     if ( !defined ( 'LDAPURI' ) || !defined ( 'LDAPBINDUSER' ) || !defined ( 'LDAPBINDPASS' ) || !defined ( 'LDAPBASEDN' ) ) {
@@ -104,35 +104,35 @@
                     <label id="txtContactInfo"></label>
                     <div class="btn-toolbar">
                         <div id="divBtnCallGroup">
-                            <button disabled class="btn btn-primary btn-sm" id="btnAudio" title="Audio" onclick="sipCall(&quot;call-audio&quot;);">
+                            <button disabled class="btn btn-primary btn-sm theme-accent-color " id="btnAudio" title="Audio" onclick="sipCall(&quot;call-audio&quot;);">
                                 <img src="images/sipml5_ng.action.phone.png" class="icon" />
                             </button>
-                            <button disabled class="btn btn-primary btn-sm" id="btnVideo" title="Video" onclick="sipCall(&quot;call-audiovideo&quot;);">
+                            <button disabled class="btn btn-primary btn-sm theme-accent-color " id="btnVideo" title="Video" onclick="sipCall(&quot;call-audiovideo&quot;);">
                                 <img src="images/sipml5_ng.action.video.png" class="icon" />
                             </button>
-                            <button disabled class="btn btn-primary btn-sm" id="btnScreenShare" title="Screen Share" onclick="sipCall(&quot;call-screenshare&quot;);">
+                            <button disabled class="btn btn-primary btn-sm theme-accent-color " id="btnScreenShare" title="Screen Share" onclick="sipCall(&quot;call-screenshare&quot;);">
                                 <img src="images/sipml5_ng.action.screenshare.png" class="icon" />
                             </button>
-                            <button disabled class="btn btn-primary btn-sm" id="btnChat" title="Chat" onclick="chatDisplay( txtPhoneNumber.value );">
+                            <button disabled class="btn btn-primary btn-sm theme-accent-color " id="btnChat" title="Chat" onclick="chatDisplay( txtPhoneNumber.value );">
                                 <img src="images/sipml5_ng.action.chat.png" class="icon" />
                             </button>
-                            <button disabled class="btn btn-primary btn-sm" id="btnHangUp" title="HangUp" onclick='sipHangUp();'>
+                            <button disabled class="btn btn-primary btn-sm theme-accent-color " id="btnHangUp" title="HangUp" onclick='sipHangUp();'>
                                 <img src="images/sipml5_ng.action.hangup.png" class="icon" />
                             </button>
-                            <input type="button" class="btn btn-primary btn-sm" id="btnKeyPadShowHide" value="Show KeyPad" onclick='uiShowHideKeyPad( 1 );' />
-                            <input type="button" disabled class="btn btn-primary btn-sm" id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
-                            <input type="button" class="btn btn-primary btn-sm" id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
-                            <input type="button" class="btn btn-primary btn-sm" id="btnHistoryShowHide" value="Hide History" onclick='uiShowHideHistory( 0 );' />
+                            <input type="button" class="btn btn-primary btn-sm theme-accent-color " id="btnKeyPadShowHide" value="Show KeyPad" onclick='uiShowHideKeyPad( 1 );' />
+                            <input type="button" disabled class="btn btn-primary btn-sm theme-accent-color " id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
+                            <input type="button" class="btn btn-primary btn-sm theme-accent-color " id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
+                            <input type="button" class="btn btn-primary btn-sm theme-accent-color " id="btnHistoryShowHide" value="Hide History" onclick='uiShowHideHistory( 0 );' />
                         </div>
                     </div>
                     <div id='divCallWrapper'>
-                        <div id='divCallOptions' class='call-options'>
-                            <input type="button" class="btn" style="" id="btnFullScreen" value="FullScreen" disabled onclick='toggleFullScreen();' /> &nbsp;
-                            <input type="button" class="btn" style="" id="btnMute" value="Mute" onclick='sipToggleMute();' /> &nbsp;
-                            <input type="button" class="btn" style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
-                            <input type="button" class="btn" style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
+                        <div id='divCallOptions' class='call-options theme-button-box-color'>
+                            <input type="button" class="btn theme-accent-color " style="" id="btnFullScreen" value="FullScreen" disabled onclick='toggleFullScreen();' /> &nbsp;
+                            <input type="button" class="btn theme-accent-color " style="" id="btnMute" value="Mute" onclick='sipToggleMute();' /> &nbsp;
+                            <input type="button" class="btn theme-accent-color " style="" id="btnHoldResume" value="Hold" onclick='sipToggleHoldResume();' /> &nbsp;
+                            <input type="button" class="btn theme-accent-color " style="" id="btnTransfer" value="Transfer" onclick='sipTransfer();' /> &nbsp;
                         </div>
-                        <div id='divCallList' class='call-options'>
+                        <div id='divCallList' class='call-options theme-button-box-color'>
                             <p>Call List</p>
                         </div>
                         <div id="divVideo" class="div-video">
@@ -140,41 +140,41 @@
                             <div id="divVideoLocalWrapper"></div>
                         </div>
                     </div>
-                    <div id="divKeyPad" class="container border-top-separator" style="display: none;">
+                    <div id="divKeyPad" class="container border-top-separator theme-accent-color-border" style="display: none;">
                         <table style="width: 125px; height: 180px; margin: auto;">
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="1" onclick="keyPadButton('1');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="2" onclick="keyPadButton('2');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="3" onclick="keyPadButton('3');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="1" onclick="keyPadButton('1');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="2" onclick="keyPadButton('2');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="3" onclick="keyPadButton('3');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="4" onclick="keyPadButton('4');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="5" onclick="keyPadButton('5');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="6" onclick="keyPadButton('6');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="4" onclick="keyPadButton('4');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="5" onclick="keyPadButton('5');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="6" onclick="keyPadButton('6');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="7" onclick="keyPadButton('7');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="8" onclick="keyPadButton('8');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="9" onclick="keyPadButton('9');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="7" onclick="keyPadButton('7');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="8" onclick="keyPadButton('8');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="9" onclick="keyPadButton('9');" />
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="*" onclick="keyPadButton('*');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="0" onclick="keyPadButton('0');" />
-                                    <input type="button" style="width: 31%" class="btn btnDialpad" value="#" onclick="keyPadButton('#');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="*" onclick="keyPadButton('*');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="0" onclick="keyPadButton('0');" />
+                                    <input type="button" style="width: 31%" class="btn btnDialpad theme-accent-color " value="#" onclick="keyPadButton('#');" />
                                 </td>
                             </tr>
                         </table>
                     </div>
-                    <div id="divShortcuts" class="container border-top-separator" style="display: none;">
+                    <div id="divShortcuts" class="container border-top-separator theme-accent-color-border" style="display: none;">
                         <div id="divShortcutsHeader">
-                            <a id="shortcutEditBtn" class="btn btn-primary btn-sm" href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
+                            <a id="shortcutEditBtn" class="btn btn-primary btn-sm theme-accent-color " href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
                             <p style="text-align: center; width: 100%;">Shortcuts</p>
                         </div>
                         <div id="divShortcutsButtons">
@@ -182,11 +182,11 @@
                     </div>
                     <div id="divChat" class="container" style="display: none;">
                         <div class="row">
-                            <div id="chatList" class="col-2 border-right-separator"></div>
-                            <div id="chatConversation" class="col-10"></div>
+                            <div id="chatList" class="border-right-separator theme-accent-color-border"></div>
+                            <div id="chatConversation"></div>
                         </div>
                     </div>
-                    <div id="divHistory" class="container border-top-separator" style="display: none;">
+                    <div id="divHistory" class="container border-top-separator theme-accent-color-border" style="display: none;">
                         <div id="divHistoryHeader">
                             <p style="text-align: center; width: 100%;">Call History</p>
                         </div>

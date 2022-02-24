@@ -1,5 +1,8 @@
 <?php
 
+// Theme Name
+//define("THEME","default-light");
+
 // Page Title
 //define("TITLE","Sample Web Phone");
 

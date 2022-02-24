@@ -27,7 +27,13 @@
             $pageTitle = TITLE;
         }
     }
-        echo "\n        <title>$pageTitle</title>\n";
+    echo "\n        <title>$pageTitle</title>\n";
+    $themeName = "default-light";
+    if ( defined ( 'THEME' ) ) {
+        if ( !empty ( THEME ) ) {
+            $themeName = THEME;
+        }
+    }
 ?>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="Keywords" content="doubango, sipML5, VoIP, HTML5, WebRTC, RTCWeb, SIP, IMS, Video chat, VP8" />
@@ -35,18 +41,19 @@
         <meta name="author" content="Doubango Telecom" />
         <meta name="author" content="Cloudonix" />
         <meta name="author" content="SEIU Local 1000 Information Technology" />
-        
+        <meta name="author" content="Joseph Gullo, https://github.com/surfrock66" />
+        <meta name="author" content="https://github.com/LBMarie" />
+     
         <!-- Fav and touch icons -->
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png">
-        <link rel="manifest" href="/images/icons/site.webmanifest">
-        <link rel="mask-icon" href="/images/icons/safari-pinned-tab.svg" color="#8165a6">
-        <link rel="shortcut icon" href="/images/icons/favicon.ico">
-        <meta name="msapplication-TileColor" content="#8165a6">
-        <meta name="msapplication-TileImage" content="/images/icons/mstile-144x144.png">
-        <meta name="msapplication-config" content="/images/icons/browserconfig.xml">
-        <meta name="theme-color" content="#8165a6">
+        <link rel="apple-touch-icon" sizes="180x180" href=<?php if ( file_exists("./themes/".$themeName."/icons/apple-touch-icon.png") ) { echo "\"./themes/".$themeName."/icons/apple-touch-icon.png\""; } else { echo "\"./images/icons/apple-touch-icon.png\""; } ?>>
+        <link rel="icon" type="image/png" sizes="32x32" href=<?php if ( file_exists("./themes/".$themeName."/icons/favicon-32x32.png") ) { echo "\"./themes/".$themeName."/icons/favicon-32x32.png\""; } else { echo "\"./images/icons/favicon-32x32.png\""; } ?>>
+        <link rel="icon" type="image/png" sizes="16x16" href=<?php if ( file_exists("./themes/".$themeName."/icons/favicon-16x16.png") ) { echo "\"./themes/".$themeName."/icons/favicon-16x16.png\""; } else { echo "\"./images/icons/favicon-16x16.png\""; } ?>>
+        <link rel="manifest" href=<?php if ( file_exists("./themes/".$themeName."/icons/apple-touch-icon.png") ) { echo "\"./themes/".$themeName."/icons/site.webmanifest\""; } else { echo "\"./images/icons/site.webmanifest\""; } ?> >
+        <link rel="mask-icon" href=<?php if ( file_exists("./themes/".$themeName."/icons/safari-pinned-tab.svg") ) { echo "\"./themes/".$themeName."/icons/safari-pinned-tab.svg\""; } else { echo "\"./images/icons/safari-pinned-tab.svg\""; } ?> color="#3b82a2">
+        <link rel="shortcut icon" href=<?php if ( file_exists("./themes/".$themeName."/icons/favicon.ico") ) { echo "\"./themes/".$themeName."/icons/favicon.ico\""; } else { echo "\"./images/icons/favicon.ico\""; } ?>>
+        <meta name="msapplication-TileColor" content="#2b5797">
+        <meta name="msapplication-config" content=<?php if ( file_exists("./themes/".$themeName."/icons/browserconfig.xml") ) { echo "\"./themes/".$themeName."/icons/browserconfig.xml\""; } else { echo "\"./images/icons/browserconfig.xml\""; } ?>>
+        <meta name="theme-color" content="#2b5797">
 
         <!-- Google Webfonts -->
         <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -67,12 +74,15 @@
 
         <!-- CSS -->
         <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href=<?php if ( file_exists("./themes/".$themeName."/style-theme.css") ) { echo "\"./themes/".$themeName."/style-theme.css\""; } else { echo "\"./css/style-theme.css\""; } ?>>
+        
 
         <!-- Scripts -->
         <script src="./js/SIPml-api.js" type="text/javascript"> </script>
         <script type="text/javascript">
 <?php
     // Pass our PHP defined variables to the local javascript session
+    echo "            window.sessionStorage.setItem('org.doubango.theme', '".$themeName."');\r\n";
     if ( defined ( 'REALM' ) ) {
         if ( !empty ( REALM ) ) {
             echo "            window.sessionStorage.setItem('org.doubango.identity.realm', '".REALM."');\r\n";
@@ -307,12 +317,12 @@
         </script>
         <script src="./js/mainPhone.js" type="text/javascript"></script>
     </head>
-    <body style="cursor:wait">
+    <body style="cursor:wait" class="theme-bg-color theme-text-color">
         <!-- offcanvas panel -->
-        <aside class="offcanvas" id="registrationOffcanvas">
-            <header class="p-3 navbar-seiu-yellow">
-                <button class="btn btn-sm btn-primary btn-close"> Close </button>
-                <h3 class="mb-0">Registration</h3>
+        <aside class="offcanvas theme-panel-bg-color" id="registrationOffcanvas">
+            <header class="p-3 navbar-panel theme-2nd-accent-color">
+                <button class="btn btn-sm btn-primary btn-close theme-accent-color"> Close </button>
+                <h3 class="mb-0 theme-text-color">Registration</h3>
             </header>
             <div class="p-3">
 		<form>
@@ -337,13 +347,13 @@
                     <label style="height: 100%">Realm<sup>*</sup>:</label>
                     <input type="text" style="width: 100%; height: 100%" id="txtRealm" value="<?php echo $realm; ?>" placeholder="<?php echo $realm;?>" />
                     <br /><br />
-                    <input type="button" class="btn btn-success" id="btnRegister" value="LogIn" disabled onclick='sipRegister();' />
+                    <input type="button" class="btn theme-accent-color" id="btnRegister" value="LogIn" disabled onclick='sipRegister();' />
                     &nbsp;
-                    <input type="button" class="btn btn-danger" id="btnUnRegister" value="LogOut" disabled onclick='sipUnRegister();' />
+                    <input type="button" class="btn theme-accent-color" id="btnUnRegister" value="LogOut" disabled onclick='sipUnRegister();' />
                     <p class="small"><sup>*</sup> <i>Mandatory Field</i></p>
 		</form>
                 <br />
-                <h2> Expert settings</h2>
+                <h2 class="theme-text-color"> Expert settings</h2>
                 <label style="height: 100%">Disable Video:</label>
                 <input type='checkbox' id='cbVideoDisable' />
                 <br />
@@ -382,29 +392,27 @@
                 <input type="button" class="btn-danger" id="btnRevert" value="Revert" onclick='settingsRevert();' />
             </div>
         </aside>
-        <aside class="offcanvas offcanvas-right" id="shortcutsOffcanvas">
-            <header class="p-3 navbar-seiu-yellow">
-                <button class="btn btn-sm btn-primary btn-close"> Close </button>
-                <h3 class="mb-0">Shortcut Editor</h3>
+        <aside class="offcanvas offcanvas-right theme-panel-bg-color" id="shortcutsOffcanvas">
+            <header class="p-3 navbar-panel theme-2nd-accent-color">
+                <button class="btn btn-sm btn-primary btn-close theme-accent-color"> Close </button>
+                <h3 class="mb-0 theme-text-color">Shortcut Editor</h3>
             </header>
             <div id="divShortcutsEditor" class="p-3 container">
             </div>
         </aside>
         <!-- offcanvas panel .end -->
-        <div class="fixed-top navbar-seiu">
+        <div class="fixed-top navbar-main theme-accent-color">
             <div class="container h-100">
                 <div class="row align-items-center h-100">
                     <div class="col-8 col-sm-8 col-lg-6">
                         <div class="container">
-                            <div class="row">
-                                <div class="col-2">
-                                    <div class="menuBtn">
-                                        <img height=36px data-trigger="#registrationOffcanvas" src="./images/menu.png" alt="Menu Icon" />
-                                    </div>
+                            <div class="row brandingRow">
+                                <div class="menuBtn pr-3">
+                                    <img height=36px data-trigger="#registrationOffcanvas" src="./images/menu.png" alt="Menu Icon" />
                                 </div>
-                                <div class="col-10 branding mt-1">
+                                <div class="branding d-flex flex-wrap align-items-center">
                                     <div class="logo">
-                                        <img src="./images/logo.svg" alt="Logo Image" />
+                                        <img src=<?php if ( file_exists("./themes/".$themeName."/logo.png") ) { echo "\"./themes/".$themeName."/logo.png\""; } else { echo "\"./images/logo.png\""; } ?> alt="Logo Image" />
                                     </div>
                                 </div>
                             </div>
@@ -414,7 +422,7 @@
                         <div class="float-right">
                             <form class="navbar-form" action="index.php" method="get">
                                 <input type="hidden" name="logout" value="true" />
-                                <input type="submit" class="btn-sm btn-primary LogOut" value="Log Out" />
+                                <input type="submit" class="btn-sm btn-primary LogOut theme-2nd-accent-color" value="Log Out" />
                             </form>
                         </div>
                     </div>

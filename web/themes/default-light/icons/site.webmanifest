@@ -1,14 +1,14 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "SIPml5-ng Web Phone",
+    "short_name": "SIPml5-ng Web Phone",
     "icons": [
         {
-            "src": "/icons/android-chrome-192x192.png",
+            "src": "./themes/default-light/icons/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/icons/android-chrome-256x256.png",
+            "src": "./themes/default-light/icons/android-chrome-256x256.png",
             "sizes": "256x256",
             "type": "image/png"
         }
