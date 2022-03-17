@@ -31,6 +31,8 @@ var bDisableVideo = false;
 var viewVideoLocal, viewVideoRemote, viewLocalScreencast; // <video> (webrtc) or <div> (webrtc4all)
 var oConfigCall;
 var oReadyStateTimer;
+var oSubscribedShortcuts = {}; // Stores sessions for monitoring presence status
+var oSubscriptionEventListeners = {}; // Listeners for subscriptions
 
 // Variables from the Expert Options page
 var cbVideoDisable;
@@ -481,23 +483,206 @@ function historySave() {
 function shortcutEnum() {
     shortcutsObj = ( "" == window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ? [] : JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
     var divShortcuts = document.getElementById("divShortcuts");
-    var divShortcutsButtons = document.getElementById("divShortcutsButtons");
     var btnShortcutsShowHide = document.getElementById( 'btnShortcutsShowHide' );
     if ( shortcutsObj.length == 0 ) {
         //btnShortcutsShowHide.disabled = true;
     } else {
         btnShortcutsShowHide.disabled = false;
-        divShortcutsButtons.innerHTML = "";
+        var shortcutListDiv = document.getElementById( 'divShortcutsList' );
+        shortcutListDiv.innerText = "";
+        var shortcutListTable = document.createElement('table');
+
+
+        shortcutListTable.setAttribute( 'border' , '1' );
+        shortcutListTable.setAttribute( 'id' , 'shortcutListTable' );
+        shortcutListTable.classList.add( 'theme-accent-color-border' );
+        var shortcutListTableRow = document.createElement( 'tr' );
+        shortcutListTable.appendChild( shortcutListTableRow );
+        var shortcutListTableCol1 = document.createElement( 'th' );
+        shortcutListTableCol1.innerText = "Shortcut Name";
+        shortcutListTableRow.appendChild( shortcutListTableCol1 );
+        var shortcutListTableCol2 = document.createElement( 'th' );
+        shortcutListTableCol2.innerText = "Online";
+        shortcutListTableRow.appendChild( shortcutListTableCol2 );
+        var shortcutListTableCol3 = document.createElement( 'th' );
+        shortcutListTableCol3.innerText = "";
+        shortcutListTableRow.appendChild( shortcutListTableCol3 );
+
+
         shortcutsObj.forEach( shortcut => {
-                var shortcutBtn = document.createElement('input');
-                shortcutBtn.setAttribute( 'type' , 'button' );
-                shortcutBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
-                shortcutBtn.setAttribute( 'id' , 'shortcut' + shortcut.order );
-                shortcutBtn.setAttribute( 'onclick' , 'shortcutRun("' + shortcut.order + '");' );
-                shortcutBtn.setAttribute( 'value' , shortcut.displayName );
-                divShortcutsButtons.appendChild( shortcutBtn );
+
+                var shortcutListTableRow = document.createElement( 'tr' );
+                var shortcutListTableCol1 = document.createElement( 'td' );
+                shortcutListTableCol1.innerText = shortcut.displayName;
+                shortcutListTableRow.appendChild( shortcutListTableCol1 );
+
+                if ( shortcut.action == "DTMF" ) {
+                    var shortcutListTableCol2 = document.createElement( 'td' );
+                    shortcutListTableRow.appendChild( shortcutListTableCol2 );
+                    var shortcutListTableCol3 = document.createElement( 'td' );
+                    var shortcutBtn = document.createElement('button');
+                    shortcutBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+                    shortcutBtn.setAttribute( 'id' , 'shortcut' + shortcut.order );
+                    shortcutBtn.setAttribute( 'onclick' , 'shortcutRun("DTMF", "' + shortcut.number + '");' );
+                    shortcutBtn.setAttribute( 'title' , shortcut.displayName );
+                    shortcutBtn.innerText = shortcut.displayName;
+                    shortcutListTableCol3.appendChild( shortcutBtn );
+                    shortcutListTableRow.appendChild( shortcutListTableCol3 );
+                    
+                } else {
+                    var shortcutListTableCol2 = document.createElement( 'td' );
+                    shortcutListTableCol2.setAttribute( 'id' , 'presence' + shortcut.order );
+                    var shortcutPresenceIcon = document.createElement( 'img' );
+                    shortcutPresenceIcon.setAttribute( 'id' , 'presenceIcon' + shortcut.order );
+                    shortcutPresenceIcon.setAttribute( 'height' , '24' );
+                    shortcutPresenceIcon.setAttribute( 'src' , 'images/sipml5_ng.status.offline.png' );
+                    shortcutListTableCol2.appendChild( shortcutPresenceIcon );
+                    shortcutListTableRow.appendChild( shortcutListTableCol2 );
+                    var shortcutListTableCol3 = document.createElement( 'td' );
+
+                    // Audio Call Button
+                    var shortcutAudBtn = document.createElement('button');
+                    shortcutAudBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+                    shortcutAudBtn.setAttribute( 'title' , 'Audio' );
+                    shortcutAudBtn.setAttribute( 'id' , 'shortcutAudio' + shortcut.order );
+                    shortcutAudBtn.setAttribute( 'onclick' , 'shortcutRun("Audio", "' + shortcut.number + '");' );
+                    shortcutListTableCol3.appendChild( shortcutAudBtn );
+                    var shortcutAudBtnImg = document.createElement('img');
+                    shortcutAudBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.phone.png');
+                    shortcutAudBtnImg.setAttribute( 'class', 'icon' );
+                    shortcutAudBtn.appendChild( shortcutAudBtnImg );
+
+                    // Video Call Button
+                    var shortcutVidBtn = document.createElement('button');
+                    shortcutVidBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+                    shortcutVidBtn.setAttribute( 'title' , 'Video' );
+                    shortcutVidBtn.setAttribute( 'id' , 'shortcutVideo' + shortcut.order );
+                    shortcutVidBtn.setAttribute( 'onclick' , 'shortcutRun("Video", "' + shortcut.number + '");' );
+                    if ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false ) {
+                        shortcutVidBtn.disabled = 'true';
+                    }
+                    shortcutListTableCol3.appendChild( shortcutVidBtn );
+                    var shortcutVidBtnImg = document.createElement('img');
+                    shortcutVidBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.video.png');
+                    shortcutVidBtnImg.setAttribute( 'class', 'icon' );
+                    shortcutVidBtn.appendChild( shortcutVidBtnImg );
+
+                    // Screenshare Call Button
+                    var shortcutScrBtn = document.createElement('button');
+                    shortcutScrBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+                    shortcutScrBtn.setAttribute( 'title' , 'Screenshare' );
+                    shortcutScrBtn.setAttribute( 'id' , 'shortcutScreenshare' + shortcut.order );
+                    shortcutScrBtn.setAttribute( 'onclick' , 'shortcutRun("Screenshare", "' + shortcut.number + '");' );
+                    if ( "true" == window.sessionStorage.getItem('org.doubango.expert.disable_callbtn_options') || "true" == window.sessionStorage.getItem('org.doubango.expert.disable_video') ? true : false ) {
+                        shortcutScrBtn.disabled = 'true';
+                    }
+                    shortcutListTableCol3.appendChild( shortcutScrBtn );
+                    var shortcutScrBtnImg = document.createElement('img');
+                    shortcutScrBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.screenshare.png');
+                    shortcutScrBtnImg.setAttribute( 'class', 'icon' );
+                    shortcutScrBtn.appendChild( shortcutScrBtnImg );
+
+                    // Chat Button
+                    var shortcutChatBtn = document.createElement('button');
+                    shortcutChatBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+                    shortcutChatBtn.setAttribute( 'title' , 'Chat' );
+                    shortcutChatBtn.setAttribute( 'id' , 'shortcutChat' + shortcut.order );
+                    shortcutChatBtn.setAttribute( 'onclick' , 'shortcutRun("Chat", "' + shortcut.number + '");' );
+                    shortcutListTableCol3.appendChild( shortcutChatBtn );
+                    var shortcutChatBtnImg = document.createElement('img');
+                    shortcutChatBtnImg.setAttribute( 'src', 'images/sipml5_ng.action.chat.png');
+                    shortcutChatBtnImg.setAttribute( 'class', 'icon' );
+                    shortcutChatBtn.appendChild( shortcutChatBtnImg );
+
+                    shortcutListTableRow.appendChild( shortcutListTableCol3 );
+
+
+                    var subscribeSession;
+                    oSubscriptionEventListeners[ shortcut.number ] = function(e){
+//                        console.info('session event = ' + e.type);
+                        if(e.type == 'i_notify'){
+//                            console.info('NOTIFY content = ' + e.getContentString());
+//                            console.info('NOTIFY content-type = ' + e.getContentType());
+
+                            if (e.getContentType() == 'application/pidf+xml') {
+                                if (window.DOMParser) {
+                                    var parser = new DOMParser();
+                                    var xmlDoc = parser ? parser.parseFromString(e.getContentString(), "text/xml") : null;
+                                    var presenceNode = xmlDoc ? xmlDoc.getElementsByTagName ("presence")[0] : null;
+                                    if(presenceNode){
+//console.log(presenceNode);
+                                        var entityUri = presenceNode.getAttribute ("entity");
+                                        var tupleNode = presenceNode.getElementsByTagName ("tuple")[0];
+                                        if(entityUri && tupleNode){
+                                            var statusNode = tupleNode.getElementsByTagName ("status")[0];
+                                            if(statusNode){
+                                                var basicNode = statusNode.getElementsByTagName ("basic")[0];
+                                                if(basicNode){
+                                                    var presenceIndicator = document.getElementById( 'presenceIcon' + shortcut.order );
+                                                    if ( basicNode.textContent == 'open' ) {
+                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.online.png' );
+                                                        var dmpeople = presenceNode.getElementsByTagName ("dm:person");
+                                                        if( dmpeople.length != 0 ) {
+                                                            for ( let i = 0; i < dmpeople.length; i++ ) {
+                                                                var dmperson = dmpeople[i];
+                                                                if ( dmperson.children.length != 0 ) {
+                                                                    for ( let j = 0; j < dmperson.children.length; j++) {
+                                                                        var personAttributes = dmperson.children[j];
+                                                                        if ( personAttributes.children.length != 0 ) {
+                                                                            if ( personAttributes.tagName == "rpid:activities" ) {
+                                                                                for ( let k = 0; k < personAttributes.children.length; k++ ) {
+                                                                                    var activitiesList = personAttributes.children[k];
+                                                                                    if ( activitiesList.tagName == "rpid:on-the-phone" ) {
+                                                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
+                                                                                    }
+                                                                                }
+                                                                            } else if ( personAttributes.tagName == "rpid:mood" ) {    
+                                                                                for ( let k = 0; k < personAttributes.children.length; k++ ) {
+                                                                                    var moodList = personAttributes.children[k];
+//                                                                                    if ( activitiesList.tagName == "rpid:on-the-phone" ) {
+//                                                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
+//                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }    
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    } else if ( basicNode.textContent == 'closed' ) {
+                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.offline.png' );
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                    subscribeSession = oSipStack.newSession('subscribe', {
+                            expires: 200,
+                            events_listener: { events: '*', listener: oSubscriptionEventListeners[ shortcut.number ] },
+                            sip_headers: [
+                                          { name: 'Event', value: 'presence' }, // only notify for 'presence' events
+                                          { name: 'Accept', value: 'application/pidf+xml' } // supported content types (COMMA-sparated)
+                                ],
+                            sip_caps: [
+                                        { name: '+g.oma.sip-im', value: null },
+                                        { name: '+audio', value: null },
+                                        { name: 'language', value: '\"en,fr\"' }
+                                ]
+                        }
+                    );
+                    oSubscribedShortcuts[ shortcut.number ] = subscribeSession;
+
+                    // start watching for entity's presence status (You may track event type 'connected' to be sure that the request has been accepted by the server)
+                    oSubscribedShortcuts[ shortcut.number ].subscribe(shortcut.number);
+                }
+                shortcutListTable.appendChild( shortcutListTableRow );
             }
         );
+        shortcutListDiv.appendChild( shortcutListTable );
     }
 }
 
@@ -626,18 +811,21 @@ function shortcutEdit( shortcutSelect ) {
         inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
         inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutSelect );
         divShortcutEditAction.appendChild( inputShortcutAction );
-        var optionAudio = document.createElement("option");
-        optionAudio.text = "Audio";
-        inputShortcutAction.add( optionAudio );
-        var optionVideo = document.createElement("option");
-        optionVideo.text = "Video";
-        inputShortcutAction.add( optionVideo );
-        var optionScreenshare = document.createElement("option");
-        optionScreenshare.text = "Screenshare";
-        inputShortcutAction.add( optionScreenshare );
-        var optionChat = document.createElement("option");
-        optionChat.text = "Chat";
-        inputShortcutAction.add( optionChat );
+//        var optionAudio = document.createElement("option");
+//        optionAudio.text = "Audio";
+//        inputShortcutAction.add( optionAudio );
+//        var optionVideo = document.createElement("option");
+//        optionVideo.text = "Video";
+//        inputShortcutAction.add( optionVideo );
+//        var optionScreenshare = document.createElement("option");
+//        optionScreenshare.text = "Screenshare";
+//        inputShortcutAction.add( optionScreenshare );
+//        var optionChat = document.createElement("option");
+//        optionChat.text = "Chat";
+//        inputShortcutAction.add( optionChat );
+        var optionContact = document.createElement("option");
+        optionContact.text = "Favorite";
+        inputShortcutAction.add( optionContact );
         var optionDTMF = document.createElement("option");
         optionDTMF.text = "DTMF";
         inputShortcutAction.add( optionDTMF );
@@ -654,6 +842,16 @@ function shortcutEdit( shortcutSelect ) {
         shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutSelect + '");' );
         shortcutEditSaveBtn.innerText = 'Save';
         divShortcutEditBlock.appendChild( shortcutEditSaveBtn );
+
+        var shortcutEditCancelBtn = document.createElement('input');
+        shortcutEditCancelBtn.setAttribute( 'type' , 'button' );
+        shortcutEditCancelBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+        shortcutEditCancelBtn.setAttribute( 'id' , 'shortcutEditCancel' );
+        shortcutEditCancelBtn.setAttribute( 'href' , '#' );
+        shortcutEditCancelBtn.setAttribute( 'onclick' , 'shortcutEnum(); shortcutsEditDraw();');
+        shortcutEditCancelBtn.setAttribute( 'value' , 'Cancel' );
+        divShortcutEditBlock.appendChild( shortcutEditCancelBtn );
+
     }
 }
 
@@ -761,7 +959,7 @@ function shortcutOrderSave() {
     shortcutsEditDraw();
 }
 
-// Function to idelete a specific shortcut
+// Function to delete a specific shortcut
 function shortcutDelete( shortcutSelect ) {
     var shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
     var divShortcutEditBlock = document.getElementById( 'shortcutEdit' + shortcutSelect );
@@ -798,6 +996,14 @@ function shortcutDelete( shortcutSelect ) {
 
 // Function to write changes to a shortcut
 function shortcutEditSave( shortcutSelect ) {
+    if ( document.getElementById( 'shortcutEditInputDisplayName' + shortcutSelect ).value == "" ) {
+        alert( "Please enter a display name!" );
+        return;
+    }
+    if ( document.getElementById( 'shortcutEditInputNumber' + shortcutSelect ).value == "" ) {
+        alert( "Please enter a number for the shortcut!" );
+        return;
+    }
     var shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
     var shortcutNextOrder = shortcutsObj.length;
     if ( document.getElementById( 'shortcutEditInputAction' + shortcutSelect ).value == 'DTMF' ) {
@@ -879,18 +1085,21 @@ function shortcutAdd() {
     inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
     inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutNextOrder );
     divShortcutEditAction.appendChild( inputShortcutAction );
-    var optionAudio = document.createElement("option");
-    optionAudio.text = "Audio";
-    inputShortcutAction.add( optionAudio );
-    var optionVideo = document.createElement("option");
-    optionVideo.text = "Video";
-    inputShortcutAction.add( optionVideo );
-    var optionScreenshare = document.createElement("option");
-    optionScreenshare.text = "Screenshare";
-    inputShortcutAction.add( optionScreenshare );
-    var optionChat = document.createElement("option");
-    optionChat.text = "Chat";
-    inputShortcutAction.add( optionChat );
+//    var optionAudio = document.createElement("option");
+//    optionAudio.text = "Audio";
+//    inputShortcutAction.add( optionAudio );
+//    var optionVideo = document.createElement("option");
+//    optionVideo.text = "Video";
+//    inputShortcutAction.add( optionVideo );
+//    var optionScreenshare = document.createElement("option");
+//    optionScreenshare.text = "Screenshare";
+//    inputShortcutAction.add( optionScreenshare );
+//    var optionChat = document.createElement("option");
+//    optionChat.text = "Chat";
+//    inputShortcutAction.add( optionChat );
+    var optionContact = document.createElement("option");
+    optionContact.text = "Favorite";
+    inputShortcutAction.add( optionContact );
     var optionDTMF = document.createElement("option");
     optionDTMF.text = "DTMF";
     inputShortcutAction.add( optionDTMF );
@@ -906,13 +1115,19 @@ function shortcutAdd() {
     shortcutEditSaveBtn.setAttribute( 'onclick' , 'shortcutEditSave("' + shortcutNextOrder + '");' );
     shortcutEditSaveBtn.innerText = 'Save';
     divShortcutEditBlock.appendChild( shortcutEditSaveBtn );
+
+    var shortcutEditCancelBtn = document.createElement('input');
+    shortcutEditCancelBtn.setAttribute( 'type' , 'button' );
+    shortcutEditCancelBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
+    shortcutEditCancelBtn.setAttribute( 'id' , 'shortcutEditCancel' );
+    shortcutEditCancelBtn.setAttribute( 'href' , '#' );
+    shortcutEditCancelBtn.setAttribute( 'onclick' , 'shortcutEnum(); shortcutsEditDraw();');
+    shortcutEditCancelBtn.setAttribute( 'value' , 'Cancel' );
+    divShortcutEditBlock.appendChild( shortcutEditCancelBtn );
 }
 
 // Activate a selected shortcut
-async function shortcutRun( shortcutSelect ) {
-    var shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
-    var shortcutNumber = shortcutsObj[ shortcutSelect ].number;
-    var shortcutAction = shortcutsObj[ shortcutSelect ].action;
+async function shortcutRun( shortcutAction, shortcutNumber ) {
     window.sessionStorage.setItem( 'org.doubango.call.phone_number', shortcutNumber );
     if ( shortcutAction == 'DTMF' ) {
         for (var i = 0; i < shortcutNumber.length; i++) {
@@ -1176,6 +1391,50 @@ function chatSave() {
     });
 }
 
+// Function to publish presence
+// Sadly this won't work with asterisk.  They do not support the PUBLISH
+//  SIP command, but instead the custom "CustomPresence" attribute.  Sadly
+//  this is not supported by sipml5 at this time, and thus will not work.
+//  https://community.asterisk.org/t/help-understanding-if-asterisk-can-handle-publish-requests/91983
+function sharePresence( presenceSelector ) {
+    var presenceStatus = presenceSelector.value;
+    if ( oSipStack ) {
+        var publishSession;
+        oSubscriptionEventListeners[ "MyPresence" ] = function(e){
+            console.info('session event = ' + e.type);
+        }
+        publishSession = oSipStack.newSession('publish', {
+            events_listener: { events: '*', listener: oSubscriptionEventListeners[ "MyPresence" ] }
+        });
+        var contentType = 'application/pidf+xml';
+        var content = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
+                      '<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"\n' +
+//                           ' xmlns:im=\"urn:ietf:params:xml:ns:pidf:im\"' +
+                           ' entity=\"' + txtPublicIdentity.value + '\">\n' +
+                           '<tuple id=\"' + txtPrivateIdentity.value + ';transport=ws\">\n' +
+                               '<status>\n'+
+                               '   <basic>' + presenceStatus + '</basic>\n' +
+//                               '   <im:im>away</im:im>\n' +a
+                               '</status>\n' +
+                               '<contact priority=\"1\">' + txtPublicIdentity.value + '</contact>\n' +
+                           '</tuple>\n' +
+                      '</presence>';
+        // send the PUBLISH request
+        publishSession.publish(content, contentType,{
+            expires: 200,
+            sip_caps: [
+                            { name: '+g.oma.sip-im' },
+                            { name: '+sip.ice' },
+                            { name: 'language', value: '\"en,fr\"' }
+                      ],
+            sip_headers: [
+                            { name: 'Event', value: 'presence' },
+                            { name: 'Organization', value: 'Doubango Telecom, Cloudonix, SEIU Local 1000, surfrock66@surfrock66.com' }
+                         ]
+        });
+    }
+}
+
 // Function to send an sms message
 function sipMsg( msgFrom ) {
     if ( oSipStack ) {
@@ -1372,7 +1631,7 @@ async function sipRegister() {
             video_size: (window.sessionStorage ? tsk_string_to_object(window.sessionStorage.getItem('org.doubango.expert.video_size')) : null), // could be redefined a session-level
             sip_headers: [
                 { name: 'User-Agent', value: 'IM-client/OMA1.0 sipML5-ng-L1KMakes-v1.2021.02' },
-                { name: 'Organization', value: 'Doubango Telecom, Cloudonix, SEIU Local 1000' }
+                { name: 'Organization', value: 'Doubango Telecom, Cloudonix, SEIU Local 1000, surfrock66@surfrock66.com' }
             ]
         }
         );
@@ -1380,20 +1639,10 @@ async function sipRegister() {
             txtRegStatus.innerHTML = '<img src="images/reg-status-disconnected.png" height="24" /><b>Failed to start the SIP stack</b>';
         }
         else  {
-            // Hide the side-oabel upon registration
+            // Hide the side-panel upon registration
             $(".screen-overlay").removeClass("show");
             $(".offcanvas").removeClass("show");
             $("body").removeClass("offcanvas-active");
-
-            // Display shortcuts
-            shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
-            shortcutEnum();
-            if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.shortcutsVisible' ) ) {
-                uiShowHideShortcuts( 0 );
-            } 
-            else {
-                uiShowHideShortcuts( 1 );
-            }
 
             // If there are chats stored in the local session, load them
             chatEnum();
@@ -2301,6 +2550,17 @@ console.log("bHeldCallPendingHangup: " + bHeldCallPendingHangup);
                 if (e.session == oSipSessionRegister) {
                     uiOnConnectionEvent(bConnected, !bConnected);
                     txtRegStatus.innerHTML = '<img src="images/reg-status-connected.png" height="24" /><i>' + e.description + '</i>';
+
+                    // Display shortcuts
+                    shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
+                    shortcutEnum();
+                    if ( "0" == window.localStorage.getItem( 'org.doubango.uiPref.shortcutsVisible' ) ) {
+                        uiShowHideShortcuts( 0 );
+                    } 
+                    else {
+                        uiShowHideShortcuts( 1 );
+                    }
+
                 }
                 else if (e.session == oSipSessionCall) {
                     btnHangUp.title = 'Hang Up';

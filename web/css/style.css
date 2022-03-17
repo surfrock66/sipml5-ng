@@ -395,7 +395,8 @@ input[type=submit].LogOut:hover {
 #divHistoryHeader {
 }
 
-#historyListTable {
+#historyListTable,
+#shortcutListTable {
   margin: auto;
   padding: 10px 2px;
   border: 2px solid;
@@ -405,12 +406,15 @@ input[type=submit].LogOut:hover {
 }
 
 #historyListTable td,
-#historyListTable th {
+#historyListTable th,
+#shortcutListTable td,
+#shortcutListTable th {
   padding: 2px 10px;
   border: none;
 }
 
-#historyListTable th {
+#historyListTable th,
+#shortcutListTable th {
   font-weight: bold;
   text-decoration: underline;
 }
@@ -420,10 +424,10 @@ input[type=submit].LogOut:hover {
   height: 20px;
 }
 
-#divShortcutsButtons {
+#divShortcutsList {
 }
 
-#divShortcutsButtons input[type=button] { 
+#divShortcutsList input[type=button] { 
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;

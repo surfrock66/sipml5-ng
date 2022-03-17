@@ -123,6 +123,10 @@
                             <input type="button" disabled class="btn btn-primary btn-sm theme-accent-color " id="btnChatShowHide" value="Show Chat" onclick='uiShowHideChat( 1 );' />
                             <input type="button" class="btn btn-primary btn-sm theme-accent-color " id="btnShortcutsShowHide" value="Hide Shortcuts" onclick='uiShowHideShortcuts( 0 );' />
                             <input type="button" class="btn btn-primary btn-sm theme-accent-color " id="btnHistoryShowHide" value="Hide History" onclick='uiShowHideHistory( 0 );' />
+<!--                            <select id="presenceStatus" onchange="sharePresence( this )">
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                            </select>-->
                         </div>
                     </div>
                     <div id='divCallWrapper'>
@@ -177,7 +181,7 @@
                             <a id="shortcutEditBtn" class="btn btn-primary btn-sm theme-accent-color " href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
                             <p style="text-align: center; width: 100%;">Shortcuts</p>
                         </div>
-                        <div id="divShortcutsButtons">
+                        <div id="divShortcutsList">
                         </div>
                     </div>
                     <div id="divChat" class="container" style="display: none;">
