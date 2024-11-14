@@ -313,7 +313,7 @@ function historyEnum() {
         btnHistoryShowHide.disabled = true;
     } else {
         btnHistoryShowHide.disabled = false;
-        let historyEntries = historyLog[0];
+        let historyEntries = historyLog;
         // Check if we are at the limit for stored history
         if ( typeof historyEntries !== 'undefined' ) {
             var historyDiv = document.getElementById("divHistory");
@@ -425,7 +425,7 @@ function historyAppendLog( hisDirection, hisType, hisTime, hisExt, hisID ) {
             callType = "Screenshare";
         }
     }
-    let historyEntries = historyLog[0];
+    let historyEntries = historyLog;
     let historyEntry = {
         "inOut": hisDirection,
         "type": callType,
@@ -442,8 +442,7 @@ function historyAppendLog( hisDirection, hisType, hisTime, hisExt, hisID ) {
         historyEntries = [];
     }
     historyEntries.push(historyEntry);
-    historyLog.push(historyEntries);
-    window.sessionStorage.setItem('org.doubango.history', JSON.stringify(historyLog));
+    window.sessionStorage.setItem('org.doubango.history', JSON.stringify(historyEntries));
     historyEnum();
     historySave();
 }
@@ -596,61 +595,64 @@ function shortcutEnum() {
 
                     shortcutListTableRow.appendChild( shortcutListTableCol3 );
 
+                    internalExtMaxLen = ( null == window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) ? null : window.sessionStorage.getItem( 'org.doubango.internal_ext_max_length' ) );
 
-                    var subscribeSession;
-                    oSubscriptionEventListeners[ shortcut.number ] = function(e){
-//                        console.info('session event = ' + e.type);
-                        if(e.type == 'i_notify'){
-//                            console.info('NOTIFY content = ' + e.getContentString());
-//                            console.info('NOTIFY content-type = ' + e.getContentType());
-
-                            if (e.getContentType() == 'application/pidf+xml') {
-                                if (window.DOMParser) {
-                                    var parser = new DOMParser();
-                                    var xmlDoc = parser ? parser.parseFromString(e.getContentString(), "text/xml") : null;
-                                    var presenceNode = xmlDoc ? xmlDoc.getElementsByTagName ("presence")[0] : null;
-                                    if(presenceNode){
+                    if ( internalExtMaxLen == null || internalExtMaxLen >= shortcut.number.length ) {
+                        var subscribeSession;
+                        oSubscriptionEventListeners[ shortcut.number ] = function(e){
+//                            console.info('session event = ' + e.type);
+                            if(e.type == 'i_notify'){
+//                                console.info('NOTIFY content = ' + e.getContentString());
+//                                console.info('NOTIFY content-type = ' + e.getContentType());
+  
+                                if (e.getContentType() == 'application/pidf+xml') {
+                                    if (window.DOMParser) {
+                                        var parser = new DOMParser();
+                                        var xmlDoc = parser ? parser.parseFromString(e.getContentString(), "text/xml") : null;
+                                        var presenceNode = xmlDoc ? xmlDoc.getElementsByTagName ("presence")[0] : null;
+                                        if(presenceNode){
 //console.log(presenceNode);
-                                        var entityUri = presenceNode.getAttribute ("entity");
-                                        var tupleNode = presenceNode.getElementsByTagName ("tuple")[0];
-                                        if(entityUri && tupleNode){
-                                            var statusNode = tupleNode.getElementsByTagName ("status")[0];
-                                            if(statusNode){
-                                                var basicNode = statusNode.getElementsByTagName ("basic")[0];
-                                                if(basicNode){
-                                                    var presenceIndicator = document.getElementById( 'presenceIcon' + shortcut.order );
-                                                    if ( basicNode.textContent == 'open' ) {
-                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.online.png' );
-                                                        var dmpeople = presenceNode.getElementsByTagName ("dm:person");
-                                                        if( dmpeople.length != 0 ) {
-                                                            for ( let i = 0; i < dmpeople.length; i++ ) {
-                                                                var dmperson = dmpeople[i];
-                                                                if ( dmperson.children.length != 0 ) {
-                                                                    for ( let j = 0; j < dmperson.children.length; j++) {
-                                                                        var personAttributes = dmperson.children[j];
-                                                                        if ( personAttributes.children.length != 0 ) {
-                                                                            if ( personAttributes.tagName == "rpid:activities" ) {
-                                                                                for ( let k = 0; k < personAttributes.children.length; k++ ) {
-                                                                                    var activitiesList = personAttributes.children[k];
-                                                                                    if ( activitiesList.tagName == "rpid:on-the-phone" ) {
-                                                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
+                                            var entityUri = presenceNode.getAttribute ("entity");
+                                            var tupleNode = presenceNode.getElementsByTagName ("tuple")[0];
+                                            if(entityUri && tupleNode){
+                                                var statusNode = tupleNode.getElementsByTagName ("status")[0];
+                                                if(statusNode){
+                                                    var basicNode = statusNode.getElementsByTagName ("basic")[0];
+                                                    if(basicNode){
+                                                        var presenceIndicator = document.getElementById( 'presenceIcon' + shortcut.order );
+                                                        if ( basicNode.textContent == 'open' ) {
+                                                            presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.online.png' );
+                                                            var dmpeople = presenceNode.getElementsByTagName ("dm:person");
+                                                            if( dmpeople.length != 0 ) {
+                                                                for ( let i = 0; i < dmpeople.length; i++ ) {
+                                                                    var dmperson = dmpeople[i];
+                                                                    if ( dmperson.children.length != 0 ) {
+                                                                        for ( let j = 0; j < dmperson.children.length; j++) {
+                                                                            var personAttributes = dmperson.children[j];
+                                                                            if ( personAttributes.children.length != 0 ) {
+                                                                                if ( personAttributes.tagName == "rpid:activities" ) {
+                                                                                    for ( let k = 0; k < personAttributes.children.length; k++ ) {
+                                                                                        var activitiesList = personAttributes.children[k];
+                                                                                        if ( activitiesList.tagName == "rpid:on-the-phone" ) {
+                                                                                            presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
+                                                                                        }
+                                                                                    }
+                                                                                } else if ( personAttributes.tagName == "rpid:mood" ) {    
+                                                                                    for ( let k = 0; k < personAttributes.children.length; k++ ) {
+                                                                                        var moodList = personAttributes.children[k];
+//                                                                                        if ( activitiesList.tagName == "rpid:on-the-phone" ) {
+//                                                                                            presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
+//                                                                                        }
                                                                                     }
                                                                                 }
-                                                                            } else if ( personAttributes.tagName == "rpid:mood" ) {    
-                                                                                for ( let k = 0; k < personAttributes.children.length; k++ ) {
-                                                                                    var moodList = personAttributes.children[k];
-//                                                                                    if ( activitiesList.tagName == "rpid:on-the-phone" ) {
-//                                                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.busy.png' );
-//                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }    
+                                                                            }    
+                                                                        }
                                                                     }
                                                                 }
                                                             }
+                                                        } else if ( basicNode.textContent == 'closed' ) {
+                                                            presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.offline.png' );
                                                         }
-                                                    } else if ( basicNode.textContent == 'closed' ) {
-                                                        presenceIndicator.setAttribute( 'src', 'images/sipml5_ng.status.offline.png' );
                                                     }
                                                 }
                                             }
@@ -659,25 +661,25 @@ function shortcutEnum() {
                                 }
                             }
                         }
+                        subscribeSession = oSipStack.newSession('subscribe', {
+                                expires: 200,
+                                events_listener: { events: '*', listener: oSubscriptionEventListeners[ shortcut.number ] },
+                                sip_headers: [
+                                              { name: 'Event', value: 'presence' }, // only notify for 'presence' events
+                                              { name: 'Accept', value: 'application/pidf+xml' } // supported content types (COMMA-sparated)
+                                    ],
+                                sip_caps: [
+                                            { name: '+g.oma.sip-im', value: null },
+                                            { name: '+audio', value: null },
+                                            { name: 'language', value: '\"en,fr\"' }
+                                    ]
+                            }
+                        );
+                        oSubscribedShortcuts[ shortcut.number ] = subscribeSession;
+    
+                        // start watching for entity's presence status (You may track event type 'connected' to be sure that the request has been accepted by the server)
+                        oSubscribedShortcuts[ shortcut.number ].subscribe(shortcut.number);
                     } 
-                    subscribeSession = oSipStack.newSession('subscribe', {
-                            expires: 200,
-                            events_listener: { events: '*', listener: oSubscriptionEventListeners[ shortcut.number ] },
-                            sip_headers: [
-                                          { name: 'Event', value: 'presence' }, // only notify for 'presence' events
-                                          { name: 'Accept', value: 'application/pidf+xml' } // supported content types (COMMA-sparated)
-                                ],
-                            sip_caps: [
-                                        { name: '+g.oma.sip-im', value: null },
-                                        { name: '+audio', value: null },
-                                        { name: 'language', value: '\"en,fr\"' }
-                                ]
-                        }
-                    );
-                    oSubscribedShortcuts[ shortcut.number ] = subscribeSession;
-
-                    // start watching for entity's presence status (You may track event type 'connected' to be sure that the request has been accepted by the server)
-                    oSubscribedShortcuts[ shortcut.number ].subscribe(shortcut.number);
                 }
                 shortcutListTable.appendChild( shortcutListTableRow );
             }
@@ -752,7 +754,7 @@ function shortcutsEditDraw() {
     shortcutAddBtn.setAttribute( 'class' , 'btn btn-primary btn-sm theme-accent-color ' );
     shortcutAddBtn.setAttribute( 'id' , 'shortcutAddBtn' );
     shortcutAddBtn.setAttribute( 'href' , '#' );
-    shortcutAddBtn.setAttribute( 'onclick' , 'shortcutAdd();' );
+    shortcutAddBtn.setAttribute( 'onclick' , 'shortcutAdd( "", "" );' );
     shortcutAddBtn.setAttribute( 'value' , 'Add' );
     divShortcutsEditor.appendChild( shortcutAddBtn );
     var shortcutReorderBtn = document.createElement('input');
@@ -811,18 +813,6 @@ function shortcutEdit( shortcutSelect ) {
         inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
         inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutSelect );
         divShortcutEditAction.appendChild( inputShortcutAction );
-//        var optionAudio = document.createElement("option");
-//        optionAudio.text = "Audio";
-//        inputShortcutAction.add( optionAudio );
-//        var optionVideo = document.createElement("option");
-//        optionVideo.text = "Video";
-//        inputShortcutAction.add( optionVideo );
-//        var optionScreenshare = document.createElement("option");
-//        optionScreenshare.text = "Screenshare";
-//        inputShortcutAction.add( optionScreenshare );
-//        var optionChat = document.createElement("option");
-//        optionChat.text = "Chat";
-//        inputShortcutAction.add( optionChat );
         var optionContact = document.createElement("option");
         optionContact.text = "Favorite";
         inputShortcutAction.add( optionContact );
@@ -1044,7 +1034,7 @@ function shortcutEditSave( shortcutSelect ) {
 }
 
 // Function to add a shortcut
-function shortcutAdd() {
+function shortcutAdd( shortcutName, shortcutNumber) {
     shortcutAddBtn = document.getElementById( 'shortcutAddBtn' );
     shortcutAddBtn.remove();
     var shortcutsObj = ( JSON.parse( window.sessionStorage.getItem( 'org.doubango.shortcuts' ) ) );
@@ -1053,6 +1043,7 @@ function shortcutAdd() {
     divShortcutEditBlock.setAttribute( 'id' , 'shortcutEdit' + shortcutNextOrder );
     divShortcutEditBlock.setAttribute( 'class', 'shortcutEditBlock' );
     divShortcutsEditor.appendChild( divShortcutEditBlock );
+
     var divShortcutEditDisplayName = document.createElement( 'div' );
     divShortcutEditDisplayName.setAttribute( 'class', 'shortcutEditLine' )
     divShortcutEditBlock.appendChild( divShortcutEditDisplayName );
@@ -1062,8 +1053,10 @@ function shortcutAdd() {
     var inputShortcutDisplayName = document.createElement( 'input' );
     inputShortcutDisplayName.setAttribute( 'type', 'text' );
     inputShortcutDisplayName.setAttribute( 'class', 'shortcutEditInput');
+    inputShortcutDisplayName.setAttribute( 'value', shortcutName );
     inputShortcutDisplayName.setAttribute( 'id', 'shortcutEditInputDisplayName' + shortcutNextOrder );
     divShortcutEditDisplayName.appendChild( inputShortcutDisplayName );
+
     var divShortcutEditNumber = document.createElement( 'div' );
     divShortcutEditNumber.setAttribute( 'class', 'shortcutEditLine' )
     divShortcutEditBlock.appendChild( divShortcutEditNumber );
@@ -1073,8 +1066,10 @@ function shortcutAdd() {
     var inputShortcutNumber = document.createElement( 'input' );
     inputShortcutNumber.setAttribute( 'type', 'text' );
     inputShortcutNumber.setAttribute( 'class', 'shortcutEditInput');
+    inputShortcutNumber.setAttribute( 'value', shortcutNumber );
     inputShortcutNumber.setAttribute( 'id', 'shortcutEditInputNumber' + shortcutNextOrder );
     divShortcutEditNumber.appendChild( inputShortcutNumber );
+
     var divShortcutEditAction = document.createElement( 'div' );
     divShortcutEditAction.setAttribute( 'class', 'shortcutEditLine' )
     divShortcutEditBlock.appendChild( divShortcutEditAction );
@@ -1085,18 +1080,7 @@ function shortcutAdd() {
     inputShortcutAction.setAttribute( 'class', 'shortcutEditInput');
     inputShortcutAction.setAttribute( 'id', 'shortcutEditInputAction' + shortcutNextOrder );
     divShortcutEditAction.appendChild( inputShortcutAction );
-//    var optionAudio = document.createElement("option");
-//    optionAudio.text = "Audio";
-//    inputShortcutAction.add( optionAudio );
-//    var optionVideo = document.createElement("option");
-//    optionVideo.text = "Video";
-//    inputShortcutAction.add( optionVideo );
-//    var optionScreenshare = document.createElement("option");
-//    optionScreenshare.text = "Screenshare";
-//    inputShortcutAction.add( optionScreenshare );
-//    var optionChat = document.createElement("option");
-//    optionChat.text = "Chat";
-//    inputShortcutAction.add( optionChat );
+
     var optionContact = document.createElement("option");
     optionContact.text = "Favorite";
     inputShortcutAction.add( optionContact );

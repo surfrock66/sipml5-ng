@@ -178,6 +178,7 @@
                     </div>
                     <div id="divShortcuts" class="container border-top-separator theme-accent-color-border" style="display: none;">
                         <div id="divShortcutsHeader">
+                            <a id="shortcutAddNewBtn" class="btn btn-primary btn-sm theme-accent-color " href="#" onclick="document.getElementById('shortcutsOffcanvas').classList.toggle('show');shortcutsEditDraw();shortcutAdd( txtContactInfo.innerText, txtPhoneNumber.value );" style="position: absolute; left: 0px;margin-left: 15px;">Create Shortcut</a>
                             <a id="shortcutEditBtn" class="btn btn-primary btn-sm theme-accent-color " href="#" data-trigger="#shortcutsOffcanvas" style="position: absolute; right: 0px;margin-right: 15px;">Edit Shortcuts</a>
                             <p style="text-align: center; width: 100%;">Shortcuts</p>
                         </div>
